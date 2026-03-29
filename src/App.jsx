@@ -289,6 +289,18 @@ const logoutAdmin = async () => {
   await fetch('/api/admin/session', { method: 'DELETE', credentials: 'same-origin' }).catch(() => null);
 };
 
+const updateAdminPassword = async (password) => {
+  const response = await fetch('/api/admin/session', {
+    method: 'PUT',
+    credentials: 'same-origin',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ password }),
+  });
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(payload?.error || 'Falha ao atualizar a senha');
+  return payload?.user || null;
+};
+
 const uploadImageSafe = async (file) => {
   const ALLOWED = ['image/jpeg','image/png','image/webp','image/gif'];
   const MAX_MB = 5;
@@ -1320,6 +1332,52 @@ const AdminLogin = ({ setLoggedUser, navigate, brand }) => {
         {lockRemainingMs > 0 && <div style={{background:B.goldLight,color:'#7A5C1E',padding:'9px 14px',borderRadius:8,fontSize:13,fontWeight:600,marginBottom:14}}>⏳ Muitas tentativas. Tente novamente em cerca de {lockMinutes} min.</div>}
         <Btn onClick={tryLogin} disabled={submitting || lockRemainingMs > 0} sx={{width:'100%',padding:'12px 0',borderRadius:10,fontSize:15}}>{submitting ? 'Verificando...' : 'Entrar'}</Btn>
         <button onClick={()=>navigate('/')} style={{width:'100%',marginTop:12,background:'none',border:'none',color:B.muted,fontSize:13,cursor:'pointer',fontFamily:'inherit'}}>← Voltar ao site</button>
+      </div>
+    </div>
+  );
+};
+
+const AdminPasswordReset = ({ brand, onSubmit, onLogout }) => {
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleSubmit = async () => {
+    if (submitting) return;
+    if (!isStrongPassword(password)) {
+      setError('Use pelo menos 8 caracteres, com letras e números.');
+      return;
+    }
+    if (password !== confirmPassword) {
+      setError('As senhas não coincidem.');
+      return;
+    }
+    setSubmitting(true);
+    setError('');
+    try {
+      await onSubmit(password);
+      setPassword('');
+      setConfirmPassword('');
+    } catch (err) {
+      setError(err?.message || 'Não foi possível atualizar a senha.');
+    }
+    setSubmitting(false);
+  };
+
+  return (
+    <div style={{background:B.cream, flex: 1, display:'flex', alignItems:'center', justifyContent:'center', padding:'24px'}}>
+      <div style={{background:B.white,borderRadius:18,padding:'44px 40px',width:420,boxShadow:'0 8px 50px rgba(44,31,64,0.12)',border:`1px solid ${B.border}`}}>
+        <div style={{textAlign:'center',marginBottom:28}}>
+          <div style={{display:'flex',justifyContent:'center',marginBottom:16}}><Logo brand={brand} size={56} /></div>
+          <h2 style={{margin:'0 0 8px',color:B.purpleDark,fontSize:22,fontFamily:'Georgia, serif'}}>Defina sua nova senha</h2>
+          <p style={{color:B.muted,fontSize:14,margin:0,lineHeight:1.5}}>Você entrou com uma senha temporária. Antes de continuar no painel, crie uma senha definitiva.</p>
+        </div>
+        <Field label="Nova senha" value={password} onChange={setPassword} type="password" placeholder="Mínimo 8 caracteres" note="Use letras e números." />
+        <Field label="Confirmar nova senha" value={confirmPassword} onChange={setConfirmPassword} type="password" placeholder="Repita a nova senha" />
+        {error && <div style={{background:B.redLight,color:B.red,padding:'9px 14px',borderRadius:8,fontSize:13,fontWeight:600,marginBottom:14}}>{error}</div>}
+        <Btn onClick={handleSubmit} disabled={submitting} sx={{width:'100%',padding:'12px 0',borderRadius:10,fontSize:15}}>{submitting ? 'Atualizando...' : 'Salvar nova senha'}</Btn>
+        <button onClick={onLogout} style={{width:'100%',marginTop:12,background:'none',border:'none',color:B.muted,fontSize:13,cursor:'pointer',fontFamily:'inherit'}}>Sair</button>
       </div>
     </div>
   );
@@ -2908,6 +2966,12 @@ export default function App() {
     await save(USERS_KEY,securedUsers);
   };
   const saveMarketing=async d=>{setMarketing(d);await save(MARKETING_KEY,d);};
+  const handleAdminPasswordReset = async (nextPassword) => {
+    const updatedUser = await updateAdminPassword(nextPassword);
+    setLoggedUser(updatedUser);
+    const loadedUsers = await load(USERS_KEY, INIT_USERS);
+    setUsers(await secureUsersForStorage(loadedUsers));
+  };
   const handleView=async(type,id)=>{
     const key=`${type}_${id}`;
     const updated={...views,[key]:(views[key]||0)+1};
@@ -2973,7 +3037,8 @@ export default function App() {
       {view==='protocol'   &&activeProt&&<ProtocolDetail protocol={activeProt} products={products} indications={indications} categories={categories} navigate={navigate} brand={brand} onView={handleView} />}
       {view==='search'     &&<ProductSearch products={products} protocols={protocols} indications={indications} categories={categories} navigate={navigate} />}
       {view==='admin_login'&&<AdminLogin setLoggedUser={setLoggedUser} navigate={navigate} brand={brand} />}
-      {view==='admin'      &&loggedUser&&<AdminPanel products={products} protocols={protocols} indications={indications} categories={categories} phases={phases} brand={brand} saveProducts={saveProd} saveProtocols={saveProt} saveIndications={saveInd} saveCategories={saveCat} savePhases={savePha} saveBrand={saveBr} navigate={navigate} setLoggedUser={setLoggedUser} loggedUser={loggedUser} users={users} saveUsers={saveUsersDb} marketing={marketing} saveMarketing={saveMarketing} views={views} />}
+      {view==='admin'      &&loggedUser?.requirePasswordReset&&<AdminPasswordReset brand={brand} onSubmit={handleAdminPasswordReset} onLogout={async ()=>{await logoutAdmin();setLoggedUser(null);navigate('/login');}} />}
+      {view==='admin'      &&loggedUser&&!loggedUser?.requirePasswordReset&&<AdminPanel products={products} protocols={protocols} indications={indications} categories={categories} phases={phases} brand={brand} saveProducts={saveProd} saveProtocols={saveProt} saveIndications={saveInd} saveCategories={saveCat} savePhases={savePha} saveBrand={saveBr} navigate={navigate} setLoggedUser={setLoggedUser} loggedUser={loggedUser} users={users} saveUsers={saveUsersDb} marketing={marketing} saveMarketing={saveMarketing} views={views} />}
       {view!=='admin'      &&<AppFooter brand={brand} />}
     </div>
   );
