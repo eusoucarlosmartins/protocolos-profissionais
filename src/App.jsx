@@ -222,6 +222,17 @@ const INIT_PROTOCOLS = [{
 // ── Supabase Storage ──────────────────────────────────
 const load = async (key, fallback) => {
   try {
+    const response = await fetch(`/api/data?key=${encodeURIComponent(key)}`, { credentials: 'same-origin' });
+    if (response.ok) {
+      const payload = await response.json();
+      if (payload && Object.prototype.hasOwnProperty.call(payload, 'value')) return payload.value;
+    }
+    if (key === USERS_KEY) return fallback;
+  } catch (e) {
+    if (key === USERS_KEY) return fallback;
+    console.warn('API load error:', e);
+  }
+  try {
     const supabaseClient = await getSupabase();
     const { data, error } = await supabaseClient.from('app_data').select('value').eq('key', key).single();
     if (!error && data) return data.value;
@@ -230,10 +241,51 @@ const load = async (key, fallback) => {
 };
 
 const save = async (key, val) => {
+  const response = await fetch('/api/data', {
+    method: 'POST',
+    credentials: 'same-origin',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ key, value: val }),
+  });
+  if (!response.ok) {
+    const payload = await response.json().catch(() => ({}));
+    if (response.status === 401) {
+      await logoutAdmin();
+      throw new Error('Sua sessão expirou. Faça login novamente.');
+    }
+    throw new Error(payload?.error || 'Falha ao salvar dados');
+  }
+  return response.json().catch(() => ({ ok: true }));
+};
+
+const savePublic = async (key, val) => {
   try {
     const supabaseClient = await getSupabase();
     await supabaseClient.from('app_data').upsert({ key, value: val }, { onConflict: 'key' });
   } catch (e) { console.warn('Supabase save error:', e); }
+};
+
+const getAdminSession = async () => {
+  const response = await fetch('/api/admin/session', { credentials: 'same-origin' });
+  if (!response.ok) return null;
+  const payload = await response.json().catch(() => ({}));
+  return payload?.user || null;
+};
+
+const loginAdmin = async (password) => {
+  const response = await fetch('/api/admin/session', {
+    method: 'POST',
+    credentials: 'same-origin',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ password }),
+  });
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(payload?.error || 'Falha ao autenticar');
+  return payload?.user || null;
+};
+
+const logoutAdmin = async () => {
+  await fetch('/api/admin/session', { method: 'DELETE', credentials: 'same-origin' }).catch(() => null);
 };
 
 const uploadImageSafe = async (file) => {
@@ -1221,7 +1273,7 @@ const ProductSearch = ({ products, protocols, indications, categories, navigate 
 };
 
 // ── Admin Login ───────────────────────────────────────
-const AdminLogin = ({ setLoggedUser, navigate, brand, users }) => {
+const AdminLogin = ({ setLoggedUser, navigate, brand }) => {
   const [pwd,setPwd]=useState('');
   const [err,setErr]=useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -1237,16 +1289,13 @@ const AdminLogin = ({ setLoggedUser, navigate, brand, users }) => {
   const tryLogin = async () => {
     if (submitting || lockRemainingMs > 0) return;
     setSubmitting(true);
-    const matched = [];
-    for (const user of users) {
-      if (await verifyPassword(user, pwd)) matched.push(user);
-    }
-    if (matched.length === 1) {
+    try {
+      const user = await loginAdmin(pwd);
       clearLoginGuardState();
-      setLoggedUser(matched[0]);
+      setLoggedUser(user);
       setPwd('');
       navigate('/admin');
-    } else {
+    } catch {
       const state = registerLoginFailure();
       setLockRemainingMs(Math.max(0, (state.lockedUntil || 0) - Date.now()));
       setErr(true);
@@ -1956,7 +2005,7 @@ const AdminPanel = ({ products, protocols, indications, categories, phases, bran
         <div style={{flex:1}} />
         <div style={{borderTop:`1px solid ${B.border}`,padding:'12px 0'}}>
           <button onClick={()=>navigate('/')} style={{display:'block',width:'100%',padding:'9px 18px',background:'none',border:'none',color:B.muted,fontSize:13,cursor:'pointer',textAlign:'left',fontFamily:'inherit'}}>← Ver site público</button>
-          <button onClick={()=>{setLoggedUser(null);navigate('/');}} style={{display:'block',width:'100%',padding:'9px 18px',background:'none',border:'none',color:B.red,fontSize:13,cursor:'pointer',textAlign:'left',fontFamily:'inherit'}}>🚪 Sair</button>
+          <button onClick={async ()=>{await logoutAdmin();setLoggedUser(null);navigate('/');}} style={{display:'block',width:'100%',padding:'9px 18px',background:'none',border:'none',color:B.red,fontSize:13,cursor:'pointer',textAlign:'left',fontFamily:'inherit'}}>🚪 Sair</button>
         </div>
       </div>
       <div style={{flex:1,padding:28,overflowY:'auto'}}>
@@ -2812,7 +2861,7 @@ export default function App() {
   const [categories,setCategories]=useState([]);
   const [phases,setPhases]=useState([]);
   const [brand,setBrand]=useState(INIT_BRAND);
-  const [users,setUsers]=useState(INIT_USERS);
+  const [users,setUsers]=useState([]);
   const [marketing,setMarketing]=useState(INIT_MARKETING);
   const [views,setViews]=useState({});
   const [favorites,setFavorites]=useState([]);
@@ -2826,21 +2875,17 @@ export default function App() {
       setIndications(await load(INDICATIONS_KEY,INIT_INDICATIONS));
       setCategories(await load(CATEGORIES_KEY,INIT_CATEGORIES));
       setPhases(await load(PHASES_KEY,INIT_PHASES));
-      const loadedUsers = await load(USERS_KEY,INIT_USERS);
-      const securedUsers = await secureUsersForStorage(loadedUsers);
-      setUsers(securedUsers);
-      if (JSON.stringify(loadedUsers) !== JSON.stringify(securedUsers)) await save(USERS_KEY, securedUsers);
       setMarketing(await load(MARKETING_KEY,INIT_MARKETING));
       setViews(await load(VIEWS_KEY,{}));
       const b = await load(BRAND_KEY,INIT_BRAND);
       setBrand(b);
       if (b.colorMain) B.purple = b.colorMain;
       if (b.colorAccent) B.gold = b.colorAccent;
-      const sessionUserId = getStoredAdminSessionId();
-      if (sessionUserId) {
-        const restoredUser = securedUsers.find(u => u.id === sessionUserId);
-        if (restoredUser) setLoggedUser(restoredUser);
-        else setStoredAdminSessionId('');
+      const sessionUser = await getAdminSession().catch(() => null);
+      if (sessionUser) {
+        setLoggedUser(sessionUser);
+        const loadedUsers = await load(USERS_KEY, INIT_USERS);
+        setUsers(await secureUsersForStorage(loadedUsers));
       }
       setLoading(false);
     })();
@@ -2866,7 +2911,7 @@ export default function App() {
     const key=`${type}_${id}`;
     const updated={...views,[key]:(views[key]||0)+1};
     setViews(updated);
-    await save(VIEWS_KEY,updated);
+    await savePublic(VIEWS_KEY,updated);
   };
   const saveBr=async d=>{
     setBrand(d);
@@ -2876,19 +2921,20 @@ export default function App() {
   };
 
   useEffect(() => {
-    setStoredAdminSessionId(loggedUser?.id || '');
-  }, [loggedUser]);
+    if (!loggedUser) return;
+    if (!users.length) return;
+    const refreshedUser = users.find(u => u.id === loggedUser.id);
+    if (!refreshedUser) return;
+    if (refreshedUser !== loggedUser) setLoggedUser(refreshedUser);
+  }, [users, loggedUser]);
 
   useEffect(() => {
     if (!loggedUser) return;
-    const refreshedUser = users.find(u => u.id === loggedUser.id);
-    if (!refreshedUser) {
-      setLoggedUser(null);
-      setStoredAdminSessionId('');
-      return;
-    }
-    if (refreshedUser !== loggedUser) setLoggedUser(refreshedUser);
-  }, [users, loggedUser]);
+    (async () => {
+      const loadedUsers = await load(USERS_KEY, INIT_USERS);
+      setUsers(await secureUsersForStorage(loadedUsers));
+    })();
+  }, [loggedUser?.id]);
 
   if(loading) return <div style={{background:B.cream,height:'100vh',display:'flex',alignItems:'center',justifyContent:'center',color:B.purple,fontFamily:'Georgia, serif',fontSize:16}}>Carregando...</div>;
 
@@ -2925,7 +2971,7 @@ export default function App() {
       {view==='product'    &&activeProd&&<PublicProductPage product={activeProd} protocols={protocols} categories={categories} navigate={navigate} brand={brand} onView={handleView} />}
       {view==='protocol'   &&activeProt&&<ProtocolDetail protocol={activeProt} products={products} indications={indications} categories={categories} navigate={navigate} brand={brand} onView={handleView} />}
       {view==='search'     &&<ProductSearch products={products} protocols={protocols} indications={indications} categories={categories} navigate={navigate} />}
-      {view==='admin_login'&&<AdminLogin setLoggedUser={setLoggedUser} navigate={navigate} brand={brand} users={users} />}
+      {view==='admin_login'&&<AdminLogin setLoggedUser={setLoggedUser} navigate={navigate} brand={brand} />}
       {view==='admin'      &&loggedUser&&<AdminPanel products={products} protocols={protocols} indications={indications} categories={categories} phases={phases} brand={brand} saveProducts={saveProd} saveProtocols={saveProt} saveIndications={saveInd} saveCategories={saveCat} savePhases={savePha} saveBrand={saveBr} navigate={navigate} setLoggedUser={setLoggedUser} loggedUser={loggedUser} users={users} saveUsers={saveUsersDb} marketing={marketing} saveMarketing={saveMarketing} views={views} />}
       {view!=='admin'      &&<AppFooter brand={brand} />}
     </div>
