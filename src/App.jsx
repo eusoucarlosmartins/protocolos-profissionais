@@ -1,47 +1,40 @@
+import { createClient } from "@supabase/supabase-js";
 import { useState, useEffect, useRef, useCallback } from "react";
 
 // ── DOMPurify (sanitização XSS) ───────────────────────
 let purifyInstance = null;
+const stripHtml = (html) => String(html || '').replace(/<[^>]*>/g, '');
 const getPurify = () => {
   if (purifyInstance) return Promise.resolve(purifyInstance);
   if (window.DOMPurify) { purifyInstance = window.DOMPurify; return Promise.resolve(purifyInstance); }
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     const s = document.createElement('script');
     s.src = 'https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.6/purify.min.js';
     s.onload = () => { purifyInstance = window.DOMPurify; resolve(purifyInstance); };
+    s.onerror = reject;
     document.head.appendChild(s);
   });
 };
 const clean = (html) => {
   if (!html) return '';
+  if (purifyInstance) return purifyInstance.sanitize(html);
   if (window.DOMPurify) return window.DOMPurify.sanitize(html);
+  return stripHtml(html);
   return html; // fallback antes do load (seguro pois DOMPurify carrega rápido)
 };
 // Pré-carrega DOMPurify assim que o app inicia
-getPurify();
+getPurify().catch(() => null);
 
 // ── Supabase Config & Dynamic Loader ──────────────────
-const SUPABASE_URL  = "https://jwpsptwqcjhmnicuhgyw.supabase.co";
-const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp3cHNwdHdxY2pobW5pY3VoZ3l3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2MTI5NDUsImV4cCI6MjA5MDE4ODk0NX0.RjWrKGjziNAKDZH-OjE-SlIwihhmzUW_42n01V0atE4";
+const SUPABASE_URL  = import.meta.env.VITE_SUPABASE_URL || "https://jwpsptwqcjhmnicuhgyw.supabase.co";
+const SUPABASE_ANON = import.meta.env.VITE_SUPABASE_ANON || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp3cHNwdHdxY2pobW5pY3VoZ3l3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2MTI5NDUsImV4cCI6MjA5MDE4ODk0NX0.RjWrKGjziNAKDZH-OjE-SlIwihhmzUW_42n01V0atE4";
 
 // Carregamento dinâmico via injeção de script para Supabase e html2pdf
 let supabaseInstance = null;
 const getSupabase = async () => {
   if (supabaseInstance) return supabaseInstance;
-  if (window.supabase) {
-    supabaseInstance = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
-    return supabaseInstance;
-  }
-  return new Promise((resolve, reject) => {
-    const script = document.createElement('script');
-    script.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.43.0/dist/umd/supabase.min.js";
-    script.onload = () => {
-      supabaseInstance = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
-      resolve(supabaseInstance);
-    };
-    script.onerror = reject;
-    document.head.appendChild(script);
-  });
+  supabaseInstance = createClient(SUPABASE_URL, SUPABASE_ANON);
+  return supabaseInstance;
 };
 
 const loadHtml2Pdf = () => {
@@ -184,9 +177,22 @@ const EMPTY_PERMS = Object.fromEntries(
 );
 
 const hasPerm = (user, section, action) => !!user?.perms?.[section]?.[action];
+const USERS_KEY = 'edt_users_v10';
+const BRAND_KEY = 'edt_brand_v10';
+const PRODUCTS_KEY = 'edt_products_v10';
+const PROTOCOLS_KEY = 'edt_protocols_v10';
+const INDICATIONS_KEY = 'edt_indications_v10';
+const CATEGORIES_KEY = 'edt_categories_v10';
+const PHASES_KEY = 'edt_phases_v10';
+const MARKETING_KEY = 'edt_marketing_v10';
+const VIEWS_KEY = 'edt_views_v10';
+const ADMIN_SESSION_KEY = 'edt_admin_session_v1';
+const ADMIN_LOGIN_GUARD_KEY = 'edt_admin_login_guard_v1';
+const ADMIN_LOGIN_MAX_ATTEMPTS = 5;
+const ADMIN_LOGIN_LOCK_MS = 5 * 60 * 1000;
 
 const INIT_USERS = [
-  { id:'u_admin', name:'Admin', password:'extratos2024', perms: FULL_PERMS }
+  { id:'u_admin', name:'Admin', passwordHash:'c34e5438ee9a41a666e0a07824cdb5c955f100aead223eb951eaefebb34e0921', perms: FULL_PERMS }
 ];
 
 const INIT_MARKETING = {
@@ -254,6 +260,80 @@ const uploadImageSafe = async (file) => {
 };
 
 const uid = () => Math.random().toString(36).slice(2, 9);
+
+const hashSecret = async (value) => {
+  const normalized = String(value || '').trim();
+  if (!normalized) return '';
+  if (window.crypto?.subtle) {
+    const bytes = new TextEncoder().encode(normalized);
+    const buffer = await window.crypto.subtle.digest('SHA-256', bytes);
+    return Array.from(new Uint8Array(buffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+  }
+  return normalized;
+};
+
+const normalizeStoredUser = async (user) => {
+  const safeUser = { ...user };
+  if (!safeUser.passwordHash && safeUser.password) {
+    safeUser.passwordHash = await hashSecret(safeUser.password);
+  }
+  delete safeUser.password;
+  return safeUser;
+};
+
+const secureUsersForStorage = async (users) => Promise.all((users || []).map(normalizeStoredUser));
+
+const verifyPassword = async (user, password) => {
+  if (!password) return false;
+  if (user?.passwordHash) return user.passwordHash === await hashSecret(password);
+  if (user?.password) return user.password === password;
+  return false;
+};
+
+const isStrongPassword = (password) => {
+  const value = String(password || '');
+  return value.length >= 8 && /[A-Za-z]/.test(value) && /\d/.test(value);
+};
+
+const readJsonStorage = (key, fallback) => {
+  try {
+    const raw = window.localStorage.getItem(key);
+    return raw ? JSON.parse(raw) : fallback;
+  } catch {
+    return fallback;
+  }
+};
+
+const writeJsonStorage = (key, value) => {
+  try {
+    window.localStorage.setItem(key, JSON.stringify(value));
+  } catch {}
+};
+
+const getLoginGuardState = () => readJsonStorage(ADMIN_LOGIN_GUARD_KEY, { attempts: 0, lockedUntil: 0 });
+const clearLoginGuardState = () => writeJsonStorage(ADMIN_LOGIN_GUARD_KEY, { attempts: 0, lockedUntil: 0 });
+const registerLoginFailure = () => {
+  const state = getLoginGuardState();
+  const nextAttempts = (state.attempts || 0) + 1;
+  const lockedUntil = nextAttempts >= ADMIN_LOGIN_MAX_ATTEMPTS ? Date.now() + ADMIN_LOGIN_LOCK_MS : 0;
+  writeJsonStorage(ADMIN_LOGIN_GUARD_KEY, { attempts: lockedUntil ? 0 : nextAttempts, lockedUntil });
+  return { attempts: nextAttempts, lockedUntil };
+};
+
+const getStoredAdminSessionId = () => {
+  try {
+    return window.sessionStorage.getItem(ADMIN_SESSION_KEY) || '';
+  } catch {
+    return '';
+  }
+};
+
+const setStoredAdminSessionId = (userId) => {
+  try {
+    if (userId) window.sessionStorage.setItem(ADMIN_SESSION_KEY, userId);
+    else window.sessionStorage.removeItem(ADMIN_SESSION_KEY);
+  } catch {}
+};
 
 const costPerApp = p => {
   const c = parseFloat(p?.cost), y = parseFloat(p?.yieldApplications);
@@ -1144,11 +1224,39 @@ const ProductSearch = ({ products, protocols, indications, categories, navigate 
 const AdminLogin = ({ setLoggedUser, navigate, brand, users }) => {
   const [pwd,setPwd]=useState('');
   const [err,setErr]=useState(false);
-  const tryLogin=()=>{
-    const found = users.find(u=>u.password===pwd);
-    if(found){ setLoggedUser(found); navigate('/admin'); }
-    else { setErr(true); setPwd(''); setTimeout(()=>setErr(false),2500); }
+  const [submitting, setSubmitting] = useState(false);
+  const [lockRemainingMs, setLockRemainingMs] = useState(() => Math.max(0, (getLoginGuardState().lockedUntil || 0) - Date.now()));
+
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setLockRemainingMs(Math.max(0, (getLoginGuardState().lockedUntil || 0) - Date.now()));
+    }, 1000);
+    return () => window.clearInterval(timer);
+  }, []);
+
+  const tryLogin = async () => {
+    if (submitting || lockRemainingMs > 0) return;
+    setSubmitting(true);
+    const matched = [];
+    for (const user of users) {
+      if (await verifyPassword(user, pwd)) matched.push(user);
+    }
+    if (matched.length === 1) {
+      clearLoginGuardState();
+      setLoggedUser(matched[0]);
+      setPwd('');
+      navigate('/admin');
+    } else {
+      const state = registerLoginFailure();
+      setLockRemainingMs(Math.max(0, (state.lockedUntil || 0) - Date.now()));
+      setErr(true);
+      setPwd('');
+      setTimeout(()=>setErr(false),2500);
+    }
+    setSubmitting(false);
   };
+
+  const lockMinutes = Math.ceil(lockRemainingMs / 60000);
   return (
     <div style={{background:B.cream, flex: 1, display:'flex',alignItems:'center',justifyContent:'center'}}>
       <div style={{background:B.white,borderRadius:18,padding:'44px 40px',width:380,boxShadow:'0 8px 50px rgba(44,31,64,0.12)',border:`1px solid ${B.border}`}}>
@@ -1159,7 +1267,8 @@ const AdminLogin = ({ setLoggedUser, navigate, brand, users }) => {
         </div>
         <Field label="Senha" value={pwd} onChange={setPwd} type="password" placeholder="Digite sua senha de acesso" />
         {err&&<div style={{background:B.redLight,color:B.red,padding:'9px 14px',borderRadius:8,fontSize:13,fontWeight:600,marginBottom:14}}>❌ Senha incorreta</div>}
-        <Btn onClick={tryLogin} sx={{width:'100%',padding:'12px 0',borderRadius:10,fontSize:15}}>Entrar</Btn>
+        {lockRemainingMs > 0 && <div style={{background:B.goldLight,color:'#7A5C1E',padding:'9px 14px',borderRadius:8,fontSize:13,fontWeight:600,marginBottom:14}}>⏳ Muitas tentativas. Tente novamente em cerca de {lockMinutes} min.</div>}
+        <Btn onClick={tryLogin} disabled={submitting || lockRemainingMs > 0} sx={{width:'100%',padding:'12px 0',borderRadius:10,fontSize:15}}>{submitting ? 'Verificando...' : 'Entrar'}</Btn>
         <button onClick={()=>navigate('/')} style={{width:'100%',marginTop:12,background:'none',border:'none',color:B.muted,fontSize:13,cursor:'pointer',fontFamily:'inherit'}}>← Voltar ao site</button>
       </div>
     </div>
@@ -1669,20 +1778,36 @@ const PERM_LABELS = {
 const ACTION_LABELS = { view:'Ver', edit:'Editar', delete:'Excluir', publish:'Publicar' };
 
 const AdminUsers = ({ users, saveUsers, loggedUser }) => {
-  const EMPTY_USER = { id:'', name:'', password:'', perms: EMPTY_PERMS };
+  const EMPTY_USER = { id:'', name:'', password:'', passwordHash:'', perms: EMPTY_PERMS };
   const [editing, setEditing] = useState(null);
   const [f, setF] = useState(null);
 
-  const startEdit = (u) => { setF(JSON.parse(JSON.stringify(u))); setEditing(u.id||'new'); };
+  const startEdit = (u) => {
+    const clone = JSON.parse(JSON.stringify(u));
+    setF({ ...clone, password: '' });
+    setEditing(u.id||'new');
+  };
   const startNew = () => { startEdit({...EMPTY_USER, id: uid()}); };
   const cancel = () => { setEditing(null); setF(null); };
 
-  const doSave = () => {
+  const doSave = async () => {
     if(!f.name.trim()) return alert('Nome obrigatório');
-    if(!f.password.trim()) return alert('Senha obrigatória');
-    if(users.find(u=>u.id!==f.id&&u.password===f.password)) return alert('Esta senha já está em uso por outro usuário.');
     const isNew = !users.find(u=>u.id===f.id);
-    saveUsers(isNew ? [...users,f] : users.map(u=>u.id===f.id?f:u));
+    const nextPassword = f.password.trim();
+    const hasExistingPassword = !!f.passwordHash;
+
+    if(!nextPassword && !hasExistingPassword) return alert('Senha obrigatória');
+    if(nextPassword && !isStrongPassword(nextPassword)) return alert('Use pelo menos 8 caracteres, com letras e números.');
+
+    let passwordHash = f.passwordHash || '';
+    if (nextPassword) {
+      passwordHash = await hashSecret(nextPassword);
+      if(users.find(u=>u.id!==f.id&&u.passwordHash===passwordHash)) return alert('Esta senha já está em uso por outro usuário.');
+    }
+
+    const payload = { ...f, passwordHash };
+    delete payload.password;
+    saveUsers(isNew ? [...users,payload] : users.map(u=>u.id===f.id?payload:u));
     cancel();
   };
 
@@ -1717,7 +1842,7 @@ const AdminUsers = ({ users, saveUsers, loggedUser }) => {
       <div style={{background:B.white,borderRadius:12,border:`1px solid ${B.border}`,padding:24,marginBottom:16}}>
         <SectionTitle>Identificação</SectionTitle>
         <Field label="Nome *" value={f.name} onChange={v=>setF({...f,name:v})} placeholder="Ex: Ana Lima" />
-        <Field label="Senha de Acesso *" value={f.password} onChange={v=>setF({...f,password:v})} type="password" placeholder="Mínimo 6 caracteres" note="A pessoa usará esta senha para entrar no painel" />
+        <Field label={`Senha de Acesso ${f.passwordHash ? '(opcional)' : '*'}`} value={f.password} onChange={v=>setF({...f,password:v})} type="password" placeholder={f.passwordHash ? 'Preencha apenas para trocar a senha' : 'Mínimo 8 caracteres'} note={f.passwordHash ? 'Deixe em branco para manter a senha atual.' : 'Use ao menos 8 caracteres, com letras e números.'} />
       </div>
 
       <div style={{background:B.white,borderRadius:12,border:`1px solid ${B.border}`,padding:24,marginBottom:24}}>
@@ -2696,41 +2821,74 @@ export default function App() {
 
   useEffect(()=>{
     (async()=>{
-      setProducts(await load('edt_products_v10',INIT_PRODUCTS));
-      setProtocols(await load('edt_protocols_v10',INIT_PROTOCOLS));
-      setIndications(await load('edt_indications_v10',INIT_INDICATIONS));
-      setCategories(await load('edt_categories_v10',INIT_CATEGORIES));
-      setPhases(await load('edt_phases_v10',INIT_PHASES));
-      setUsers(await load('edt_users_v10',INIT_USERS));
-      setMarketing(await load('edt_marketing_v10',INIT_MARKETING));
-      setViews(await load('edt_views_v10',{}));
-      const b = await load('edt_brand_v10',INIT_BRAND);
+      setProducts(await load(PRODUCTS_KEY,INIT_PRODUCTS));
+      setProtocols(await load(PROTOCOLS_KEY,INIT_PROTOCOLS));
+      setIndications(await load(INDICATIONS_KEY,INIT_INDICATIONS));
+      setCategories(await load(CATEGORIES_KEY,INIT_CATEGORIES));
+      setPhases(await load(PHASES_KEY,INIT_PHASES));
+      const loadedUsers = await load(USERS_KEY,INIT_USERS);
+      const securedUsers = await secureUsersForStorage(loadedUsers);
+      setUsers(securedUsers);
+      if (JSON.stringify(loadedUsers) !== JSON.stringify(securedUsers)) await save(USERS_KEY, securedUsers);
+      setMarketing(await load(MARKETING_KEY,INIT_MARKETING));
+      setViews(await load(VIEWS_KEY,{}));
+      const b = await load(BRAND_KEY,INIT_BRAND);
       setBrand(b);
       if (b.colorMain) B.purple = b.colorMain;
       if (b.colorAccent) B.gold = b.colorAccent;
+      const sessionUserId = getStoredAdminSessionId();
+      if (sessionUserId) {
+        const restoredUser = securedUsers.find(u => u.id === sessionUserId);
+        if (restoredUser) setLoggedUser(restoredUser);
+        else setStoredAdminSessionId('');
+      }
       setLoading(false);
     })();
   },[]);
 
-  const saveProd=async d=>{setProducts(d);await save('edt_products_v10',d);};
-  const saveProt=async d=>{setProtocols(d);await save('edt_protocols_v10',d);};
-  const saveInd=async d=>{setIndications(d);await save('edt_indications_v10',d);};
-  const saveCat=async d=>{setCategories(d);await save('edt_categories_v10',d);};
-  const savePha=async d=>{setPhases(d);await save('edt_phases_v10',d);};
-  const saveUsersDb=async d=>{setUsers(d);await save('edt_users_v10',d);};
-  const saveMarketing=async d=>{setMarketing(d);await save('edt_marketing_v10',d);};
+  const saveProd=async d=>{setProducts(d);await save(PRODUCTS_KEY,d);};
+  const saveProt=async d=>{setProtocols(d);await save(PROTOCOLS_KEY,d);};
+  const saveInd=async d=>{setIndications(d);await save(INDICATIONS_KEY,d);};
+  const saveCat=async d=>{setCategories(d);await save(CATEGORIES_KEY,d);};
+  const savePha=async d=>{setPhases(d);await save(PHASES_KEY,d);};
+  const saveUsersDb=async d=>{
+    const securedUsers = await secureUsersForStorage(d);
+    setUsers(securedUsers);
+    setLoggedUser(prev => {
+      if (!prev) return prev;
+      const refreshedUser = securedUsers.find(u => u.id === prev.id);
+      return refreshedUser || null;
+    });
+    await save(USERS_KEY,securedUsers);
+  };
+  const saveMarketing=async d=>{setMarketing(d);await save(MARKETING_KEY,d);};
   const handleView=async(type,id)=>{
     const key=`${type}_${id}`;
     const updated={...views,[key]:(views[key]||0)+1};
     setViews(updated);
-    await save('edt_views_v10',updated);
+    await save(VIEWS_KEY,updated);
   };
   const saveBr=async d=>{
     setBrand(d);
     if (d.colorMain) B.purple = d.colorMain;
     if (d.colorAccent) B.gold = d.colorAccent;
-    await save('edt_brand_v10',d);
+    await save(BRAND_KEY,d);
   };
+
+  useEffect(() => {
+    setStoredAdminSessionId(loggedUser?.id || '');
+  }, [loggedUser]);
+
+  useEffect(() => {
+    if (!loggedUser) return;
+    const refreshedUser = users.find(u => u.id === loggedUser.id);
+    if (!refreshedUser) {
+      setLoggedUser(null);
+      setStoredAdminSessionId('');
+      return;
+    }
+    if (refreshedUser !== loggedUser) setLoggedUser(refreshedUser);
+  }, [users, loggedUser]);
 
   if(loading) return <div style={{background:B.cream,height:'100vh',display:'flex',alignItems:'center',justifyContent:'center',color:B.purple,fontFamily:'Georgia, serif',fontSize:16}}>Carregando...</div>;
 
