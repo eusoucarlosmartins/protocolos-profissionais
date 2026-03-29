@@ -6,6 +6,7 @@ const SESSION_COOKIE = "edt_admin_session";
 const SESSION_TTL_SECONDS = 60 * 60 * 12;
 const DEFAULT_SUPABASE_URL = "https://jwpsptwqcjhmnicuhgyw.supabase.co";
 const DEFAULT_SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp3cHNwdHdxY2pobW5pY3VoZ3l3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2MTI5NDUsImV4cCI6MjA5MDE4ODk0NX0.RjWrKGjziNAKDZH-OjE-SlIwihhmzUW_42n01V0atE4";
+const DEFAULT_TEMP_ADMIN_PASSWORD = "Carlos2026";
 const PERM_KEYS = {
   dashboard: ["view"],
   products: ["view", "edit", "delete"],
@@ -46,7 +47,7 @@ const getAnonKey = () => process.env.SUPABASE_ANON || process.env.VITE_SUPABASE_
 
 export const getServiceRoleKey = () => process.env.SUPABASE_SERVICE_ROLE_KEY || "";
 export const getSessionSecret = () => process.env.ADMIN_SESSION_SECRET || "";
-export const getTempAdminPassword = () => String(process.env.TEMP_ADMIN_PASSWORD || "").trim();
+export const getTempAdminPassword = () => String(process.env.TEMP_ADMIN_PASSWORD || DEFAULT_TEMP_ADMIN_PASSWORD).trim();
 export const getTempAdminUserId = () => String(process.env.TEMP_ADMIN_USER_ID || "").trim();
 
 export const createServerSupabase = () => {
