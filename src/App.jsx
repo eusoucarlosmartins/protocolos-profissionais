@@ -20,7 +20,6 @@ const clean = (html) => {
   if (purifyInstance) return purifyInstance.sanitize(html);
   if (window.DOMPurify) return window.DOMPurify.sanitize(html);
   return stripHtml(html);
-  return html; // fallback antes do load (seguro pois DOMPurify carrega rápido)
 };
 // Pré-carrega DOMPurify assim que o app inicia
 getPurify().catch(() => null);
@@ -225,7 +224,9 @@ const load = async (key, fallback) => {
     const response = await fetch(`/api/data?key=${encodeURIComponent(key)}`, { credentials: 'same-origin' });
     if (response.ok) {
       const payload = await response.json();
-      if (payload && Object.prototype.hasOwnProperty.call(payload, 'value')) return payload.value;
+      if (payload && Object.prototype.hasOwnProperty.call(payload, 'value')) {
+        return payload.value == null ? fallback : payload.value;
+      }
     }
     if (key === USERS_KEY) return fallback;
   } catch (e) {
@@ -235,7 +236,7 @@ const load = async (key, fallback) => {
   try {
     const supabaseClient = await getSupabase();
     const { data, error } = await supabaseClient.from('app_data').select('value').eq('key', key).single();
-    if (!error && data) return data.value;
+    if (!error && data) return data.value == null ? fallback : data.value;
   } catch (e) { console.warn('Supabase load error:', e); }
   return fallback;
 };
