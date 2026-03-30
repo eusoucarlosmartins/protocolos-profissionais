@@ -9,6 +9,13 @@ const PRODUCT_TYPE_TAG_STYLES = {
   kit_homecare: { color: '#FBF5E8', text: '#7A5C1E' },
 };
 
+const PRODUCT_TYPE_ACCENTS = {
+  protocol: '#1A56DB',
+  skincare: '#1E7E46',
+  kit_professional: '#5E3D8F',
+  kit_homecare: '#C8A96E',
+};
+
 export const AdminProducts = ({
   products,
   categories,
@@ -52,6 +59,11 @@ export const AdminProducts = ({
     return matchSearch && matchStatus && matchCategory && matchType;
   });
 
+  const productTypeCounts = PRODUCT_TYPE_OPTIONS.map((option) => ({
+    ...option,
+    count: products.filter((product) => productHasType(product, option.id)).length,
+  }));
+
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: isMobile ? 'stretch' : 'center', flexDirection: isMobile ? 'column' : 'row', gap: isMobile ? 12 : 16, marginBottom: 24 }}>
@@ -87,11 +99,30 @@ export const AdminProducts = ({
         </div>
       </div>
 
+      <div style={{display:'grid',gridTemplateColumns:isMobile?'1fr 1fr':'repeat(4, minmax(0, 1fr))',gap:10,marginBottom:18}}>
+        {productTypeCounts.map((option) => {
+          const style = PRODUCT_TYPE_TAG_STYLES[option.id] || { color: B.purpleLight, text: B.purpleDark };
+          return (
+            <div key={option.id} style={{background:B.white,border:`1px solid ${B.border}`,borderRadius:12,padding:'12px 14px',boxShadow:'0 10px 24px rgba(44,31,64,0.04)'}}>
+              <div style={{fontSize:11,fontWeight:700,color:B.muted,textTransform:'uppercase',letterSpacing:'0.06em',marginBottom:4}}>Tipo</div>
+              <div style={{display:'inline-flex',marginBottom:8}}>
+                <Tag label={option.label} color={style.color} text={style.text} />
+              </div>
+              <div style={{fontSize:22,fontWeight:800,color:B.purpleDark,lineHeight:1}}>{option.count}</div>
+              <div style={{fontSize:12,color:B.muted,marginTop:4}}>produtos marcados</div>
+            </div>
+          );
+        })}
+      </div>
+
       <div style={{ background: B.white, borderRadius: 12, border: `1px solid ${B.border}`, overflow: 'hidden' }}>
         {sortByName(filtered).map((product, index) => {
           const cpa = costPerApp(product);
+          const productTypes = getProductTypes(product);
+          const primaryType = productTypes[0];
+          const accentColor = PRODUCT_TYPE_ACCENTS[primaryType] || B.purple;
           return (
-            <div key={product.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: isMobile ? 'flex-start' : 'center', flexDirection: isMobile ? 'column' : 'row', gap: isMobile ? 12 : 16, padding: isMobile ? '14px 16px' : '14px 20px', borderBottom: index < filtered.length - 1 ? `1px solid ${B.border}` : 'none' }}>
+            <div key={product.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: isMobile ? 'flex-start' : 'center', flexDirection: isMobile ? 'column' : 'row', gap: isMobile ? 12 : 16, padding: isMobile ? '14px 16px' : '14px 20px', borderBottom: index < filtered.length - 1 ? `1px solid ${B.border}` : 'none', borderLeft:`4px solid ${accentColor}` }}>
               <div style={{ width: isMobile ? '100%' : 'auto' }}>
                 <div style={{ fontWeight: 700, fontSize: 14, color: B.text, marginBottom: 3 }}>{product.name}</div>
                 <div style={{ fontSize: 12, color: B.muted, display: 'flex', gap: 12, flexWrap: 'wrap' }}>
