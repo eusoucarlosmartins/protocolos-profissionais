@@ -304,5 +304,7 @@ export const getAffectedProtocols = (product, protocols) =>
     (protocol) =>
       protocol.steps.some((step) => step.productId === product.id) ||
       protocol.homeUse?.morning?.some((item) => item.productId === product.id) ||
-      protocol.homeUse?.night?.some((item) => item.productId === product.id),
+      protocol.homeUse?.night?.some((item) => item.productId === product.id) ||
+      protocol.professionalKitId === product.id ||
+      protocol.homeKitId === product.id,
   );

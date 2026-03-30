@@ -616,6 +616,8 @@ const ProtocolCard = ({ protocol:p, products, indications, categories, onClick, 
 const ProtocolDetail = ({ protocol:p, products, indications, categories, navigate, brand, onView }) => {
   const isMobile = useIsMobile();
   const get = id => products.find(x=>x.id===id);
+  const professionalKit = p.professionalKitId ? get(p.professionalKitId) : null;
+  const homeKit = p.homeKitId ? get(p.homeKitId) : null;
 
   useEffect(()=>{ if(onView) onView('protocol', p.id); },[p.id]);
 
@@ -624,6 +626,11 @@ const ProtocolDetail = ({ protocol:p, products, indications, categories, navigat
 
   const protocolProducts = p.steps.filter(s=>s.productId).map(s=>get(s.productId)).filter(Boolean);
   const uniqueProducts = [...new Map(protocolProducts.map(pr=>[pr.id,pr])).values()];
+  const summaryProducts = [
+    ...uniqueProducts.map(pr => ({ ...pr, _summaryRole: 'product' })),
+    ...(professionalKit && !uniqueProducts.some(pr => pr.id === professionalKit.id) ? [{ ...professionalKit, _summaryRole: 'professionalKit' }] : []),
+    ...(homeKit && !uniqueProducts.some(pr => pr.id === homeKit.id) && (!professionalKit || professionalKit.id !== homeKit.id) ? [{ ...homeKit, _summaryRole: 'homeKit' }] : [])
+  ];
   
   // LÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œGICA DE RENTABILIDADE
   const totalInvestment = uniqueProducts.reduce((acc, pr) => acc + (parseFloat(pr.cost) || 0), 0);
@@ -654,6 +661,29 @@ const ProtocolDetail = ({ protocol:p, products, indications, categories, navigat
   };
 
   const shareText = encodeURIComponent(`Confira este protocolo: ${p.name} ${shareUrl}`);
+  const homeRoutineSections = [{ slot:'morning', label:'Manha' }, { slot:'night', label:'Noite' }]
+    .map(({ slot, label }) => {
+      const entries = (p.homeUse?.[slot] || [])
+        .map((item, index) => {
+          const prod = item.productId ? get(item.productId) : null;
+          const title = prod?.name || `Passo ${index + 1}`;
+          const instruction = (item.instruction || '').trim();
+          return `- ${title}${instruction ? `: ${instruction}` : ''}`;
+        })
+        .filter(Boolean);
+      return entries.length ? `${label}\n${entries.join('\n')}` : '';
+    })
+    .filter(Boolean);
+  const homeRoutineText = encodeURIComponent(
+    [
+      `Olá! Segue a rotina de uso em casa do protocolo ${p.name}.`,
+      homeKit ? `Kit de uso em casa recomendado: ${homeKit.name}` : '',
+      '',
+      ...homeRoutineSections,
+      '',
+      `Link do protocolo: ${shareUrl}`
+    ].filter(Boolean).join('\n')
+  );
 
   return (
     <div style={{background:B.cream, flex: 1}}>
@@ -739,15 +769,45 @@ const ProtocolDetail = ({ protocol:p, products, indications, categories, navigat
         </div>
 
         {/* Home Use */}
-        {p.homeUse&&(p.homeUse.morning?.length>0||p.homeUse.night?.length>0)&&(
+        {((p.homeUse&&(p.homeUse.morning?.length>0||p.homeUse.night?.length>0)) || homeKit) && (
           <div className="avoid-break" style={{background:B.white,borderRadius:16,border:`1px solid ${B.border}`,padding:secPad,marginBottom:16,boxShadow:'0 8px 22px rgba(44,31,64,0.04)'}}>
-            <h2 style={{margin:'0 0 4px',fontSize:15,fontWeight:700,color:B.text}}>Uso em Casa</h2>
-            <p style={{margin:'0 0 16px',fontSize:12,color:B.muted}}>Orientacoes de rotina domiciliar para potencializar os resultados entre as sessoes</p>
+            <div style={{display:'flex',justifyContent:'space-between',alignItems:isMobile?'stretch':'flex-start',gap:12,flexDirection:isMobile?'column':'row',marginBottom:12}}>
+              <div>
+                <h2 style={{margin:'0 0 4px',fontSize:15,fontWeight:700,color:B.text}}>Uso em Casa</h2>
+                <p style={{margin:0,fontSize:12,color:B.muted}}>Orientacoes de rotina domiciliar para potencializar os resultados entre as sessoes</p>
+              </div>
+              {(p.homeUse?.morning?.length>0 || p.homeUse?.night?.length>0) && (
+                <a href={`https://api.whatsapp.com/send?text=${homeRoutineText}`} target="_blank" rel="noreferrer" className="no-print" style={{background:'#25D366',color:B.white,textDecoration:'none',padding:'10px 14px',borderRadius:10,fontWeight:700,fontSize:12,display:'inline-flex',alignItems:'center',justifyContent:'center',textAlign:'center',minHeight:42}}>
+                  Enviar rotina para o cliente (WhatsApp)
+                </a>
+              )}
+            </div>
+            {homeKit && (
+              <div style={{background:`linear-gradient(135deg, ${B.purpleLight}, rgba(245,236,216,0.82))`,border:`1px solid ${B.border}`,borderRadius:12,padding:isMobile?'12px':'14px 16px',marginBottom:16}}>
+                <div style={{fontSize:11,fontWeight:700,color:B.purple,textTransform:'uppercase',letterSpacing:'0.08em',marginBottom:8}}>Kit de Uso em Casa</div>
+                <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',gap:10,flexWrap:'wrap'}}>
+                  <div style={{display:'flex',alignItems:'center',gap:12,minWidth:0,flex:'1 1 240px'}}>
+                    {homeKit.image ? (
+                      <img src={homeKit.image} alt={homeKit.name} style={{width:52,height:52,objectFit:'contain',borderRadius:10,background:B.white,border:`1px solid ${B.border}`,flexShrink:0}} />
+                    ) : (
+                      <div style={{width:52,height:52,borderRadius:10,background:B.white,display:'flex',alignItems:'center',justifyContent:'center',fontSize:18,flexShrink:0}}>P</div>
+                    )}
+                    <div style={{minWidth:0}}>
+                      <div style={{fontSize:11,color:B.muted,fontWeight:700,textTransform:'uppercase',letterSpacing:'0.06em',marginBottom:2}}>Recomendado ao final</div>
+                      <ProductTooltip product={homeKit} navigate={navigate}>
+                        <span style={{fontWeight:700,fontSize:14,color:B.purpleDark,lineHeight:1.35}}>{homeKit.name}</span>
+                      </ProductTooltip>
+                    </div>
+                  </div>
+                  <BuyLink href={homeKit.siteUrl} isMobile={isMobile} sx={{padding:'8px 14px',fontSize:11}} />
+                </div>
+              </div>
+            )}
             <div className="rp-grid-home" style={{display:'grid',gap:12}}>
-              {[{slot:'morning',icon:'AM',label:'Manha'},{slot:'night',icon:'PM',label:'Noite'}].map(({slot,icon,label})=>
+              {[{slot:'morning',label:'Manha'},{slot:'night',label:'Noite'}].map(({slot,label})=>
                 p.homeUse[slot]?.length>0&&(
                   <div key={slot} style={{background:B.cream,borderRadius:12,padding:isMobile?'14px 12px':'14px 16px',border:isMobile?`1px solid ${B.border}`:'none'}}>
-                    <div style={{fontWeight:700,fontSize:13,color:B.text,marginBottom:12}}>{icon} {label}</div>
+                    <div style={{fontWeight:700,fontSize:13,color:B.text,marginBottom:12}}>{label}</div>
                     {p.homeUse[slot].map((item,i)=>{
                       const prod = item.productId ? get(item.productId) : null;
                       return (
@@ -784,12 +844,17 @@ const ProtocolDetail = ({ protocol:p, products, indications, categories, navigat
         )}
 
         {/* Product & Cost Summary */}
-        {uniqueProducts.length > 0 && (
+        {summaryProducts.length > 0 && (
           <div className="rp-cost-summary avoid-break" style={{background:`linear-gradient(135deg, ${B.purpleLight}, ${B.goldLight})`,borderRadius:16,border:`1px solid ${B.border}`,padding:'22px 28px', pageBreakInside: 'avoid', boxShadow:'0 10px 28px rgba(44,31,64,0.06)'}}>
             <h2 style={{margin:'0 0 14px',fontSize:16,fontWeight:700,color:B.purpleDark}}>Resumo de Produtos do Protocolo</h2>
             <div style={{display:'flex',flexDirection:'column',gap:8,marginBottom:16}}>
-              {uniqueProducts.map(pr=>{
+              {summaryProducts.map(pr=>{
                 const c=costPerApp(pr);
+                const roleLabel = pr._summaryRole === 'professionalKit'
+                  ? 'Kit Profissional'
+                  : pr._summaryRole === 'homeKit'
+                    ? 'Kit Uso em Casa'
+                    : null;
                 return (
                   <div key={pr.id} className="avoid-break" style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',background:'rgba(255,255,255,0.8)',borderRadius:10,padding:'12px 14px', border:`1px solid rgba(255,255,255,0.4)`}}>
                     <div style={{display:'flex', alignItems:'center', gap:12}}>
@@ -799,11 +864,12 @@ const ProtocolDetail = ({ protocol:p, products, indications, categories, navigat
                           <div style={{width:40,height:40,borderRadius:6,background:B.cream,display:'flex',alignItems:'center',justifyContent:'center',fontSize:18}}>P</div>
                       )}
                       <div style={{display:'flex', flexDirection:'column', alignItems: 'flex-start', justifyContent: 'center'}}>
+                        {roleLabel && <span style={{fontSize:10,color:B.purple,fontWeight:700,textTransform:'uppercase',letterSpacing:'0.08em',marginBottom:3}}>{roleLabel}</span>}
                         <span style={{fontSize:isMobile?13:14,color:B.text,fontWeight:700,lineHeight:1.2, marginBottom: 4}}>{pr.name}</span>
                         <BuyLink href={pr.siteUrl} isMobile={isMobile} sx={{padding: '5px 12px', fontSize: 11}} />
                       </div>
                     </div>
-                    {c!=null && <span className="no-print" style={{fontSize:13,fontWeight:700,color:B.green,flexShrink:0, marginLeft: 10}}>{fmtCurrency(c)}/apl.</span>}
+                    {c!=null && pr._summaryRole === 'product' && <span className="no-print" style={{fontSize:13,fontWeight:700,color:B.green,flexShrink:0, marginLeft: 10}}>{fmtCurrency(c)}/apl.</span>}
                   </div>
                 );
               })}
@@ -1057,7 +1123,7 @@ const ProductSearch = ({ products, protocols, indications, categories, navigate 
   const [q, setQ] = useState('');
   const isMobile = useIsMobile();
   const matched = q.length>1 ? products.filter(p=>p.name.toLowerCase().includes(q.toLowerCase())) : [];
-  const getProtos = id => protocols.filter(p=>p.published&&(p.steps.some(s=>s.productId===id)||p.homeUse?.morning?.some(h=>h.productId===id)||p.homeUse?.night?.some(h=>h.productId===id)));
+  const getProtos = id => protocols.filter(p=>p.published&&(p.steps.some(s=>s.productId===id)||p.homeUse?.morning?.some(h=>h.productId===id)||p.homeUse?.night?.some(h=>h.productId===id)||p.professionalKitId===id||p.homeKitId===id));
   return (
     <div style={{background:B.cream, flex: 1}}>
       <div style={{background:`linear-gradient(135deg, ${B.purpleDark} 0%, ${B.purple} 100%)`,padding:isMobile?'28px 14px 24px':'44px 24px 36px',textAlign:'center',overflowX:'hidden'}}>
@@ -1968,7 +2034,7 @@ const AdminProtocols = ({ products, protocols, indications, categories, saveProt
   const duplicate = (p) => {
     setEditProt({ ...p, id: uid(), name: `${p.name} (Copia)`, _new: true });
   };
-  const newP = () => setEditProt({id:uid(),name:'',description:'',concerns:[],category:'',frequency:'',associations:'',youtubeUrl:'',published:false,steps:[],homeUse:{morning:[],night:[]},_new:true});
+  const newP = () => setEditProt({id:uid(),name:'',description:'',concerns:[],category:'',frequency:'',associations:'',youtubeUrl:'',published:false,steps:[],homeUse:{morning:[],night:[]},professionalKitId:'',homeKitId:'',_new:true});
   
   const filtered = protocols.filter(p => {
     const matchSearch = !search || p.name.toLowerCase().includes(search.toLowerCase()) || p.description?.toLowerCase().includes(search.toLowerCase());
@@ -2049,7 +2115,7 @@ const AdminProtocols = ({ products, protocols, indications, categories, saveProt
 // ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ Admin Protocol Form ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬
 const AdminProtForm = ({ prot, products, protocols, indications, categories, phases, saveProtocols, saveIndications, savePhases, setEditProt, loggedUser }) => {
   const isMobile = useIsMobile();
-  const [f,setF]=useState({...prot,steps:[...(prot.steps||[])],homeUse:{morning:[...(prot.homeUse?.morning||[])],night:[...(prot.homeUse?.night||[])]}, concerns: [...(prot.concerns||[])]});
+  const [f,setF]=useState({...prot,professionalKitId:prot.professionalKitId||'',homeKitId:prot.homeKitId||'',steps:[...(prot.steps||[])],homeUse:{morning:[...(prot.homeUse?.morning||[])],night:[...(prot.homeUse?.night||[])]}, concerns: [...(prot.concerns||[])]});
   
   const [newIndication, setNewIndication] = useState('');
   const [showNewIndication, setShowNewIndication] = useState(false);
@@ -2202,6 +2268,28 @@ const AdminProtForm = ({ prot, products, protocols, indications, categories, pha
         <Field label="Link do Botao Comprar (Imagem Destaque)" value={f.featuredLink} onChange={v=>setF({...f,featuredLink:v})} placeholder="https://..." />
         </div>
 
+        <div style={{marginTop: 16, paddingTop: 16, borderTop: `1px dashed ${B.border}`}}>
+          <div style={{fontSize:12,fontWeight:700,color:B.muted,marginBottom:10,textTransform:'uppercase',letterSpacing:'0.06em'}}>Kits Vinculados ao Protocolo</div>
+          <div style={{display:'grid',gridTemplateColumns:isMobile?'1fr':'1fr 1fr',gap:14}}>
+            <div>
+              <div style={{fontSize:11,fontWeight:700,color:B.muted,marginBottom:4}}>KIT PROFISSIONAL</div>
+              <select value={f.professionalKitId||''} onChange={e=>setF({...f,professionalKitId:e.target.value})} style={inpSt}>
+                <option value="">Nenhum kit profissional vinculado</option>
+                {getProductOptions(f.professionalKitId).filter(o=>o.v !== '').map(o=><option key={o.v} value={o.v}>{o.l}</option>)}
+              </select>
+              <div style={{fontSize:11,color:B.muted,marginTop:5}}>Esse kit aparece no resumo final do protocolo, sem entrar no passo a passo.</div>
+            </div>
+            <div>
+              <div style={{fontSize:11,fontWeight:700,color:B.muted,marginBottom:4}}>KIT USO EM CASA</div>
+              <select value={f.homeKitId||''} onChange={e=>setF({...f,homeKitId:e.target.value})} style={inpSt}>
+                <option value="">Nenhum kit de uso em casa vinculado</option>
+                {getProductOptions(f.homeKitId).filter(o=>o.v !== '').map(o=><option key={o.v} value={o.v}>{o.l}</option>)}
+              </select>
+              <div style={{fontSize:11,color:B.muted,marginTop:5}}>Esse kit aparece no bloco de uso em casa e no resumo de produtos do protocolo.</div>
+            </div>
+          </div>
+        </div>
+
         <div>
           <div style={{fontSize:12,fontWeight:700,color:B.muted,marginBottom:8,textTransform:'uppercase',letterSpacing:'0.06em'}}>Preocupacoes / Indicacoes</div>
           <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
@@ -2321,10 +2409,10 @@ const AdminProtForm = ({ prot, products, protocols, indications, categories, pha
         </div>
         <div style={{fontSize:13,color:B.muted,marginBottom:16}}>Orientacoes de rotina domiciliar para potencializar os resultados</div>
         <div style={{display:'grid',gridTemplateColumns:isMobile?'1fr':'1fr 1fr',gap:20}}>
-          {[{sl:'morning',icon:'AM',lbl:'Manha'},{sl:'night',icon:'PM',lbl:'Noite'}].map(({sl,icon,lbl})=>(
+          {[{sl:'morning',lbl:'Manha'},{sl:'night',lbl:'Noite'}].map(({sl,lbl})=>(
             <div key={sl}>
               <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:10}}>
-                <div style={{fontSize:13,fontWeight:700,color:B.text}}>{icon} {lbl}</div>
+                <div style={{fontSize:13,fontWeight:700,color:B.text}}>{lbl}</div>
                 <Btn size="sm" variant="secondary" onClick={(e)=>{e.preventDefault(); addHome(sl);}}>+ Adicionar</Btn>
               </div>
               {f.homeUse[sl].map((item,i)=>(
