@@ -3,6 +3,8 @@ import {
   ADMIN_LOGIN_GUARD_KEY,
   ADMIN_LOGIN_LOCK_MS,
   ADMIN_LOGIN_MAX_ATTEMPTS,
+  EMPTY_PERMS,
+  FULL_PERMS,
   USERS_KEY,
 } from "./app-constants";
 
@@ -224,6 +226,16 @@ export const hashSecret = async (value) => {
 
 export const normalizeStoredUser = async (user) => {
   const safeUser = { ...user };
+  const basePerms = safeUser.id === "u_admin" ? FULL_PERMS : EMPTY_PERMS;
+  safeUser.perms = Object.fromEntries(
+    Object.entries(basePerms).map(([section, actions]) => [
+      section,
+      {
+        ...actions,
+        ...(safeUser.perms?.[section] || {}),
+      },
+    ]),
+  );
   if (!safeUser.passwordHash && safeUser.password) {
     safeUser.passwordHash = await hashSecret(safeUser.password);
   }
