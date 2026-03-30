@@ -663,10 +663,17 @@ const ProtocolDetail = ({ protocol:p, products, indications, categories, navigat
                   <div style={{fontSize:10,fontWeight:700,color:B.purpleMid,textTransform:'uppercase',letterSpacing:'0.08em',marginBottom:5}}>{step.phase}</div>
                   {prod
                     ? <div style={{background:B.purpleLight,border:`1px solid ${B.border}`,borderRadius:10,padding:isMobile?'8px 10px':'10px 14px',marginBottom:8}}>
-                        <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',gap:6,flexWrap:'wrap'}}>
-                          <ProductTooltip product={prod} navigate={navigate}>
-                            <span style={{fontWeight:700,fontSize:isMobile?13:14,color:isActive(prod)?B.purpleDark:B.red}}>{prod.name}{!isActive(prod)&&' (inativo)'}</span>
-                          </ProductTooltip>
+                        <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',gap:10,flexWrap:'wrap'}}>
+                          <div style={{display:'flex',alignItems:'center',gap:10,minWidth:0,flex:'1 1 260px'}}>
+                            {prod.image ? (
+                              <img src={prod.image} alt={prod.name} style={{width:isMobile?38:44,height:isMobile?38:44,objectFit:'contain',borderRadius:8,background:B.white,border:`1px solid ${B.border}`,flexShrink:0}} />
+                            ) : (
+                              <div style={{width:isMobile?38:44,height:isMobile?38:44,borderRadius:8,background:B.cream,display:'flex',alignItems:'center',justifyContent:'center',fontSize:isMobile?15:18,flexShrink:0}}>P</div>
+                            )}
+                            <ProductTooltip product={prod} navigate={navigate}>
+                              <span style={{fontWeight:700,fontSize:isMobile?13:14,color:isActive(prod)?B.purpleDark:B.red,lineHeight:1.35}}>{prod.name}{!isActive(prod)&&' (inativo)'}</span>
+                            </ProductTooltip>
+                          </div>
                           {cpa!=null&&<span className="no-print" style={{fontSize:11,fontWeight:700,color:B.green,whiteSpace:'nowrap'}}>{fmtCurrency(cpa)}/apl.</span>}
                         </div>
                         {!isActive(prod)&&<div className="no-print" style={{fontSize:11,color:B.red,fontWeight:700,marginTop:3}}>Produto inativo</div>}
@@ -696,13 +703,22 @@ const ProtocolDetail = ({ protocol:p, products, indications, categories, navigat
                       return (
                         <div key={i} className="avoid-break" style={{display:'flex',gap:8,marginBottom:10,alignItems:'flex-start'}}>
                           <span className="no-print" style={{width:20,height:20,background:B.purple,color:B.white,borderRadius:'50%',display:'flex',alignItems:'center',justifyContent:'center',fontSize:10,fontWeight:700,flexShrink:0,marginTop:2}}>{i+1}</span>
-                          <div>
+                          <div style={{flex:1,minWidth:0}}>
                             {prod ? (
-                              <div style={{display:'flex', alignItems:'center', gap: 6, flexWrap: 'wrap'}}>
-                                <ProductTooltip product={prod} navigate={navigate}>
-                                  <span style={{fontWeight:700,fontSize:12,color:B.purpleDark,lineHeight:1.3}}>{prod.name}</span>
-                                </ProductTooltip>
-                                <BuyLink href={prod.siteUrl} isMobile={isMobile} sx={{padding: '2px 8px', fontSize: 10}} />
+                              <div style={{display:'flex', alignItems:'flex-start', gap: 8, marginBottom: 4}}>
+                                {prod.image ? (
+                                  <img src={prod.image} alt={prod.name} style={{width:36,height:36,objectFit:'contain',borderRadius:8,background:B.white,border:`1px solid ${B.border}`,flexShrink:0}} />
+                                ) : (
+                                  <div style={{width:36,height:36,borderRadius:8,background:B.white,display:'flex',alignItems:'center',justifyContent:'center',fontSize:15,flexShrink:0}}>P</div>
+                                )}
+                                <div style={{display:'flex', flexDirection:'column', gap: 4, minWidth: 0}}>
+                                  <ProductTooltip product={prod} navigate={navigate}>
+                                    <span style={{fontWeight:700,fontSize:12,color:B.purpleDark,lineHeight:1.3}}>{prod.name}</span>
+                                  </ProductTooltip>
+                                  <div>
+                                    <BuyLink href={prod.siteUrl} isMobile={isMobile} sx={{padding: '2px 8px', fontSize: 10}} />
+                                  </div>
+                                </div>
                               </div>
                             ) : null}
                             <div style={{fontSize:12,color:B.text,marginTop:4}}><InfoText text={item.instruction} isMobile={isMobile} /></div>
