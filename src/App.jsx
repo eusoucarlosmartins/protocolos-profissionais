@@ -2463,9 +2463,10 @@ export default function App() {
       if (b.colorAccent) B.gold = b.colorAccent;
       const sessionUser = await getAdminSession().catch(() => null);
       if (sessionUser) {
-        setLoggedUser(sessionUser);
         const loadedUsers = await load(USERS_KEY, INIT_USERS);
-        setUsers(await secureUsersForStorage(loadedUsers));
+        const securedUsers = await secureUsersForStorage(loadedUsers);
+        setUsers(securedUsers);
+        setLoggedUser(securedUsers.find((user) => user.id === sessionUser.id) || sessionUser);
       }
       setLoading(false);
     })();
@@ -2518,7 +2519,12 @@ export default function App() {
     if (!loggedUser) return;
     (async () => {
       const loadedUsers = await load(USERS_KEY, INIT_USERS);
-      setUsers(await secureUsersForStorage(loadedUsers));
+      const securedUsers = await secureUsersForStorage(loadedUsers);
+      setUsers(securedUsers);
+      setLoggedUser((prev) => {
+        if (!prev) return prev;
+        return securedUsers.find((user) => user.id === prev.id) || prev;
+      });
     })();
   }, [loggedUser?.id]);
 
