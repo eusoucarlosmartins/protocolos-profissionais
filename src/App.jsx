@@ -179,6 +179,12 @@ const AppFooter = ({ brand }) => (
     <div style={{ fontWeight: 700, color: B.white, marginBottom: 8, fontSize: 16 }}>{brand?.companyName || 'Extratos da Terra'}</div>
     <p style={{margin: '0 0 8px 0', fontSize: 13}}>Protocolos Profissionais e Cuidados com a Pele</p>
     <a href="https://www.extratosdaterrapro.com.br" target="_blank" rel="noreferrer" style={{ color: B.gold, textDecoration: 'none', fontWeight: 700, fontSize: 15 }}>www.extratosdaterrapro.com.br</a>
+    <div style={{ marginTop: 16, paddingTop: 14, borderTop: '1px solid rgba(255,255,255,0.12)', fontSize: 12, lineHeight: 1.7, color: 'rgba(255,255,255,0.82)' }}>
+      Desenvolvido por Carlos Martins{' '}
+      <a href="tel:+5548996962910" style={{ color: B.gold, textDecoration: 'none', fontWeight: 700 }}>
+        (48) 99696-2910
+      </a>
+    </div>
   </footer>
 );
 
