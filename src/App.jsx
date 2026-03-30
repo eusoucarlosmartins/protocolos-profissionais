@@ -504,7 +504,21 @@ const PublicHome = ({ protocols, products, indications, categories, favorites, s
         <p style={{color:'rgba(255,255,255,0.7)',fontSize:isMobile?13:15,margin:`0 0 ${isMobile?18:28}px`,lineHeight:1.5}}>Passo a passo completo para esteticistas, com os produtos {brand?.companyName || 'Extratos da Terra'}</p>
         
         <div style={{maxWidth:900, margin:'0 auto', padding:`0 ${isMobile?4:0}px`}}>
-          <div style={{background:'rgba(255,255,255,0.12)', padding: '16px', borderRadius: 16, display:'flex', flexDirection:'column', gap: 12, border: '1px solid rgba(255,255,255,0.2)'}}>
+          <div style={{background:'rgba(255,255,255,0.12)', padding: '16px', borderRadius: 16, display:'flex', flexDirection:'column', gap: 14, border: '1px solid rgba(255,255,255,0.2)', boxShadow:'0 18px 40px rgba(24, 12, 44, 0.16)'}}>
+            <div style={{display:'flex',justifyContent:'space-between',alignItems:isMobile?'flex-start':'center',gap:10,flexDirection:isMobile?'column':'row',textAlign:'left'}}>
+              <div>
+                <div style={{fontSize:11,fontWeight:700,color:'rgba(255,255,255,0.72)',textTransform:'uppercase',letterSpacing:'0.08em',marginBottom:4}}>Encontre o protocolo ideal</div>
+                <div style={{fontSize:13,color:'rgba(255,255,255,0.82)',lineHeight:1.45}}>Refine por nome, categoria, produto vinculado, indicacao ou favoritos.</div>
+              </div>
+              {(search || filterCat !== 'all' || filterProd !== 'all' || filterInd !== 'all') && (
+                <button
+                  onClick={() => { setSearch(''); setFilterCat('all'); setFilterProd('all'); setFilterInd('all'); }}
+                  style={{padding:'9px 14px',borderRadius:999,border:'1px solid rgba(255,255,255,0.22)',background:'rgba(255,255,255,0.08)',color:B.white,fontSize:12,fontWeight:700,cursor:'pointer',fontFamily:'inherit'}}
+                >
+                  Limpar todos os filtros
+                </button>
+              )}
+            </div>
             <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Pesquisar protocolo por nome ou descricao..."
               style={{width:'100%',padding:'11px 16px',borderRadius:10,border:'none',fontSize:14,outline:'none',boxSizing:'border-box',background:B.white,color:B.text,fontFamily:'inherit'}} />
             <div style={{display:'flex', gap: 10, flexDirection: isMobile ? 'column' : 'row'}}>
@@ -517,26 +531,31 @@ const PublicHome = ({ protocols, products, indications, categories, favorites, s
                 {sortByName(products).filter(p=>isActive(p)).map(p=><option key={p.id} value={p.id}>{p.name}</option>)}
               </select>
             </div>
-            <div style={{display:'flex',gap:10,flexDirection:isMobile?'column':'row',alignItems:isMobile?'stretch':'center'}}>
-              <div style={{display:'flex',alignItems:'center',gap:8,flexWrap:'wrap'}}>
-                <span style={{fontSize:11,fontWeight:700,color:'rgba(255,255,255,0.72)',textTransform:'uppercase',letterSpacing:'0.05em'}}>Filtros:</span>
-                <button onClick={()=>setFilterInd('all')} style={{padding:'8px 14px',borderRadius:999,border:`1.5px solid ${activeQuickFilter==='all' && selectedIndication==='all'?'transparent':'rgba(255,255,255,0.25)'}`,background:activeQuickFilter==='all' && selectedIndication==='all'?B.white:'rgba(255,255,255,0.08)',color:activeQuickFilter==='all' && selectedIndication==='all'?B.purpleDark:B.white,fontSize:12,fontWeight:700,cursor:'pointer',whiteSpace:'nowrap',fontFamily:'inherit'}}>
+            <div style={{background:'rgba(255,255,255,0.07)',border:'1px solid rgba(255,255,255,0.12)',borderRadius:14,padding:isMobile?'12px':'12px 14px',display:'flex',gap:12,flexDirection:'column'}}>
+              <div style={{fontSize:11,fontWeight:700,color:'rgba(255,255,255,0.72)',textTransform:'uppercase',letterSpacing:'0.08em',textAlign:'left'}}>Refino rapido</div>
+              <div style={{display:'flex',gap:10,flexDirection:isMobile?'column':'row',alignItems:isMobile?'stretch':'center'}}>
+                <div style={{display:'flex',alignItems:'center',gap:8,flexWrap:'wrap'}}>
+                  <button onClick={()=>setFilterInd('all')} style={{padding:'8px 14px',borderRadius:999,border:`1.5px solid ${activeQuickFilter==='all' && selectedIndication==='all'?'transparent':'rgba(255,255,255,0.25)'}`,background:activeQuickFilter==='all' && selectedIndication==='all'?B.white:'rgba(255,255,255,0.08)',color:activeQuickFilter==='all' && selectedIndication==='all'?B.purpleDark:B.white,fontSize:12,fontWeight:700,cursor:'pointer',whiteSpace:'nowrap',fontFamily:'inherit'}}>
                   Todos
-                </button>
-                <button onClick={()=>setFilterInd('favorites')} style={{padding:'8px 14px',borderRadius:999,border:`1.5px solid ${activeQuickFilter==='favorites'?'transparent':'rgba(255,255,255,0.25)'}`,background:activeQuickFilter==='favorites'?B.redLight:'rgba(255,255,255,0.08)',color:activeQuickFilter==='favorites'?B.red:B.white,fontSize:12,fontWeight:700,cursor:'pointer',whiteSpace:'nowrap',fontFamily:'inherit'}}>
-                  Meus Favoritos
-                </button>
-              </div>
-              <div style={{display:'flex',gap:10,flex:1,flexDirection:isMobile?'column':'row',alignItems:isMobile?'stretch':'center'}}>
-                <select value={selectedIndication} onChange={e=>setFilterInd(e.target.value)} style={{flex:1,padding:'10px 12px',borderRadius:10,border:'none',fontSize:13,outline:'none',background:B.white,color:B.text,fontFamily:'inherit'}}>
-                  <option value="all">Todas as indicacoes</option>
-                  {[...indications].sort((a,b)=>a.label.localeCompare(b.label)).map(c=><option key={c.id} value={c.id}>{c.label}</option>)}
-                </select>
-                {selectedIndication !== 'all' && (
-                  <button onClick={()=>setFilterInd(activeQuickFilter === 'favorites' ? 'favorites' : 'all')} style={{padding:'10px 12px',borderRadius:10,border:'1.5px solid rgba(255,255,255,0.22)',background:'rgba(255,255,255,0.08)',color:B.white,fontSize:12,fontWeight:700,cursor:'pointer',fontFamily:'inherit'}}>
-                    Limpar indicacao
                   </button>
-                )}
+                  <button onClick={()=>setFilterInd('favorites')} style={{padding:'8px 14px',borderRadius:999,border:`1.5px solid ${activeQuickFilter==='favorites'?'transparent':'rgba(255,255,255,0.25)'}`,background:activeQuickFilter==='favorites'?B.redLight:'rgba(255,255,255,0.08)',color:activeQuickFilter==='favorites'?B.red:B.white,fontSize:12,fontWeight:700,cursor:'pointer',whiteSpace:'nowrap',fontFamily:'inherit'}}>
+                  Meus Favoritos
+                  </button>
+                </div>
+                <div style={{display:'flex',gap:10,flex:1,flexDirection:isMobile?'column':'row',alignItems:isMobile?'stretch':'center'}}>
+                  <div style={{display:'flex',flexDirection:'column',gap:6,flex:1,textAlign:'left'}}>
+                    <span style={{fontSize:11,fontWeight:700,color:'rgba(255,255,255,0.72)',letterSpacing:'0.04em'}}>Indicacao</span>
+                    <select value={selectedIndication} onChange={e=>setFilterInd(e.target.value)} style={{flex:1,padding:'10px 12px',borderRadius:10,border:'none',fontSize:13,outline:'none',background:B.white,color:B.text,fontFamily:'inherit'}}>
+                      <option value="all">Todas as indicacoes</option>
+                      {[...indications].sort((a,b)=>a.label.localeCompare(b.label)).map(c=><option key={c.id} value={c.id}>{c.label}</option>)}
+                    </select>
+                  </div>
+                  {selectedIndication !== 'all' && (
+                    <button onClick={()=>setFilterInd(activeQuickFilter === 'favorites' ? 'favorites' : 'all')} style={{padding:'10px 12px',borderRadius:10,border:'1.5px solid rgba(255,255,255,0.22)',background:'rgba(255,255,255,0.08)',color:B.white,fontSize:12,fontWeight:700,cursor:'pointer',fontFamily:'inherit',alignSelf:isMobile?'stretch':'flex-end'}}>
+                      Limpar indicacao
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
           </div>
