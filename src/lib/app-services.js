@@ -15,6 +15,32 @@ const SUPABASE_ANON =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp3cHNwdHdxY2pobW5pY3VoZ3l3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2MTI5NDUsImV4cCI6MjA5MDE4ODk0NX0.RjWrKGjziNAKDZH-OjE-SlIwihhmzUW_42n01V0atE4";
 
 const stripHtml = (html) => String(html || "").replace(/<[^>]*>/g, "");
+const MOJIBAKE_RE = /Ã.|Â.|â€|â€“|â€”|�/;
+
+const decodeMojibake = (value) => {
+  if (typeof value !== "string" || !MOJIBAKE_RE.test(value)) return value;
+  try {
+    let current = value;
+    for (let index = 0; index < 2; index += 1) {
+      const bytes = Uint8Array.from(Array.from(current).map((char) => char.charCodeAt(0) & 0xff));
+      const next = new TextDecoder("utf-8").decode(bytes);
+      if (!next || next === current) break;
+      current = next;
+      if (!MOJIBAKE_RE.test(current)) break;
+    }
+    return current;
+  } catch {
+    return value;
+  }
+};
+
+const normalizeContent = (value) => {
+  if (Array.isArray(value)) return value.map(normalizeContent);
+  if (value && typeof value === "object") {
+    return Object.fromEntries(Object.entries(value).map(([key, item]) => [key, normalizeContent(item)]));
+  }
+  return decodeMojibake(value);
+};
 
 export const getPurify = () => {
   if (purifyInstance) return Promise.resolve(purifyInstance);
@@ -65,32 +91,33 @@ export const load = async (key, fallback) => {
     if (response.ok) {
       const payload = await response.json();
       if (payload && Object.prototype.hasOwnProperty.call(payload, "value")) {
-        return payload.value == null ? fallback : payload.value;
+        return payload.value == null ? normalizeContent(fallback) : normalizeContent(payload.value);
       }
     }
-    if (key === USERS_KEY) return fallback;
+    if (key === USERS_KEY) return normalizeContent(fallback);
   } catch (error) {
-    if (key === USERS_KEY) return fallback;
+    if (key === USERS_KEY) return normalizeContent(fallback);
     console.warn("API load error:", error);
   }
 
   try {
     const supabaseClient = await getSupabase();
     const { data, error } = await supabaseClient.from("app_data").select("value").eq("key", key).single();
-    if (!error && data) return data.value == null ? fallback : data.value;
+    if (!error && data) return data.value == null ? normalizeContent(fallback) : normalizeContent(data.value);
   } catch (error) {
     console.warn("Supabase load error:", error);
   }
 
-  return fallback;
+  return normalizeContent(fallback);
 };
 
 export const save = async (key, value) => {
+  const normalizedValue = normalizeContent(value);
   const response = await fetch("/api/data", {
     method: "POST",
     credentials: "same-origin",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ key, value }),
+    body: JSON.stringify({ key, value: normalizedValue }),
   });
   if (!response.ok) {
     const payload = await response.json().catch(() => ({}));
@@ -106,7 +133,7 @@ export const save = async (key, value) => {
 export const savePublic = async (key, value) => {
   try {
     const supabaseClient = await getSupabase();
-    await supabaseClient.from("app_data").upsert({ key, value }, { onConflict: "key" });
+    await supabaseClient.from("app_data").upsert({ key, value: normalizeContent(value) }, { onConflict: "key" });
   } catch (error) {
     console.warn("Supabase save error:", error);
   }

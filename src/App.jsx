@@ -372,15 +372,15 @@ const Header = ({ navigate, adminAuth, setAdminAuth, brand }) => {
             <button key={n.v} onClick={()=>navigate(n.v)} style={{background:'transparent',color:'rgba(255,255,255,0.65)',border:'none',padding:'7px 14px',borderRadius:6,fontSize:13,fontWeight:700,cursor:'pointer',fontFamily:'inherit'}}>{n.l}</button>
           ))}
           <button onClick={()=>adminAuth?navigate('/admin'):navigate('/login')} style={{background:B.gold,color:B.white,border:'none',padding:'7px 16px',borderRadius:6,fontSize:13,fontWeight:700,cursor:'pointer',marginLeft:8,fontFamily:'inherit'}}>
-            {adminAuth?'ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¾ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ Admin':'ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â°ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¸ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â Admin'}
+            {adminAuth ? 'Painel Admin' : 'Entrar Admin'}
           </button>
         </nav>
       )}
 
       {isMobile && (
         <div style={{display:'flex',alignItems:'center',gap:8}}>
-          <button onClick={()=>adminAuth?navigate('/admin'):navigate('/login')} style={{background:B.gold,color:B.white,border:'none',padding:'6px 12px',borderRadius:6,fontSize:12,fontWeight:700,cursor:'pointer',fontFamily:'inherit'}}>{adminAuth?'ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¾ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢':'ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â°ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¸ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â'}</button>
-          <button onClick={()=>setMenuOpen(o=>!o)} style={{background:'rgba(255,255,255,0.15)',color:B.white,border:'none',width:38,height:38,borderRadius:8,fontSize:18,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center'}}>{menuOpen ? 'ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢' : 'ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¹ÃƒÆ’Ã¢â‚¬Â¦ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â°'}</button>
+          <button onClick={()=>adminAuth?navigate('/admin'):navigate('/login')} style={{background:B.gold,color:B.white,border:'none',padding:'6px 12px',borderRadius:6,fontSize:12,fontWeight:700,cursor:'pointer',fontFamily:'inherit'}}>{adminAuth ? 'Painel' : 'Entrar'}</button>
+          <button onClick={()=>setMenuOpen(o=>!o)} style={{background:'rgba(255,255,255,0.15)',color:B.white,border:'none',width:38,height:38,borderRadius:8,fontSize:12,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',fontWeight:700,fontFamily:'inherit'}}>{menuOpen ? 'X' : 'Menu'}</button>
         </div>
       )}
 
@@ -422,13 +422,13 @@ const PublicHome = ({ protocols, products, indications, categories, favorites, s
       <HeroBanner banners={marketing?.banners} navigate={navigate} />
       <CampaignSection campaign={marketing?.campaign} protocols={protocols} navigate={navigate} />
       <div className="rp-hero" style={{background:`linear-gradient(135deg, ${B.purpleDark} 0%, ${B.purple} 60%, ${B.purpleMid} 100%)`,textAlign:'center'}}>
-        <div style={{fontSize:10,color:B.gold,fontWeight:700,letterSpacing:'0.16em',marginBottom:8,textTransform:'uppercase'}}>Cosmetologia AvanÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§ada</div>
+        <div style={{fontSize:10,color:B.gold,fontWeight:700,letterSpacing:'0.16em',marginBottom:8,textTransform:'uppercase'}}>Cosmetologia Avancada</div>
         <h1 className="rp-hero" style={{color:B.white,fontWeight:700,fontFamily:'Georgia, serif',margin:'0 0 10px',letterSpacing:'-0.01em'}}>Protocolos Profissionais</h1>
         <p style={{color:'rgba(255,255,255,0.7)',fontSize:isMobile?13:15,margin:`0 0 ${isMobile?18:28}px`,lineHeight:1.5}}>Passo a passo completo para esteticistas, com os produtos {brand?.companyName || 'Extratos da Terra'}</p>
         
         <div style={{maxWidth:900, margin:'0 auto', padding:`0 ${isMobile?4:0}px`}}>
           <div style={{background:'rgba(255,255,255,0.12)', padding: '16px', borderRadius: 16, display:'flex', flexDirection:'column', gap: 10, border: '1px solid rgba(255,255,255,0.2)'}}>
-            <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Pesquisar protocolo por nome ou descriÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â£o..."
+            <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Pesquisar protocolo por nome ou descricao..."
               style={{width:'100%',padding:'11px 16px',borderRadius:10,border:'none',fontSize:14,outline:'none',boxSizing:'border-box',background:B.white,color:B.text,fontFamily:'inherit'}} />
             <div style={{display:'flex', gap: 10, flexDirection: isMobile ? 'column' : 'row'}}>
               <select value={filterCat} onChange={e=>setFilterCat(e.target.value)} style={{flex:1, padding:'11px 16px',borderRadius:10,border:'none',fontSize:14,outline:'none',background:B.white,color:B.text,fontFamily:'inherit'}}>
@@ -468,7 +468,7 @@ const PublicHome = ({ protocols, products, indications, categories, favorites, s
 
       <div style={{maxWidth:1100,margin:'0 auto',padding:`${isMobile?20:32}px ${isMobile?12:24}px`}}>
         {filtered.length===0
-          ? <div style={{textAlign:'center',padding:'70px 0',color:B.muted}}><div style={{fontSize:52,marginBottom:14}}>ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â°ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¸ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¹</div><div style={{fontSize:16,fontWeight:600,color:B.text,marginBottom:6}}>Nenhum protocolo encontrado com estes filtros</div></div>
+          ? <div style={{textAlign:'center',padding:'70px 0',color:B.muted}}><div style={{fontSize:52,marginBottom:14}}>...</div><div style={{fontSize:16,fontWeight:600,color:B.text,marginBottom:6}}>Nenhum protocolo encontrado com estes filtros</div></div>
           : <div className="rp-grid-proto" style={{display:'grid',gap:16}}>
               {filtered.map(p=><ProtocolCard key={p.id} protocol={p} products={products} indications={indications} categories={categories} onClick={()=>navigate(`/protocolo/${p.id}`)} isFav={favorites.includes(p.id)} toggleFav={(e)=>{e.stopPropagation(); setFavorites(prev => prev.includes(p.id)? prev.filter(x=>x!==p.id) : [...prev, p.id])}} />)}
             </div>
@@ -490,7 +490,7 @@ const ProtocolCard = ({ protocol:p, products, indications, categories, onClick, 
       style={{position:'relative', background:B.white,borderRadius:14,border:`1px solid ${hov?B.purpleMid:B.border}`,padding:22,cursor:'pointer',transition:'all 0.18s',transform:hov?'translateY(-3px)':'none',boxShadow:hov?'0 10px 35px rgba(94,61,143,0.13)':'none'}}>
       {p.badge&&<span style={{position:'absolute',top:-8,left:14,background:B.gold,color:'#fff',fontSize:10,fontWeight:700,padding:'3px 10px',borderRadius:20,textTransform:'uppercase',letterSpacing:'0.07em',zIndex:3}}>{p.badge}</span>}
       <button onClick={toggleFav} style={{position:'absolute', top: 18, right: 18, background:'none', border:'none', fontSize: 22, cursor:'pointer', color: isFav ? B.red : B.border, zIndex: 2}}>
-        {isFav ? 'ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¤ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¯ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¸ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â' : 'ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â°ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¸ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¤ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â'}
+        {isFav ? '♥' : '♡'}
       </button>
       <div style={{display:'flex',gap:6,marginBottom:12,flexWrap:'wrap', paddingRight: 30}}>
         {(p.concerns || []).map(c=><Tag key={c} label={indications.find(x=>x.id===c)?.label||c} />)}
@@ -500,9 +500,9 @@ const ProtocolCard = ({ protocol:p, products, indications, categories, onClick, 
       <p style={{margin:'0 0 16px',color:B.muted,fontSize:13,lineHeight:1.6}} dangerouslySetInnerHTML={{__html: clean((p.description||'').slice(0,100) + ((p.description||'').length>100?'...':''))}} />
       <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',borderTop:`1px solid ${B.border}`,paddingTop:12}}>
         <div style={{display:'flex',flexDirection:'column',gap:2}}>
-          <span style={{fontSize:12,color:B.muted}}>ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â°ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¸ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Âª {p.steps.length} etapas ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â· {prodCount} produtos</span>
+          <span style={{fontSize:12,color:B.muted}}>{p.steps.length} etapas - {prodCount} produtos</span>
         </div>
-        <span style={{fontSize:13,color:B.purple,fontWeight:700}}>Ver protocolo ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾Ãƒâ€šÃ‚Â¢</span>
+        <span style={{fontSize:13,color:B.purple,fontWeight:700}}>Ver protocolo -&gt;</span>
       </div>
     </div>
   );
@@ -554,11 +554,11 @@ const ProtocolDetail = ({ protocol:p, products, indications, categories, navigat
   return (
     <div style={{background:B.cream, flex: 1}}>
       <div className="no-print rp-bkbar" style={{background:B.white,borderBottom:`1px solid ${B.border}`,padding:'10px 24px',display:'flex',justifyContent:'space-between',alignItems:'center'}}>
-        <button onClick={()=>navigate('/')} style={{background:'none',border:'none',color:B.purple,fontWeight:700,cursor:'pointer',fontSize:14,fontFamily:'inherit'}}>ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â Voltar</button>
+        <button onClick={()=>navigate('/')} style={{background:'none',border:'none',color:B.purple,fontWeight:700,cursor:'pointer',fontSize:14,fontFamily:'inherit'}}>Voltar</button>
         <div style={{display:'flex', gap:8}}>
-          <button onClick={()=>{navigator.clipboard.writeText(window.location.href); alert('Link copiado!');}} style={{background:B.purpleLight,color:B.purple,border:'none',padding:'8px 14px',borderRadius:8,fontWeight:700,fontSize:isMobile?12:13,cursor:'pointer',fontFamily:'inherit'}}>ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â°ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¸ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â Copiar link</button>
-          <a href={`https://api.whatsapp.com/send?text=${shareText}`} target="_blank" rel="noreferrer" style={{background:'#25D366',color:B.white,textDecoration:'none',padding:'8px 16px',borderRadius:8,fontWeight:700,fontSize:isMobile?12:13,display:'inline-flex',alignItems:'center'}}>ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â°ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¸ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â± Compartilhar</a>
-          <button onClick={handlePrint} style={{background:B.purple,color:B.white,border:'none',padding:'8px 16px',borderRadius:8,fontWeight:700,fontSize:isMobile?12:13,cursor:'pointer',fontFamily:'inherit'}}>ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â°ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¸ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¨ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¯ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¸ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â {isMobile?'PDF':'Salvar PDF'}</button>
+          <button onClick={()=>{navigator.clipboard.writeText(window.location.href); alert('Link copiado!');}} style={{background:B.purpleLight,color:B.purple,border:'none',padding:'8px 14px',borderRadius:8,fontWeight:700,fontSize:isMobile?12:13,cursor:'pointer',fontFamily:'inherit'}}>Copiar link</button>
+          <a href={`https://api.whatsapp.com/send?text=${shareText}`} target="_blank" rel="noreferrer" style={{background:'#25D366',color:B.white,textDecoration:'none',padding:'8px 16px',borderRadius:8,fontWeight:700,fontSize:isMobile?12:13,display:'inline-flex',alignItems:'center'}}>Compartilhar</a>
+          <button onClick={handlePrint} style={{background:B.purple,color:B.white,border:'none',padding:'8px 16px',borderRadius:8,fontWeight:700,fontSize:isMobile?12:13,cursor:'pointer',fontFamily:'inherit'}}>{isMobile ? 'PDF' : 'Salvar PDF'}</button>
         </div>
       </div>
 
@@ -582,17 +582,17 @@ const ProtocolDetail = ({ protocol:p, products, indications, categories, navigat
           <h1 style={{margin:'0 0 10px',color:B.purpleDark,fontSize:isMobile?20:24,fontWeight:700,fontFamily:'Georgia, serif',lineHeight:1.3}}>{p.name}</h1>
           <InfoText text={p.description} isMobile={isMobile} />
           <div className="rp-proto-meta" style={{display:'flex',gap:isMobile?10:28,flexWrap:'wrap',paddingTop:12,borderTop:`1px solid ${B.border}`, marginTop: 14}}>
-            {p.frequency&&<div><span style={{fontSize:11,color:B.muted,textTransform:'uppercase',fontWeight:700,letterSpacing:'0.06em'}}>FrequÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Âªncia</span><br/><span style={{fontSize:13,color:B.text,fontWeight:600}}>{p.frequency}</span></div>}
-            {p.associations&&<div><span style={{fontSize:11,color:B.muted,textTransform:'uppercase',fontWeight:700,letterSpacing:'0.06em'}}>AssociaÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Âµes</span><br/><span style={{fontSize:13,color:B.text,fontWeight:600}}>{p.associations}</span></div>}
+            {p.frequency&&<div><span style={{fontSize:11,color:B.muted,textTransform:'uppercase',fontWeight:700,letterSpacing:'0.06em'}}>Frequencia</span><br/><span style={{fontSize:13,color:B.text,fontWeight:600}}>{p.frequency}</span></div>}
+            {p.associations&&<div><span style={{fontSize:11,color:B.muted,textTransform:'uppercase',fontWeight:700,letterSpacing:'0.06em'}}>Associacoes</span><br/><span style={{fontSize:13,color:B.text,fontWeight:600}}>{p.associations}</span></div>}
             {p.youtubeUrl&&(
-              <a href={p.youtubeUrl} target="_blank" rel="noreferrer" className="no-print" style={{display:'inline-flex',alignItems:'center',gap:7,background:'#FF0000',color:B.white,padding:'7px 14px',borderRadius:8,fontWeight:700,fontSize:12,textDecoration:'none'}}>ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¶ YouTube</a>
+              <a href={p.youtubeUrl} target="_blank" rel="noreferrer" className="no-print" style={{display:'inline-flex',alignItems:'center',gap:7,background:'#FF0000',color:B.white,padding:'7px 14px',borderRadius:8,fontWeight:700,fontSize:12,textDecoration:'none'}}>Video no YouTube</a>
             )}
           </div>
         </div>
 
         {/* Steps */}
         <div style={{background:B.white,borderRadius:14,border:`1px solid ${B.border}`,padding:secPad,marginBottom:16}}>
-          <h2 style={{margin:'0 0 20px',fontSize:15,fontWeight:700,color:B.text}}>ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â°ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¸ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â  Protocolo em Cabine</h2>
+          <h2 style={{margin:'0 0 20px',fontSize:15,fontWeight:700,color:B.text}}>Protocolo em Cabine</h2>
           {p.steps.map((step,i)=>{
             const prod = step.productId ? get(step.productId) : null;
             const cpa = costPerApp(prod);
@@ -608,14 +608,14 @@ const ProtocolDetail = ({ protocol:p, products, indications, categories, navigat
                     ? <div style={{background:B.purpleLight,border:`1px solid ${B.border}`,borderRadius:10,padding:isMobile?'8px 10px':'10px 14px',marginBottom:8}}>
                         <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',gap:6,flexWrap:'wrap'}}>
                           <ProductTooltip product={prod} navigate={navigate}>
-                            <span style={{fontWeight:700,fontSize:isMobile?13:14,color:isActive(prod)?B.purpleDark:B.red}}>{prod.name}{!isActive(prod)&&' ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¯ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¸ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â'}</span>
+                            <span style={{fontWeight:700,fontSize:isMobile?13:14,color:isActive(prod)?B.purpleDark:B.red}}>{prod.name}{!isActive(prod)&&' (inativo)'}</span>
                           </ProductTooltip>
                           {cpa!=null&&<span className="no-print" style={{fontSize:11,fontWeight:700,color:B.green,whiteSpace:'nowrap'}}>{fmtCurrency(cpa)}/apl.</span>}
                         </div>
-                        {!isActive(prod)&&<div className="no-print" style={{fontSize:11,color:B.red,fontWeight:700,marginTop:3}}>ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¯ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¸ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â Produto inativo</div>}
+                        {!isActive(prod)&&<div className="no-print" style={{fontSize:11,color:B.red,fontWeight:700,marginTop:3}}>Produto inativo</div>}
                         {prod.actives&&isActive(prod)&&<div style={{fontSize:11,color:B.muted,marginTop:3,lineHeight:1.4}} dangerouslySetInnerHTML={{__html: clean('Ativos: ' + prod.actives.slice(0,isMobile?80:999) + (isMobile&&prod.actives.length>80?'...':''))}} /> }
                       </div>
-                    : <div style={{background:'#F3F4F6',borderRadius:10,padding:'8px 12px',marginBottom:8,fontSize:13,color:B.muted,fontStyle:'italic'}}>Equipamento / tÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â©cnica manual</div>
+                    : <div style={{background:'#F3F4F6',borderRadius:10,padding:'8px 12px',marginBottom:8,fontSize:13,color:B.muted,fontStyle:'italic'}}>Equipamento / tecnica manual</div>
                   }
                   <InfoText text={step.instruction} isMobile={isMobile} />
                 </div>
@@ -759,10 +759,10 @@ const CompositionSection = ({ composition, isMobile }) => {
   return (
     <div>
       <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:10}}>
-        <span style={{fontSize:13,fontWeight:700,color:B.muted,textTransform:'uppercase',letterSpacing:'0.07em'}}>ComposiÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â£o (INCI)</span>
+        <span style={{fontSize:13,fontWeight:700,color:B.muted,textTransform:'uppercase',letterSpacing:'0.07em'}}>Composicao (INCI)</span>
         {hasMore && (
           <button onClick={()=>setExpanded(e=>!e)} style={{background:'none',border:'none',color:B.purple,fontWeight:700,fontSize:12,cursor:'pointer',fontFamily:'inherit',padding:0}}>
-            {expanded ? 'ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â² Recolher' : 'ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¼ Ver completa'}
+            {expanded ? 'Recolher' : 'Ver completa'}
           </button>
         )}
       </div>
@@ -801,9 +801,9 @@ const PublicProductPage = ({ product: p, protocols, categories, navigate, brand,
   return (
     <div style={{background:B.cream, flex: 1}}>
       <div className="no-print" style={{background:B.white,borderBottom:`1px solid ${B.border}`,padding:`10px ${isMobile?14:24}px`,display:'flex',justifyContent:'space-between',alignItems:'center'}}>
-        <button onClick={()=>navigate('/')} style={{background:'none',border:'none',color:B.purple,fontWeight:700,cursor:'pointer',fontSize:14,fontFamily:'inherit'}}>ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â Voltar</button>
+        <button onClick={()=>navigate('/')} style={{background:'none',border:'none',color:B.purple,fontWeight:700,cursor:'pointer',fontSize:14,fontFamily:'inherit'}}>Voltar</button>
         <div style={{display:'flex', gap:8}}>
-          <a href={`https://api.whatsapp.com/send?text=${shareText}`} target="_blank" rel="noreferrer" style={{background:'#25D366',color:B.white,textDecoration:'none',padding:isMobile?'8px 14px':'9px 22px',borderRadius:8,fontWeight:700,fontSize:isMobile?12:14,display:'inline-flex',alignItems:'center'}}>ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â°ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¸ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â± Partilhar</a>
+          <a href={`https://api.whatsapp.com/send?text=${shareText}`} target="_blank" rel="noreferrer" style={{background:'#25D366',color:B.white,textDecoration:'none',padding:isMobile?'8px 14px':'9px 22px',borderRadius:8,fontWeight:700,fontSize:isMobile?12:14,display:'inline-flex',alignItems:'center'}}>Compartilhar</a>
           <BuyLink href={p.siteUrl} isMobile={isMobile}>Comprar / Saiba mais</BuyLink>
         </div>
       </div>
@@ -840,15 +840,15 @@ const PublicProductPage = ({ product: p, protocols, categories, navigate, brand,
           <div>
             {p.description && (
               <div style={{background:B.white,borderRadius:14,border:`1px solid ${B.border}`,padding:isMobile?14:24,marginBottom:14}}>
-                <Section title="DescriÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â£o"><InfoText text={p.description} isMobile={isMobile} /></Section>
+                <Section title="Descricao"><InfoText text={p.description} isMobile={isMobile} /></Section>
               </div>
             )}
             {p.benefits && (
               <div style={{background:B.white,borderRadius:14,border:`1px solid ${B.border}`,padding:isMobile?14:24,marginBottom:14}}>
-                <Section title="BenefÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­cios">
+                <Section title="Beneficios">
                   {p.benefits.split(';').map((b,i)=>b.trim()&&(
                     <div key={i} style={{display:'flex',gap:8,marginBottom:7,alignItems:'flex-start'}}>
-                      <span style={{color:B.purple,fontWeight:700,flexShrink:0,marginTop:3}}>ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¦</span>
+                      <span style={{color:B.purple,fontWeight:700,flexShrink:0,marginTop:3}}>•</span>
                       <span style={{fontSize:isMobile?13:15,color:B.text,lineHeight:1.6}} dangerouslySetInnerHTML={{__html: clean(b.trim())}} />
                     </div>
                   ))}
@@ -870,25 +870,25 @@ const PublicProductPage = ({ product: p, protocols, categories, navigate, brand,
             {(p.howToUse||p.indications||p.contra) && (
               <div style={{background:B.white,borderRadius:14,border:`1px solid ${B.border}`,padding:isMobile?14:24,marginBottom:14}}>
                 {p.howToUse&&<Section title="Modo de Uso"><InfoText text={p.howToUse} isMobile={isMobile} /></Section>}
-                {p.indications&&<Section title="IndicaÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Âµes"><InfoText text={p.indications} isMobile={isMobile} /></Section>}
-                {p.contra&&<Section title="ContraindicaÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Âµes"><InfoText text={p.contra} isMobile={isMobile} /></Section>}
+                {p.indications&&<Section title="Indicacoes"><InfoText text={p.indications} isMobile={isMobile} /></Section>}
+                {p.contra&&<Section title="Contraindicacoes"><InfoText text={p.contra} isMobile={isMobile} /></Section>}
               </div>
             )}
             {(p.yieldApplications||p.cost) && (
               <div style={{background:B.purpleLight,borderRadius:14,border:`1px solid ${B.border}`,padding:isMobile?14:24,marginBottom:14}}>
                 <Section title="Rendimento & Custo">
                   <div style={{display:'flex',flexDirection:'column',gap:8}}>
-                    {p.yieldApplications&&<div style={{display:'flex',justifyContent:'space-between',alignItems:'center',background:'rgba(255,255,255,0.6)',borderRadius:8,padding:'8px 12px'}}><span style={{fontSize:13,color:B.muted}}>Rendimento</span><span style={{fontSize:14,fontWeight:700,color:B.purple}}>{p.yieldApplications} aplicaÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Âµes</span></div>}
-                    {p.yieldGramsPerUse&&<div style={{display:'flex',justifyContent:'space-between',alignItems:'center',background:'rgba(255,255,255,0.6)',borderRadius:8,padding:'8px 12px'}}><span style={{fontSize:13,color:B.muted}}>Por aplicaÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â£o</span><span style={{fontSize:14,fontWeight:700,color:B.purple}}>{p.yieldGramsPerUse} g/ml</span></div>}
+                    {p.yieldApplications&&<div style={{display:'flex',justifyContent:'space-between',alignItems:'center',background:'rgba(255,255,255,0.6)',borderRadius:8,padding:'8px 12px'}}><span style={{fontSize:13,color:B.muted}}>Rendimento</span><span style={{fontSize:14,fontWeight:700,color:B.purple}}>{p.yieldApplications} aplicacoes</span></div>}
+                    {p.yieldGramsPerUse&&<div style={{display:'flex',justifyContent:'space-between',alignItems:'center',background:'rgba(255,255,255,0.6)',borderRadius:8,padding:'8px 12px'}}><span style={{fontSize:13,color:B.muted}}>Por aplicacao</span><span style={{fontSize:14,fontWeight:700,color:B.purple}}>{p.yieldGramsPerUse} g/ml</span></div>}
                     {p.cost&&<div style={{display:'flex',justifyContent:'space-between',alignItems:'center',background:'rgba(255,255,255,0.6)',borderRadius:8,padding:'8px 12px'}}><span style={{fontSize:13,color:B.muted}}>Custo produto</span><span style={{fontSize:14,fontWeight:700,color:B.purple}}>{fmtCurrency(parseFloat(p.cost))}</span></div>}
-                    {costPerApp(p)!=null&&<div style={{display:'flex',justifyContent:'space-between',alignItems:'center',background:B.purple,borderRadius:8,padding:'10px 14px'}}><span style={{fontSize:13,color:'rgba(255,255,255,0.8)',fontWeight:600}}>Custo/aplicaÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â£o</span><span style={{fontSize:16,fontWeight:700,color:B.gold}}>{fmtCurrency(costPerApp(p))}</span></div>}
+                    {costPerApp(p)!=null&&<div style={{display:'flex',justifyContent:'space-between',alignItems:'center',background:B.purple,borderRadius:8,padding:'10px 14px'}}><span style={{fontSize:13,color:'rgba(255,255,255,0.8)',fontWeight:600}}>Custo/aplicacao</span><span style={{fontSize:16,fontWeight:700,color:B.gold}}>{fmtCurrency(costPerApp(p))}</span></div>}
                   </div>
                 </Section>
               </div>
             )}
             {p.homeUseNote && (
               <div style={{background:B.greenLight,borderRadius:14,border:'1px solid #A5D6A7',padding:isMobile?14:24,marginBottom:14}}>
-                <Section title="ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â°ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¸ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â  Home Care">
+                <Section title="Rotina Home Care">
                   <InfoText text={p.homeUseNote} isMobile={isMobile} />
                 </Section>
               </div>
@@ -912,7 +912,7 @@ const PublicProductPage = ({ product: p, protocols, categories, navigate, brand,
                     {usedIn.map(prot=>(
                       <button key={prot.id} onClick={()=>navigate(`/protocolo/${prot.id}`)} style={{display:'flex',justifyContent:'space-between',alignItems:'center',background:B.cream,border:`1px solid ${B.border}`,borderRadius:10,padding:'10px 14px',cursor:'pointer',fontFamily:'inherit',textAlign:'left',width:'100%'}}>
                         <span style={{fontSize:13,fontWeight:700,color:B.purpleDark,lineHeight:1.3}}>{prot.name}</span>
-                        <span style={{fontSize:12,color:B.purple,fontWeight:700,flexShrink:0,marginLeft:8}}>Ver ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾Ãƒâ€šÃ‚Â¢</span>
+                        <span style={{fontSize:12,color:B.purple,fontWeight:700,flexShrink:0,marginLeft:8}}>Ver protocolo</span>
                       </button>
                     ))}
                   </div>
@@ -935,9 +935,9 @@ const ProductSearch = ({ products, protocols, indications, categories, navigate 
     <div style={{background:B.cream, flex: 1}}>
       <div style={{background:`linear-gradient(135deg, ${B.purpleDark} 0%, ${B.purple} 100%)`,padding:'44px 24px 36px',textAlign:'center'}}>
         <h1 style={{color:B.white,fontSize:26,fontWeight:700,fontFamily:'Georgia, serif',margin:'0 0 8px'}}>Buscar por Produto</h1>
-        <p style={{color:'rgba(255,255,255,0.7)',fontSize:14,margin:'0 0 24px'}}>Descubra em quais protocolos um produto ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â© utilizado</p>
+        <p style={{color:'rgba(255,255,255,0.7)',fontSize:14,margin:'0 0 24px'}}>Descubra em quais protocolos um produto e utilizado</p>
         <div style={{maxWidth:480,margin:'0 auto'}}>
-          <input value={q} onChange={e=>setQ(e.target.value)} placeholder="Ex: SÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â©rum Melan T-Block..." autoFocus
+          <input value={q} onChange={e=>setQ(e.target.value)} placeholder="Ex: Serum Melan T-Block..." autoFocus
             style={{width:'100%',padding:'13px 20px',borderRadius:30,border:'none',fontSize:15,outline:'none',boxSizing:'border-box',fontFamily:'inherit'}} />
         </div>
       </div>
@@ -952,7 +952,7 @@ const ProductSearch = ({ products, protocols, indications, categories, navigate 
                 <div>
                   <h3 style={{margin:'0 0 4px',color:B.purpleDark,fontSize:16,fontWeight:700}}>{prod.name}</h3>
                   {prod.actives&&<div style={{fontSize:13,color:B.muted,marginBottom:2}} dangerouslySetInnerHTML={{__html: clean('Ativos: ' + prod.actives.slice(0, 100))}} /> }
-                  {cpa!=null&&<div style={{fontSize:13,color:B.green,fontWeight:700}}>Custo/aplicaÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â£o: {fmtCurrency(cpa)}</div>}
+                  {cpa!=null&&<div style={{fontSize:13,color:B.green,fontWeight:700}}>Custo/aplicacao: {fmtCurrency(cpa)}</div>}
                 </div>
                 <div style={{display:'flex',flexDirection:'column',gap:4,alignItems:'flex-end'}}>
                   <div style={{display:'flex',gap:4,flexWrap:'wrap'}}>{(prod.categories||[prod.category]).map(c=><Tag key={c} label={categories.find(cat=>cat.id===c)?.label||c} color={B.goldLight} text={'#7A5C1E'} />)}{(prod.uso||[]).includes('homecare')&&<Tag label='Home Care' color='#E8F5E9' text='#1E7E46' />}</div>
