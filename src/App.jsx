@@ -1048,11 +1048,28 @@ const ProductSearch = ({ products, protocols, indications, categories, navigate 
   return (
     <div style={{background:B.cream, flex: 1}}>
       <div style={{background:`linear-gradient(135deg, ${B.purpleDark} 0%, ${B.purple} 100%)`,padding:isMobile?'28px 14px 24px':'44px 24px 36px',textAlign:'center',overflowX:'hidden'}}>
+        <div style={{fontSize:10,color:B.gold,fontWeight:700,letterSpacing:'0.16em',marginBottom:8,textTransform:'uppercase'}}>Localize por produto</div>
         <h1 style={{color:B.white,fontSize:26,fontWeight:700,fontFamily:'Georgia, serif',margin:'0 0 8px'}}>Buscar por Produto</h1>
         <p style={{color:'rgba(255,255,255,0.7)',fontSize:14,margin:'0 0 24px'}}>Descubra em quais protocolos um produto e utilizado</p>
-        <div style={{maxWidth:480,margin:'0 auto'}}>
-          <input value={q} onChange={e=>setQ(e.target.value)} placeholder="Ex: Serum Melan T-Block..." autoFocus
-            style={{width:'100%',padding:'13px 20px',borderRadius:30,border:'none',fontSize:15,outline:'none',boxSizing:'border-box',fontFamily:'inherit'}} />
+        <div style={{maxWidth:760,margin:'0 auto',padding:`0 ${isMobile?4:0}px`}}>
+          <div style={{background:'rgba(255,255,255,0.12)',padding:'16px',borderRadius:16,border:'1px solid rgba(255,255,255,0.2)',boxShadow:'0 18px 40px rgba(24, 12, 44, 0.16)',display:'flex',flexDirection:'column',gap:12,textAlign:'left'}}>
+            <div>
+              <div style={{fontSize:11,fontWeight:700,color:'rgba(255,255,255,0.72)',textTransform:'uppercase',letterSpacing:'0.08em',marginBottom:4}}>Encontre um produto</div>
+              <div style={{fontSize:13,color:'rgba(255,255,255,0.82)',lineHeight:1.45}}>Pesquise pelo nome para ver em quais protocolos ele aparece e acessar sua pagina rapidamente.</div>
+            </div>
+            <div style={{display:'flex',gap:10,flexDirection:isMobile?'column':'row'}}>
+              <input value={q} onChange={e=>setQ(e.target.value)} placeholder="Ex: Serum Melan T-Block..." autoFocus
+                style={{width:'100%',padding:'13px 20px',borderRadius:12,border:'none',fontSize:15,outline:'none',boxSizing:'border-box',fontFamily:'inherit',background:B.white,color:B.text,flex:1}} />
+              {q && (
+                <button
+                  onClick={()=>setQ('')}
+                  style={{padding:isMobile?'11px 14px':'0 16px',borderRadius:12,border:'1px solid rgba(255,255,255,0.22)',background:'rgba(255,255,255,0.08)',color:B.white,fontSize:12,fontWeight:700,cursor:'pointer',fontFamily:'inherit',minHeight:48}}
+                >
+                  Limpar busca
+                </button>
+              )}
+            </div>
+          </div>
         </div>
       </div>
       <div style={{maxWidth:720,margin:'0 auto',padding:isMobile?'22px 12px':'32px 24px',overflowX:'hidden'}}>
