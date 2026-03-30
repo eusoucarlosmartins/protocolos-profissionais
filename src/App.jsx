@@ -138,7 +138,7 @@ const Logo = ({ brand, size = 34 }) => {
   if (brand?.logoUrl) {
     return <img src={brand.logoUrl} alt={brand.companyName || 'Logo'} style={{ height: size, objectFit: 'contain', flexShrink: 0 }} />;
   }
-  return <div style={{width:size,height:size,background:`linear-gradient(135deg, ${B.gold}, #e8b96a)`,borderRadius:8,display:'flex',alignItems:'center',justifyContent:'center',fontSize:size/2,flexShrink:0,color:B.white}}>ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â°ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¸ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¿</div>;
+  return <div style={{width:size,height:size,background:`linear-gradient(135deg, ${B.gold}, #e8b96a)`,borderRadius:8,display:'flex',alignItems:'center',justifyContent:'center',fontSize:size/2.7,flexShrink:0,color:B.white,fontWeight:800,letterSpacing:'0.04em'}}>ET</div>;
 };
 
 const AppFooter = ({ brand }) => (
@@ -170,7 +170,7 @@ const BuyLink = ({ href, children, isMobile, sx = {} }) => {
       borderRadius: 8, fontWeight: 700, fontSize: isMobile ? 12 : 14,
       textDecoration: 'none', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6, ...sx
     }}>
-      ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â°ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¸ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂºÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾Ãƒâ€šÃ‚Â¢ {children || 'Comprar'}
+      Comprar {children || 'agora'}
     </a>
   );
 };
@@ -205,7 +205,7 @@ const RichTextField = ({ label, value, onChange, placeholder, rows=3, note }) =>
           <button type="button" onClick={()=>applyTag('<i>','</i>')} style={{fontStyle:'italic', padding:'2px 8px', border:'none', background:'transparent', cursor:'pointer', color:B.purpleDark}}>I</button>
           <button type="button" onClick={()=>applyTag('<u>','</u>')} style={{textDecoration:'underline', padding:'2px 8px', border:'none', background:'transparent', cursor:'pointer', color:B.purpleDark}}>S</button>
           <div style={{width:1, background:B.border, margin:'0 4px'}} />
-          <button type="button" onClick={()=>applyTag('<ul>\n<li>','</li>\n</ul>')} style={{padding:'2px 8px', border:'none', background:'transparent', cursor:'pointer', color:B.purpleDark}}>ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ Lista</button>
+          <button type="button" onClick={()=>applyTag('<ul>\n<li>','</li>\n</ul>')} style={{padding:'2px 8px', border:'none', background:'transparent', cursor:'pointer', color:B.purpleDark}}>• Lista</button>
         </div>
         <textarea 
           ref={ref}
@@ -585,7 +585,7 @@ const ProtocolDetail = ({ protocol:p, products, indications, categories, navigat
 
       <div id="protocol-content" style={{maxWidth:740,margin:'0 auto',padding:isMobile?'16px 12px':'36px 24px', background: B.cream}}>
         
-        {/* Header para ImpressÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â£o */}
+          {/* Header para impressao */}
         <div className="print-only" style={{ textAlign: 'center', marginBottom: '30px', borderBottom: `2px solid ${B.purple}`, paddingBottom: '20px' }}>
           <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 12 }}>
             <Logo brand={brand} size={60} />
@@ -1027,7 +1027,7 @@ const TextProtocolImporter = ({ onImport, products }) => {
         const lower = line.toLowerCase();
         
         // Ignora rodapÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â©s e cabeÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§alhos genÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â©ricos
-        if (lower === 'protocolo' || lower.includes('versÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â£o') || lower === 'extratos' || lower === 'da terra' || lower.includes('cosmetologia') || lower === 'beleza' || lower === 'que faz' || lower === 'bem' || lower.includes('protocolo clareamento')) continue;
+        if (lower === 'protocolo' || lower.includes('versao') || lower === 'extratos' || lower === 'da terra' || lower.includes('cosmetologia') || lower === 'beleza' || lower === 'que faz' || lower === 'bem' || lower.includes('protocolo clareamento')) continue;
 
         if (!category && (lower === 'corporal' || lower === 'facial' || lower === 'capilar')) {
             category = lower;
@@ -1046,7 +1046,7 @@ const TextProtocolImporter = ({ onImport, products }) => {
         }
 
         if (parsingHomeUse) {
-            if (lower.includes('manhÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â£:')) { homeUseTime = 'morning'; continue; }
+            if (lower.includes('manha:')) { homeUseTime = 'morning'; continue; }
             if (lower.includes('noite:')) { homeUseTime = 'night'; continue; }
             if (homeUseTime && line.match(/^\d+\.\s*/)) {
                 homeUse[homeUseTime].push({ instruction: line.replace(/^\d+\.\s*/, ''), productId: null });
@@ -1058,12 +1058,12 @@ const TextProtocolImporter = ({ onImport, products }) => {
             continue;
         }
 
-        if (lower.includes('frequÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Âªncia:')) {
-            frequency = line.replace(/.*frequÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Âªncia:\s*/i, '').replace(/ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¹ÃƒÆ’Ã¢â‚¬Â¦ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â/g, '').trim();
+        if (lower.includes('frequencia:')) {
+            frequency = line.replace(/.*frequencia:\s*/i, '').replace(/[•]/g, '').trim();
             continue;
         }
-        if (lower.includes('associaÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Âµes:')) {
-            associations = line.replace(/.*associaÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Âµes:\s*/i, '').replace(/ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¹ÃƒÆ’Ã¢â‚¬Â¦ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â/g, '').trim();
+        if (lower.includes('associacoes:')) {
+            associations = line.replace(/.*associacoes:\s*/i, '').replace(/[•]/g, '').trim();
             continue;
         }
 
@@ -1074,7 +1074,7 @@ const TextProtocolImporter = ({ onImport, products }) => {
             continue;
         }
 
-        if (currentStep && !lower.includes('ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¹ÃƒÆ’Ã¢â‚¬Â¦ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â')) {
+        if (currentStep && !lower.includes('•')) {
             currentStep.instruction += (currentStep.instruction ? '\n' : '') + line;
         }
     }
@@ -1123,21 +1123,21 @@ const TextProtocolImporter = ({ onImport, products }) => {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
           <h3 style={{ margin: '0 0 4px', color: B.purpleDark, fontSize: 16 }}>Importar Protocolo via Texto (PDF)</h3>
-          <p style={{ margin: 0, fontSize: 13, color: B.purpleDark }}>Cole o texto extraÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­do do PDF para adiantar o preenchimento.</p>
+          <p style={{ margin: 0, fontSize: 13, color: B.purpleDark }}>Cole o texto extraido do PDF para adiantar o preenchimento.</p>
         </div>
         <button 
           onClick={() => setShowImport(!showImport)}
           style={{ background: B.purple, color: B.white, border: 'none', padding: '9px 16px', borderRadius: 8, cursor: 'pointer', fontWeight: 700, fontFamily: 'inherit' }}
         >
-          {showImport ? 'ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ Fechar' : 'ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â°ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¸ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¾ Importar de PDF'}
+          {showImport ? 'Fechar' : 'Importar de PDF'}
         </button>
       </div>
 
       {showImport && (
         <div style={{ marginTop: 16, borderTop: `1px solid rgba(94, 61, 143, 0.2)`, paddingTop: 16 }}>
           <p style={{ fontSize: 13, marginBottom: 10, color: B.purpleDark }}>
-            Abra o PDF, selecione todo o texto do protocolo (Ctrl+C) e cole na caixa abaixo (Ctrl+V). 
-            NÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³s vamos tentar separar o TÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­tulo, as Fases e as InstruÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Âµes. Depois ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â© sÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³ vocÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Âª revisar e salvar.
+            Abra o PDF, selecione todo o texto do protocolo (Ctrl+C) e cole na caixa abaixo (Ctrl+V).
+            Nos vamos tentar separar o titulo, as fases e as instrucoes. Depois e so revisar e salvar.
           </p>
           <textarea 
             value={text}
@@ -1149,7 +1149,7 @@ const TextProtocolImporter = ({ onImport, products }) => {
             onClick={processText}
             style={{ marginTop: 12, background: B.green, color: B.white, border: 'none', padding: '12px 24px', borderRadius: 8, cursor: 'pointer', fontWeight: 700, fontFamily: 'inherit', fontSize: 14 }}
           >
-            ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¶ Processar e Preencher
+            Processar e Preencher
           </button>
         </div>
       )}
@@ -1165,7 +1165,7 @@ const XMLImporter = ({ products, saveProducts }) => {
 
   const handleXMLImport = () => {
     if (!xmlInput.trim()) {
-      alert("Cole o cÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³digo XML antes de processar.");
+      alert("Cole o codigo XML antes de processar.");
       return;
     }
 
@@ -1185,7 +1185,7 @@ const XMLImporter = ({ products, saveProducts }) => {
     const items = xmlDoc.getElementsByTagName("item");
 
     if (!items || items.length === 0) {
-      alert("Nenhum <item> encontrado no XML. Verifique se copiou o cÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³digo correto.");
+      alert("Nenhum <item> encontrado no XML. Verifique se copiou o codigo correto.");
       return;
     }
 
@@ -1243,7 +1243,7 @@ const XMLImporter = ({ products, saveProducts }) => {
       saveProducts(newProducts);
       alert(`${updatedCount} produtos atualizados e ${addedCount} novos produtos cadastrados com sucesso!`);
     } else {
-      alert("Processamento concluÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­do. Nenhum produto novo encontrado e os preÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§os jÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ estavam atualizados.");
+      alert("Processamento concluido. Nenhum produto novo encontrado e os precos ja estavam atualizados.");
     }
     setXmlInput('');
     setShowImport(false);
@@ -1253,21 +1253,21 @@ const XMLImporter = ({ products, saveProducts }) => {
     <div style={{ marginBottom: 20, padding: 18, background: B.goldLight, borderRadius: 12, border: `1px solid ${B.gold}` }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
-          <h3 style={{ margin: '0 0 4px', color: '#7A5C1E', fontSize: 16 }}>SincronizaÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â£o via XML</h3>
-          <p style={{ margin: 0, fontSize: 13, color: '#7A5C1E' }}>Importe preÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§os e cadastre produtos novos automaticamente.</p>
+          <h3 style={{ margin: '0 0 4px', color: '#7A5C1E', fontSize: 16 }}>Sincronizacao via XML</h3>
+          <p style={{ margin: 0, fontSize: 13, color: '#7A5C1E' }}>Importe precos e cadastre produtos novos automaticamente.</p>
         </div>
         <button 
           onClick={() => setShowImport(!showImport)}
           style={{ background: B.gold, color: B.white, border: 'none', padding: '9px 16px', borderRadius: 8, cursor: 'pointer', fontWeight: 700, fontFamily: 'inherit' }}
         >
-          {showImport ? 'ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ Fechar Importador' : 'ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â°ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¸ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¾ Abrir Importador'}
+          {showImport ? 'Fechar Importador' : 'Abrir Importador'}
         </button>
       </div>
 
       {showImport && (
         <div style={{ marginTop: 16, borderTop: `1px solid rgba(200, 169, 110, 0.3)`, paddingTop: 16 }}>
           <p style={{ fontSize: 13, marginBottom: 10, color: '#7A5C1E' }}>
-            Abra <a href="https://extratosdaterrapro.com.br/xml/shopping.xml" target="_blank" rel="noreferrer" style={{color: B.purple, fontWeight: 'bold'}}>extratosdaterrapro.com.br/xml/shopping.xml</a>, copie todo o cÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³digo (Ctrl+A, Ctrl+C) e cole abaixo:
+            Abra <a href="https://extratosdaterrapro.com.br/xml/shopping.xml" target="_blank" rel="noreferrer" style={{color: B.purple, fontWeight: 'bold'}}>extratosdaterrapro.com.br/xml/shopping.xml</a>, copie todo o codigo (Ctrl+A, Ctrl+C) e cole abaixo:
           </p>
           <textarea 
             value={xmlInput}
@@ -1279,7 +1279,7 @@ const XMLImporter = ({ products, saveProducts }) => {
             onClick={handleXMLImport}
             style={{ marginTop: 12, background: B.purple, color: B.white, border: 'none', padding: '12px 24px', borderRadius: 8, cursor: 'pointer', fontWeight: 700, fontFamily: 'inherit', fontSize: 14 }}
           >
-            ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¶ Processar XML
+            Processar XML
           </button>
         </div>
       )}
@@ -1302,7 +1302,7 @@ const AdminDictionary = ({ title, items, saveItems, placeholder }) => {
   };
 
   const remove = id => {
-    if(window.confirm('Excluir este item? Isso nÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â£o removerÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ as marcaÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Âµes existentes nos protocolos, mas elas ficarÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â£o sem o selo visual correspondente.'))
+if(window.confirm('Excluir este item? Isso nao removera as marcacoes existentes nos protocolos, mas elas ficarao sem o selo visual correspondente.'))
       saveItems(items.filter(c => c.id !== id));
   };
 
@@ -1322,7 +1322,7 @@ const AdminDictionary = ({ title, items, saveItems, placeholder }) => {
         {[...items].sort((a,b)=>a.label.localeCompare(b.label)).map((c, i) => (
           <div key={c.id} style={{display:'flex', justifyContent:'space-between', padding: '14px 20px', borderBottom: i < items.length - 1 ? `1px solid ${B.border}` : 'none'}}>
             <span style={{fontWeight: 600, color: B.text}}>{c.label}</span>
-            <button onClick={() => remove(c.id)} style={{color: B.red, background: 'none', border: 'none', cursor: 'pointer', fontWeight: 700, fontFamily: 'inherit'}}>ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ Excluir</button>
+            <button onClick={() => remove(c.id)} style={{color: B.red, background: 'none', border: 'none', cursor: 'pointer', fontWeight: 700, fontFamily: 'inherit'}}>Excluir</button>
           </div>
         ))}
         {items.length === 0 && <div style={{padding: 30, textAlign: 'center', color: B.muted}}>Nenhum item cadastrado</div>}
@@ -1360,13 +1360,13 @@ const AdminMarketing = ({ marketing, saveMarketing, protocols }) => {
     <div style={{maxWidth:700}}>
       <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:24}}>
         <h2 style={{margin:0,color:B.purpleDark,fontSize:22,fontFamily:'Georgia, serif'}}>Marketing</h2>
-        <Btn onClick={save} sx={{padding:'10px 24px'}}>ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â°ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¸ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¾ Salvar tudo</Btn>
+        <Btn onClick={save} sx={{padding:'10px 24px'}}>Salvar tudo</Btn>
       </div>
 
       {/* Notice Bar */}
       <div style={{background:B.white,borderRadius:12,border:`1px solid ${B.border}`,padding:24,marginBottom:16}}>
         <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:16}}>
-          <SectionTitle>ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â°ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¸ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â Barra de Aviso</SectionTitle>
+          <SectionTitle>Barra de Aviso</SectionTitle>
           <label style={{display:'flex',alignItems:'center',gap:8,cursor:'pointer'}}>
             <div style={{width:40,height:22,borderRadius:11,background:m.notice.active?B.purple:'#ccc',position:'relative',transition:'background 0.2s',cursor:'pointer'}} onClick={()=>setM(prev=>({...prev,notice:{...prev.notice,active:!prev.notice.active}}))}>
               <div style={{position:'absolute',top:3,left:m.notice.active?20:3,width:16,height:16,borderRadius:'50%',background:'#fff',transition:'left 0.2s'}} />
@@ -1374,7 +1374,7 @@ const AdminMarketing = ({ marketing, saveMarketing, protocols }) => {
             <span style={{fontSize:13,fontWeight:700,color:m.notice.active?B.purple:B.muted}}>{m.notice.active?'Ativa':'Inativa'}</span>
           </label>
         </div>
-        <Field label="Texto do aviso (aceita HTML bÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡sico)" value={m.notice.text} onChange={v=>setM(prev=>({...prev,notice:{...prev.notice,text:v}}))} placeholder="Ex: ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â°ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¸ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¸ PromoÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â£o de Abril: frete grÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡tis acima de R$ 300" multi rows={2} />
+        <Field label="Texto do aviso (aceita HTML basico)" value={m.notice.text} onChange={v=>setM(prev=>({...prev,notice:{...prev.notice,text:v}}))} placeholder="Ex: Promocao de Abril: frete gratis acima de R$ 300" multi rows={2} />
         <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:14,marginTop:8}}>
           <div>
             <label style={{display:'block',fontSize:12,fontWeight:700,color:B.muted,marginBottom:6,textTransform:'uppercase',letterSpacing:'0.06em'}}>Cor de fundo</label>
@@ -1387,7 +1387,7 @@ const AdminMarketing = ({ marketing, saveMarketing, protocols }) => {
         </div>
         {m.notice.active&&m.notice.text&&(
           <div style={{marginTop:14,borderRadius:8,overflow:'hidden'}}>
-            <div style={{fontSize:11,fontWeight:700,color:B.muted,marginBottom:6,textTransform:'uppercase'}}>PrÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â©via</div>
+            <div style={{fontSize:11,fontWeight:700,color:B.muted,marginBottom:6,textTransform:'uppercase'}}>Previa</div>
             <div style={{background:m.notice.bgColor||B.purple,color:m.notice.textColor||'#fff',padding:'10px 20px',fontSize:13,fontWeight:600,textAlign:'center'}} dangerouslySetInnerHTML={{__html:clean(m.notice.text)}} />
           </div>
         )}
@@ -1396,7 +1396,7 @@ const AdminMarketing = ({ marketing, saveMarketing, protocols }) => {
       {/* Campaign */}
       <div style={{background:B.white,borderRadius:12,border:`1px solid ${B.border}`,padding:24,marginBottom:16}}>
         <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:16}}>
-          <SectionTitle>ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â Destaque do MÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Âªs</SectionTitle>
+          <SectionTitle>Destaque do Mes</SectionTitle>
           <label style={{display:'flex',alignItems:'center',gap:8,cursor:'pointer'}}>
             <div style={{width:40,height:22,borderRadius:11,background:m.campaign.active?B.purple:'#ccc',position:'relative',transition:'background 0.2s',cursor:'pointer'}} onClick={()=>setM(prev=>({...prev,campaign:{...prev.campaign,active:!prev.campaign.active}}))}>
               <div style={{position:'absolute',top:3,left:m.campaign.active?20:3,width:16,height:16,borderRadius:'50%',background:'#fff',transition:'left 0.2s'}} />
@@ -1427,8 +1427,8 @@ const AdminMarketing = ({ marketing, saveMarketing, protocols }) => {
             <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:12}}>
               <span style={{fontWeight:700,fontSize:13,color:B.purpleDark}}>Banner {i+1}</span>
               <div style={{display:'flex',gap:6}}>
-                <button onClick={()=>moveBanner(b.id,-1)} disabled={i===0} style={{background:'none',border:`1px solid ${B.border}`,borderRadius:6,padding:'3px 8px',cursor:'pointer',opacity:i===0?0.3:1}}>ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¹Ãƒâ€¦Ã¢â‚¬Å“</button>
-                <button onClick={()=>moveBanner(b.id,1)} disabled={i===m.banners.length-1} style={{background:'none',border:`1px solid ${B.border}`,borderRadius:6,padding:'3px 8px',cursor:'pointer',opacity:i===m.banners.length-1?0.3:1}}>ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œ</button>
+                  <button onClick={()=>moveBanner(b.id,-1)} disabled={i===0} style={{background:'none',border:`1px solid ${B.border}`,borderRadius:6,padding:'3px 8px',cursor:'pointer',opacity:i===0?0.3:1}}>↑</button>
+                  <button onClick={()=>moveBanner(b.id,1)} disabled={i===m.banners.length-1} style={{background:'none',border:`1px solid ${B.border}`,borderRadius:6,padding:'3px 8px',cursor:'pointer',opacity:i===m.banners.length-1?0.3:1}}>↓</button>
                 <label style={{display:'flex',alignItems:'center',gap:5,cursor:'pointer',padding:'3px 8px',borderRadius:6,border:`1px solid ${b.active?B.purple:B.border}`,background:b.active?B.purpleLight:'none',fontSize:12,fontWeight:700,color:b.active?B.purple:B.muted}}>
                   <input type="checkbox" checked={b.active} onChange={e=>updateBanner(b.id,'active',e.target.checked)} style={{display:'none'}} />
                   {b.active?'Ativo':'Inativo'}
@@ -1441,7 +1441,7 @@ const AdminMarketing = ({ marketing, saveMarketing, protocols }) => {
                 <label style={{display:'block',fontSize:12,fontWeight:700,color:B.muted,marginBottom:6,textTransform:'uppercase',letterSpacing:'0.06em'}}>Imagem do banner</label>
                 {b.imageUrl&&<img src={b.imageUrl} alt="banner" style={{width:'100%',height:80,objectFit:'cover',borderRadius:8,marginBottom:8,border:`1px solid ${B.border}`}} />}
                 <label style={{display:'inline-block',padding:'7px 14px',background:B.purpleLight,color:B.purple,borderRadius:7,fontWeight:700,fontSize:12,cursor:'pointer',border:`1.5px dashed ${B.purple}`}}>
-                  ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â°ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¸ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â· {b.imageUrl?'Trocar imagem':'Enviar imagem'}
+                    {b.imageUrl?'Trocar imagem':'Enviar imagem'}
                   <input type="file" accept="image/*" style={{display:'none'}} onChange={e=>handleBannerFile(b.id,e.target.files[0])} />
                 </label>
               </div>
@@ -1454,32 +1454,32 @@ const AdminMarketing = ({ marketing, saveMarketing, protocols }) => {
         ))}
       </div>
 
-      <Btn onClick={save} sx={{padding:'12px 28px'}}>ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â°ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¸ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¾ Salvar Marketing</Btn>
+      <Btn onClick={save} sx={{padding:'12px 28px'}}>Salvar Marketing</Btn>
     </div>
   );
 };
 
 const AdminSettings = ({ brand, saveBrand }) => {
   const [f, setF] = useState(brand);
-  const handleSave = () => { saveBrand(f); alert('ConfiguraÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Âµes salvas!'); };
+  const handleSave = () => { saveBrand(f); alert('Configuracoes salvas!'); };
   return (
     <div style={{maxWidth:600}}>
-      <h2 style={{margin:'0 0 24px',color:B.purpleDark,fontSize:22,fontFamily:'Georgia, serif'}}>ConfiguraÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Âµes da Marca</h2>
+      <h2 style={{margin:'0 0 24px',color:B.purpleDark,fontSize:22,fontFamily:'Georgia, serif'}}>Configuracoes da Marca</h2>
       <div style={{background:B.white,borderRadius:12,border:`1px solid ${B.border}`,padding:24}}>
         <Field label="Nome da Empresa" value={f.companyName} onChange={v=>setF({...f,companyName:v})} />
-        <Field label="URL da Logo (Imagem)" value={f.logoUrl} onChange={v=>setF({...f,logoUrl:v})} placeholder="https://..." note="Cole o link da imagem (JPG/PNG). Se vazio, usa ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­cone padrÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â£o." />
+        <Field label="URL da Logo (Imagem)" value={f.logoUrl} onChange={v=>setF({...f,logoUrl:v})} placeholder="https://..." note="Cole o link da imagem (JPG/PNG). Se vazio, usa o icone padrao." />
         <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:16}}>
           <Field label="Cor Principal (HEX)" value={f.colorMain} onChange={v=>setF({...f,colorMain:v})} type="color" />
-          <Field label="Cor SecundÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ria (HEX)" value={f.colorAccent} onChange={v=>setF({...f,colorAccent:v})} type="color" />
+          <Field label="Cor Secundaria (HEX)" value={f.colorAccent} onChange={v=>setF({...f,colorAccent:v})} type="color" />
         </div>
         <div style={{marginTop: 16}}>
            <label style={{display:'flex',alignItems:'center',gap:8,cursor:'pointer',fontWeight:700,fontSize:14}}>
              <input type="checkbox" checked={f.showCalculator} onChange={e=>setF({...f,showCalculator:e.target.checked})} style={{width: 18, height: 18}} />
              Ativar Calculadora de Lucratividade nos Protocolos
            </label>
-           <div style={{fontSize:11,color:B.muted,marginTop:4, marginLeft: 26}}>Se ativado, os visitantes poderÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â£o calcular o lucro por sessÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â£o nas pÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ginas dos protocolos.</div>
+           <div style={{fontSize:11,color:B.muted,marginTop:4, marginLeft: 26}}>Se ativado, os visitantes poderao calcular o lucro por sessao nas paginas dos protocolos.</div>
         </div>
-        <Btn onClick={handleSave} sx={{marginTop: 20}}>ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â°ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¸ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¾ Salvar ConfiguraÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Âµes</Btn>
+        <Btn onClick={handleSave} sx={{marginTop: 20}}>Salvar Configuracoes</Btn>
       </div>
     </div>
   );
@@ -1581,8 +1581,8 @@ const AdminPanel = ({ products, protocols, indications, categories, phases, bran
           </Suspense>
         )}
         {aView==='categories'&&!editProd&&!editProt&&hasPerm(loggedUser,'categories','view')&&<AdminDictionary title="Gerenciar Categorias (Protocolos)" items={categories} saveItems={hasPerm(loggedUser,'categories','edit')?saveCategories:null} placeholder="Nova categoria (ex: Facial)..." readOnly={!hasPerm(loggedUser,'categories','edit')} />}
-        {aView==='indications'&&!editProd&&!editProt&&hasPerm(loggedUser,'indications','view')&&<AdminDictionary title="Gerenciar IndicaÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Âµes" items={indications} saveItems={hasPerm(loggedUser,'indications','edit')?saveIndications:null} placeholder="Nova indicaÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â£o (ex: Acne)..." readOnly={!hasPerm(loggedUser,'indications','edit')} />}
-        {aView==='phases'&&!editProd&&!editProt&&hasPerm(loggedUser,'phases','view')&&<AdminDictionary title="Gerenciar Fases (Etapas)" items={phases} saveItems={hasPerm(loggedUser,'phases','edit')?savePhases:null} placeholder="Nova fase (ex: HigienizaÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â£o)..." readOnly={!hasPerm(loggedUser,'phases','edit')} />}
+        {aView==='indications'&&!editProd&&!editProt&&hasPerm(loggedUser,'indications','view')&&<AdminDictionary title="Gerenciar Indicacoes" items={indications} saveItems={hasPerm(loggedUser,'indications','edit')?saveIndications:null} placeholder="Nova indicacao (ex: Acne)..." readOnly={!hasPerm(loggedUser,'indications','edit')} />}
+        {aView==='phases'&&!editProd&&!editProt&&hasPerm(loggedUser,'phases','view')&&<AdminDictionary title="Gerenciar Fases (Etapas)" items={phases} saveItems={hasPerm(loggedUser,'phases','edit')?savePhases:null} placeholder="Nova fase (ex: Higienizacao)..." readOnly={!hasPerm(loggedUser,'phases','edit')} />}
         {aView==='products'&&!editProd&&hasPerm(loggedUser,'products','view')&&<AdminProducts products={products} categories={categories} saveProducts={saveProducts} setEditProd={setEditProd} filters={prodFilters} setFilters={setProdFilters} search={prodSearch} setSearch={setProdSearch} onClearFilters={()=>{setProdFilters(EMPTY_PROD_FILTERS);setProdSearch('');}} loggedUser={loggedUser} />}
         {aView==='products'&&editProd&&hasPerm(loggedUser,'products','edit')&&<AdminProdForm prod={editProd} products={products} categories={categories} saveProducts={saveProducts} setEditProd={setEditProd} />}
         {aView==='protocols'&&!editProt&&hasPerm(loggedUser,'protocols','view')&&<AdminProtocols products={products} protocols={protocols} indications={indications} categories={categories} saveProtocols={saveProtocols} setEditProt={setEditProt} filters={protFilters} setFilters={setProtFilters} search={protSearch} setSearch={setProtSearch} onClearFilters={()=>{setProtFilters(EMPTY_PROT_FILTERS);setProtSearch('');}} loggedUser={loggedUser} />}
@@ -1681,7 +1681,7 @@ const AdminProducts = ({ products, categories, saveProducts, setEditProd, filter
 
   const del = id => { if(window.confirm('Excluir produto?')) saveProducts(products.filter(p=>p.id!==id)); };
   const duplicate = (p) => {
-    setEditProd({ ...p, id: uid(), name: `${p.name} (CÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³pia)`, _new: true });
+        setEditProd({ ...p, id: uid(), name: `${p.name} (Copia)`, _new: true });
   };
 
   const filtered = products.filter(p => {
@@ -1704,23 +1704,23 @@ const AdminProducts = ({ products, categories, saveProducts, setEditProd, filter
       <div style={{background:B.white, padding: isMobile ? '16px' : '16px 20px', borderRadius: 12, border:`1px solid ${B.border}`, marginBottom: 20}}>
         <div style={{display:'flex',justifyContent:'space-between',alignItems:isMobile?'flex-start':'center',flexDirection:isMobile?'column':'row',gap:isMobile?8:12,marginBottom:12}}>
           <div style={{fontWeight: 700, color: B.purpleDark, fontSize: 14, textTransform: 'uppercase', letterSpacing: '0.05em'}}>Filtros de Pesquisa</div>
-          {hasActiveFilters && <button onClick={onClearFilters} style={{background:'none',border:`1px solid ${B.border}`,borderRadius:7,padding:'5px 12px',fontSize:12,fontWeight:700,color:B.muted,cursor:'pointer',fontFamily:'inherit'}}>ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ Limpar filtros</button>}
+{hasActiveFilters && <button onClick={onClearFilters} style={{background:'none',border:`1px solid ${B.border}`,borderRadius:7,padding:'5px 12px',fontSize:12,fontWeight:700,color:B.muted,cursor:'pointer',fontFamily:'inherit'}}>Limpar filtros</button>}
         </div>
         <div style={{display: 'flex', gap: 10, flexWrap: 'wrap', flexDirection:isMobile?'column':'row'}}>
            <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Buscar produto por nome..." style={{flex: 1, minWidth: isMobile ? '100%' : 200, width:isMobile?'100%':'auto', padding:'9px 12px',border:`1.5px solid ${B.border}`,borderRadius:8,fontSize:14,outline:'none',fontFamily:'inherit'}} />
            <select value={filters.status} onChange={e=>setFilters({...filters, status: e.target.value})} style={{padding:'9px 12px',border:`1.5px solid ${B.border}`,borderRadius:8,fontSize:14,outline:'none',fontFamily:'inherit', background: B.white, width:isMobile?'100%':'auto'}}>
              <option value="all">Status: Todos</option>
-             <option value="active">ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â°ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¸ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¸ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ Ativos</option>
-             <option value="inactive">ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â°ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¸ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â´ Inativos</option>
+              <option value="active">Ativos</option>
+              <option value="inactive">Inativos</option>
            </select>
            <select value={filters.category} onChange={e=>setFilters({...filters, category: e.target.value})} style={{padding:'9px 12px',border:`1.5px solid ${B.border}`,borderRadius:8,fontSize:14,outline:'none',fontFamily:'inherit', background: B.white, width:isMobile?'100%':'auto'}}>
-             <option value="all">ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Ârea: Todas</option>
+              <option value="all">Area: Todas</option>
              {[...categories].sort((a,b)=>a.label.localeCompare(b.label)).map(c => <option key={c.id} value={c.id}>{c.label}</option>)}
            </select>
            <select value={filters.uso} onChange={e=>setFilters({...filters, uso: e.target.value})} style={{padding:'9px 12px',border:`1.5px solid ${B.border}`,borderRadius:8,fontSize:14,outline:'none',fontFamily:'inherit', background: B.white, width:isMobile?'100%':'auto'}}>
              <option value="all">Uso: Todos</option>
-             <option value="profissional">ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â°ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¸ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¥ Profissional</option>
-             <option value="homecare">ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â°ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¸ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â  Home Care</option>
+              <option value="profissional">Profissional</option>
+              <option value="homecare">Home Care</option>
            </select>
         </div>
         <div style={{marginTop: 12, fontSize: 12, color: B.muted, fontWeight: 600}}>
@@ -1737,7 +1737,7 @@ const AdminProducts = ({ products, categories, saveProducts, setEditProd, filter
                 <div style={{fontWeight:700,fontSize:14,color:B.text,marginBottom:3}}>{p.name}</div>
                 <div style={{fontSize:12,color:B.muted,display:'flex',gap:12,flexWrap:'wrap'}}>
                   <span dangerouslySetInnerHTML={{__html: clean((p.actives||'').slice(0,60) + ((p.actives||'').length>60?'...':''))}} />
-                  {cpa!=null&&<span style={{color:B.green,fontWeight:700}}>ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â°ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¸ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â° {fmtCurrency(cpa)}/apl.</span>}
+{cpa!=null&&<span style={{color:B.green,fontWeight:700}}>Custo {fmtCurrency(cpa)}/apl.</span>}
                 </div>
               </div>
               <div style={{display:'flex',gap:8,alignItems:'center',flexShrink:0,flexWrap:'wrap',width:isMobile?'100%':'auto'}}>
@@ -1745,7 +1745,7 @@ const AdminProducts = ({ products, categories, saveProducts, setEditProd, filter
                 {hasPerm(loggedUser,'products','edit')&&<Btn size="sm" variant="secondary" onClick={()=>setEditProd(p)}>Editar</Btn>}
                 {hasPerm(loggedUser,'products','edit')&&<Btn size="sm" variant="ghost" onClick={()=>duplicate(p)}>Duplicar</Btn>}
                 {hasPerm(loggedUser,'products','edit')&&<button onClick={()=>saveProducts(products.map(x=>x.id===p.id?{...x,active:!isActive(x)}:x))} style={{padding:'5px 10px',borderRadius:6,border:`1px solid ${isActive(p)?B.border:B.red}`,background:isActive(p)?B.white:B.redLight,color:isActive(p)?B.muted:B.red,fontSize:12,fontWeight:700,cursor:'pointer',fontFamily:'inherit'}}>{isActive(p)?'Inativar':'Reativar'}</button>}
-                {hasPerm(loggedUser,'products','delete')&&<Btn size="sm" variant="danger" onClick={()=>del(p.id)}>ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢</Btn>}
+{hasPerm(loggedUser,'products','delete')&&<Btn size="sm" variant="danger" onClick={()=>del(p.id)}>Excluir</Btn>}
               </div>
             </div>
           );
@@ -1769,7 +1769,7 @@ const AdminProdForm = ({ prod, products, categories, saveProducts, setEditProd }
     setJsonErr('');
     let parsed;
     try { parsed = JSON.parse(jsonText.trim()); }
-    catch { setJsonErr('JSON invÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡lido. Verifique a formataÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â£o e tente novamente.'); return; }
+    catch { setJsonErr('JSON invalido. Verifique a formatacao e tente novamente.'); return; }
     const benefits = Array.isArray(parsed.benefits)
       ? parsed.benefits.join('; ')
       : (parsed.benefits || '');
@@ -1791,7 +1791,7 @@ const AdminProdForm = ({ prod, products, categories, saveProducts, setEditProd }
   };
 
   const doSave = () => {
-    if(!f.name.trim()) return alert('Nome obrigatÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³rio');
+    if(!f.name.trim()) return alert('Nome obrigatorio');
     const {_new,...clean}=f;
     if(prod._new) saveProducts([...products,clean]);
     else saveProducts(products.map(p=>p.id===clean.id?clean:p));
@@ -1808,16 +1808,16 @@ const AdminProdForm = ({ prod, products, categories, saveProducts, setEditProd }
   return (
     <div style={{maxWidth:680}}>
       <div style={{display:'flex',alignItems:'center',gap:12,marginBottom:24,flexWrap:'wrap'}}>
-        <button onClick={()=>setEditProd(null)} style={{background:'none',border:'none',color:B.purple,fontWeight:700,cursor:'pointer',fontSize:14,fontFamily:'inherit'}}>ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â Voltar</button>
+        <button onClick={()=>setEditProd(null)} style={{background:'none',border:'none',color:B.purple,fontWeight:700,cursor:'pointer',fontSize:14,fontFamily:'inherit'}}>← Voltar</button>
         <h2 style={{margin:0,color:B.purpleDark,fontSize:20,fontFamily:'Georgia, serif',flex:1}}>{prod._new?'Novo Produto':'Editar Produto'}</h2>
-        <button onClick={()=>{setJsonModal(true);setJsonErr('');}} style={{background:B.gold,color:B.white,border:'none',padding:'8px 14px',borderRadius:8,fontWeight:700,fontSize:13,cursor:'pointer',fontFamily:'inherit',whiteSpace:'nowrap'}}>ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¨ Preencher com IA (Colar JSON)</button>
+        <button onClick={()=>{setJsonModal(true);setJsonErr('');}} style={{background:B.gold,color:B.white,border:'none',padding:'8px 14px',borderRadius:8,fontWeight:700,fontSize:13,cursor:'pointer',fontFamily:'inherit',whiteSpace:'nowrap'}}>Preencher com IA (Colar JSON)</button>
       </div>
 
       {jsonModal && (
         <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.55)',zIndex:9999,display:'flex',alignItems:'center',justifyContent:'center',padding:16}}>
           <div style={{background:B.white,borderRadius:14,padding:28,maxWidth:580,width:'100%',boxShadow:'0 20px 60px rgba(0,0,0,0.25)'}}>
-            <h3 style={{margin:'0 0 6px',color:B.purpleDark,fontFamily:'Georgia,serif',fontSize:18}}>ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¨ Preencher com JSON</h3>
-            <p style={{margin:'0 0 16px',fontSize:13,color:B.muted,lineHeight:1.5}}>Cole o JSON do produto abaixo. Os campos de texto serÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â£o preenchidos automaticamente. PreÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§o, rendimento, foto e links <strong>nÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â£o serÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â£o alterados</strong>.</p>
+            <h3 style={{margin:'0 0 6px',color:B.purpleDark,fontFamily:'Georgia,serif',fontSize:18}}>Preencher com JSON</h3>
+            <p style={{margin:'0 0 16px',fontSize:13,color:B.muted,lineHeight:1.5}}>Cole o JSON do produto abaixo. Os campos de texto serao preenchidos automaticamente. Preco, rendimento, foto e links <strong>nao serao alterados</strong>.</p>
             <textarea
               value={jsonText}
               onChange={e=>setJsonText(e.target.value)}
@@ -1834,33 +1834,33 @@ const AdminProdForm = ({ prod, products, categories, saveProducts, setEditProd }
       )}
 
       <div style={{background:B.white,borderRadius:12,border:`1px solid ${B.border}`,padding:24,marginBottom:16}}>
-        <SectionTitle>IdentificaÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â£o</SectionTitle>
-        <Field label="Nome do produto *" value={f.name} onChange={set('name')} placeholder="Ex: ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Âmega 7 Creme de Massagem Corporal" />
+        <SectionTitle>Identificacao</SectionTitle>
+        <Field label="Nome do produto *" value={f.name} onChange={set('name')} placeholder="Ex: Omega 7 Creme de Massagem Corporal" />
         <div style={{marginBottom:16}}>
           <label style={{display:'block',fontSize:12,fontWeight:700,color:B.muted,marginBottom:8,textTransform:'uppercase',letterSpacing:'0.06em'}}>Foto do Produto</label>
           <div style={{display:'flex',gap:14,alignItems:'flex-start',flexDirection:isMobile?'column':'row'}}>
             {f.image && <img src={f.image} alt="produto" style={{width:90,height:90,objectFit:'contain',borderRadius:10,border:`1px solid ${B.border}`,background:B.cream,flexShrink:0}} />}
             <div style={{flex:1}}>
               <label style={{display:'inline-block',padding:'9px 18px',background:B.purpleLight,color:B.purple,borderRadius:8,fontWeight:700,fontSize:13,cursor:'pointer',border:`1.5px dashed ${B.purple}`}}>
-                ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â°ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¸ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â· {f.image?'Trocar foto':'Enviar foto'}
+                {f.image?'Trocar foto':'Enviar foto'}
                 <input type="file" accept="image/*" style={{display:'none'}} onChange={handleFileChange} />
               </label>
-              {f.image&&<button onClick={()=>setF(x=>({...x,image:''}))} style={{marginLeft:10,background:'none',border:'none',color:B.red,fontSize:12,cursor:'pointer',fontFamily:'inherit',fontWeight:700}}>ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ Remover</button>}
-              <div style={{fontSize:11,color:B.muted,marginTop:6}}>Recomendado: fundo branco, quadrado. JPG ou PNG atÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â© 2MB.</div>
+              {f.image&&<button onClick={()=>setF(x=>({...x,image:''}))} style={{marginLeft:10,background:'none',border:'none',color:B.red,fontSize:12,cursor:'pointer',fontFamily:'inherit',fontWeight:700}}>Remover</button>}
+              <div style={{fontSize:11,color:B.muted,marginTop:6}}>Recomendado: fundo branco, quadrado. JPG ou PNG ate 2MB.</div>
             </div>
           </div>
         </div>
         <div style={{display:'grid',gridTemplateColumns:isMobile?'1fr':'1fr 1fr',gap:16,marginBottom:14}}>
           <div>
-            <label style={{display:'block',fontSize:12,fontWeight:700,color:'#6B7280',marginBottom:8,textTransform:'uppercase',letterSpacing:'0.06em'}}>ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Ârea de AplicaÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â£o</label>
+            <label style={{display:'block',fontSize:12,fontWeight:700,color:'#6B7280',marginBottom:8,textTransform:'uppercase',letterSpacing:'0.06em'}}>Area de Aplicacao</label>
             <div style={{display:'flex',gap:10,flexWrap:'wrap'}}>
               {categories.map(c => {
                 const cat = c.id;
-                const icons = { facial: 'ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â°ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¸ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¹Ãƒâ€¦Ã¢â‚¬Å“ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¤', corporal: 'ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â°ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¸ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Âª', capilar: 'ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â°ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¸ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â ' };
+          const icons = { facial: 'F', corporal: 'C', capilar: 'H' };
                 return (
                 <label key={cat} style={{display:'flex',alignItems:'center',gap:6,cursor:'pointer',padding:'8px 14px',borderRadius:8,border:`1.5px solid ${(f.categories||[]).includes(cat)?'#5E3D8F':'#E2D9F3'}`,background:(f.categories||[]).includes(cat)?'#EDE5F5':'#fff',fontWeight:700,fontSize:13,userSelect:'none'}}>
                   <input type="checkbox" checked={(f.categories||[]).includes(cat)} onChange={()=>{const cur=f.categories||[];setF({...f,categories:cur.includes(cat)?cur.filter(x=>x!==cat):[...cur,cat]});}} style={{display:'none'}} />
-                  {icons[cat] || 'ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¨'} {c.label}
+                  {icons[cat] || '•'} {c.label}
                 </label>
               )})}
             </div>
@@ -1868,7 +1868,7 @@ const AdminProdForm = ({ prod, products, categories, saveProducts, setEditProd }
           <div>
             <label style={{display:'block',fontSize:12,fontWeight:700,color:'#6B7280',marginBottom:8,textTransform:'uppercase',letterSpacing:'0.06em'}}>Tipo de Uso</label>
             <div style={{display:'flex',gap:10,flexWrap:'wrap'}}>
-              {[{v:'profissional',l:'ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â°ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¸ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¥ Profissional'},{v:'homecare',l:'ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â°ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¸ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â  Home Care'}].map(u => (
+              {[{v:'profissional',l:'Profissional'},{v:'homecare',l:'Home Care'}].map(u => (
                 <label key={u.v} style={{display:'flex',alignItems:'center',gap:6,cursor:'pointer',padding:'8px 14px',borderRadius:8,border:`1.5px solid ${(f.uso||[]).includes(u.v)?'#5E3D8F':'#E2D9F3'}`,background:(f.uso||[]).includes(u.v)?'#EDE5F5':'#fff',fontWeight:700,fontSize:13,userSelect:'none'}}>
                   <input type="checkbox" checked={(f.uso||[]).includes(u.v)} onChange={()=>{const cur=f.uso||[];setF({...f,uso:cur.includes(u.v)?cur.filter(x=>x!==u.v):[...cur,u.v]});}} style={{display:'none'}} />
                   {u.l}
@@ -1877,11 +1877,11 @@ const AdminProdForm = ({ prod, products, categories, saveProducts, setEditProd }
             </div>
           </div>
         </div>
-        <Field label="FunÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â£o Principal" value={f.mainFunction} onChange={set('mainFunction')} placeholder="FunÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â£o principal resumida do produto" />
-        <Field label="Badge de Destaque" value={f.badge||''} onChange={set('badge')} placeholder="Ex: LanÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§amento, Novo, Exclusivo, Black Friday" note="Deixe em branco para nÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â£o exibir. Aparece como etiqueta sobre o card." />
-        <Field label="Link no Site Oficial" value={f.siteUrl} onChange={set('siteUrl')} placeholder="https://extratosdaterrapro.com.br/produto/..." note="URL da pÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡gina do produto no site" />
-        <Field label="Link Ficha TÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â©cnica (Google Drive)" value={f.fichaUrl} onChange={set('fichaUrl')} placeholder="https://drive.google.com/file/d/..." note="PrÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â©-preenchido automaticamente do docx" />
-        <Field label="NÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Âºmero de Registro ANVISA" value={f.anvisa} onChange={set('anvisa')} placeholder="Ex: 25351.953989/2024-82" />
+        <Field label="Funcao Principal" value={f.mainFunction} onChange={set('mainFunction')} placeholder="Funcao principal resumida do produto" />
+        <Field label="Badge de Destaque" value={f.badge||''} onChange={set('badge')} placeholder="Ex: Lancamento, Novo, Exclusivo, Black Friday" note="Deixe em branco para nao exibir. Aparece como etiqueta sobre o card." />
+        <Field label="Link no Site Oficial" value={f.siteUrl} onChange={set('siteUrl')} placeholder="https://extratosdaterrapro.com.br/produto/..." note="URL da pagina do produto no site" />
+        <Field label="Link Ficha Tecnica (Google Drive)" value={f.fichaUrl} onChange={set('fichaUrl')} placeholder="https://drive.google.com/file/d/..." note="Pre-preenchido automaticamente do docx" />
+        <Field label="Numero de Registro ANVISA" value={f.anvisa} onChange={set('anvisa')} placeholder="Ex: 25351.953989/2024-82" />
       </div>
 
       <div style={{background:B.white,borderRadius:12,border:`1px solid ${B.border}`,padding:24,marginBottom:16}}>
@@ -2047,17 +2047,17 @@ const AdminProtForm = ({ prot, products, protocols, indications, categories, pha
 
   const [draggedIdx, setDraggedIdx] = useState(null);
 
-  // Dropdown de produtos deve conter apenas os ativos E os jÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ selecionados (mesmo que inativos)
+  // Dropdown de produtos deve conter apenas os ativos e os ja selecionados (mesmo que inativos)
   const getProductOptions = (selectedId) => {
       const activeProducts = [...products].filter(p => isActive(p)).sort((a,b)=>a.name.localeCompare(b.name));
-      const opts = [{v:'', l:'ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â Sem produto (equipamento/tÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â©cnica) ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â'}];
+      const opts = [{v:'', l:'Sem produto (equipamento/tecnica)'}];
       
       activeProducts.forEach(p => opts.push({v: p.id, l: p.name}));
       
       if (selectedId) {
           const currentProd = products.find(p => p.id === selectedId);
           if (currentProd && !isActive(currentProd)) {
-              opts.push({v: currentProd.id, l: `ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â« [INATIVO] ${currentProd.name}`});
+              opts.push({v: currentProd.id, l: `[INATIVO] ${currentProd.name}`});
           }
       }
       return opts;
@@ -2123,7 +2123,7 @@ const AdminProtForm = ({ prot, products, protocols, indications, categories, pha
   const handleDragEnd = () => setDraggedIdx(null);
 
   const doSave=(pub=null)=>{
-    if(!f.name.trim()) return alert('Nome obrigatÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³rio');
+    if(!f.name.trim()) return alert('Nome obrigatorio');
     const {_new,...clean}=f;
     if(pub!==null) clean.published=pub;
     if(prot._new) saveProtocols([...protocols,clean]);
@@ -2153,7 +2153,7 @@ const AdminProtForm = ({ prot, products, protocols, indications, categories, pha
   return (
     <div style={{maxWidth:700}}>
       <div style={{display:'flex',alignItems:'center',gap:12,marginBottom:24}}>
-        <button onClick={()=>setEditProt(null)} style={{background:'none',border:'none',color:B.purple,fontWeight:700,cursor:'pointer',fontSize:14,fontFamily:'inherit'}}>ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â Voltar</button>
+        <button onClick={()=>setEditProt(null)} style={{background:'none',border:'none',color:B.purple,fontWeight:700,cursor:'pointer',fontSize:14,fontFamily:'inherit'}}>← Voltar</button>
         <h2 style={{margin:0,color:B.purpleDark,fontSize:20,fontFamily:'Georgia, serif'}}>{prot._new?'Novo Protocolo':'Editar Protocolo'}</h2>
       </div>
 
@@ -2183,21 +2183,21 @@ const AdminProtForm = ({ prot, products, protocols, indications, categories, pha
                   setF(x => ({...x, featuredImage: url}));
                 }} />
               </label>
-              {f.featuredImage&&<button onClick={(e)=>{e.preventDefault(); setF(x=>({...x,featuredImage:''}));}} style={{marginLeft:10,background:'none',border:'none',color:B.red,fontSize:12,cursor:'pointer',fontFamily:'inherit',fontWeight:700}}>ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ Remover</button>}
+              {f.featuredImage&&<button onClick={(e)=>{e.preventDefault(); setF(x=>({...x,featuredImage:''}));}} style={{marginLeft:10,background:'none',border:'none',color:B.red,fontSize:12,cursor:'pointer',fontFamily:'inherit',fontWeight:700}}>Remover</button>}
               <div style={{fontSize:11,color:B.muted,marginTop:6}}>Imagem retangular ou quadrada para o final do protocolo.</div>
             </div>
           </div>
-          <Field label="Link do BotÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â£o Comprar (Imagem Destaque)" value={f.featuredLink} onChange={v=>setF({...f,featuredLink:v})} placeholder="https://..." />
+        <Field label="Link do Botao Comprar (Imagem Destaque)" value={f.featuredLink} onChange={v=>setF({...f,featuredLink:v})} placeholder="https://..." />
         </div>
 
         <div>
-          <div style={{fontSize:12,fontWeight:700,color:B.muted,marginBottom:8,textTransform:'uppercase',letterSpacing:'0.06em'}}>PreocupaÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Âµes / IndicaÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Âµes</div>
+          <div style={{fontSize:12,fontWeight:700,color:B.muted,marginBottom:8,textTransform:'uppercase',letterSpacing:'0.06em'}}>Preocupacoes / Indicacoes</div>
           <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
             {[...indications].sort((a,b)=>a.label.localeCompare(b.label)).map(c=>(
               <button key={c.id} onClick={(e)=>{e.preventDefault(); togConcern(c.id);}} style={{padding:'6px 14px',borderRadius:20,border:`1.5px solid ${f.concerns.includes(c.id)?B.purple:B.border}`,background:f.concerns.includes(c.id)?B.purple:B.white,color:f.concerns.includes(c.id)?B.white:B.text,fontSize:13,cursor:'pointer',fontWeight:700,fontFamily:'inherit'}}>{c.label}</button>
             ))}
             {!showNewIndication ? (
-              <button onClick={(e) => {e.preventDefault(); setShowNewIndication(true);}} style={{padding:'6px 14px',borderRadius:20,border:`1.5px dashed ${B.purple}`,background:'transparent',color:B.purple,fontSize:13,cursor:'pointer',fontWeight:700}}>+ Nova IndicaÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â£o</button>
+              <button onClick={(e) => {e.preventDefault(); setShowNewIndication(true);}} style={{padding:'6px 14px',borderRadius:20,border:`1.5px dashed ${B.purple}`,background:'transparent',color:B.purple,fontSize:13,cursor:'pointer',fontWeight:700}}>+ Nova Indicacao</button>
             ) : (
               <div style={{display:'flex', gap: 5}}>
                  <input 
@@ -2208,8 +2208,8 @@ const AdminProtForm = ({ prot, products, protocols, indications, categories, pha
                     style={{padding:'6px 10px', borderRadius:20, border:`1px solid ${B.border}`, fontSize:13, outline:'none'}} 
                     autoFocus 
                  />
-                 <button onClick={(e)=>{e.preventDefault(); handleAddIndication();}} style={{padding:'6px 10px', borderRadius:20, border:'none', background:B.green, color:B.white, cursor:'pointer', fontWeight:700}}>ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œ</button>
-                 <button onClick={(e)=>{e.preventDefault(); setShowNewIndication(false);}} style={{padding:'6px 10px', borderRadius:20, border:'none', background:B.redLight, color:B.red, cursor:'pointer', fontWeight:700}}>ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢</button>
+                    <button onClick={(e)=>{e.preventDefault(); handleAddIndication();}} style={{padding:'6px 10px', borderRadius:20, border:'none', background:B.green, color:B.white, cursor:'pointer', fontWeight:700}}>OK</button>
+                    <button onClick={(e)=>{e.preventDefault(); setShowNewIndication(false);}} style={{padding:'6px 10px', borderRadius:20, border:'none', background:B.redLight, color:B.red, cursor:'pointer', fontWeight:700}}>×</button>
               </div>
             )}
           </div>
@@ -2232,10 +2232,10 @@ const AdminProtForm = ({ prot, products, protocols, indications, categories, pha
           >
             <div style={{display:'flex',justifyContent:'space-between',marginBottom:10, alignItems: 'center'}}>
               <div style={{display: 'flex', alignItems: 'center', gap: 10}}>
-                <span style={{cursor: 'grab', fontSize: 18, color: B.muted}}>ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¹ÃƒÆ’Ã¢â‚¬Â¦ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â°</span>
+              <span style={{cursor: 'grab', fontSize: 18, color: B.muted}}>≡</span>
                 <span style={{fontSize:11,fontWeight:700,color:B.purple,textTransform:'uppercase',letterSpacing:'0.08em'}}>Etapa {i+1}</span>
               </div>
-              <button onClick={(e)=>{e.preventDefault(); rmStep(step.id);}} style={{background:'none',border:'none',color:B.red,cursor:'pointer',fontSize:16,lineHeight:1}}>ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢</button>
+              <button onClick={(e)=>{e.preventDefault(); rmStep(step.id);}} style={{background:'none',border:'none',color:B.red,cursor:'pointer',fontSize:16,lineHeight:1}}>×</button>
             </div>
             <div style={{display:'grid',gridTemplateColumns:'1fr 2fr',gap:10,marginBottom:10}}>
               <div>
@@ -2250,13 +2250,13 @@ const AdminProtForm = ({ prot, products, protocols, indications, categories, pha
                             placeholder="Nova fase..." 
                             style={{...inpSt, flex:1}} 
                         />
-                        <button onClick={(e) => { e.preventDefault(); handleAddPhase(step.id); }} style={{background:B.green, color:B.white, border:'none', borderRadius:7, padding:'0 10px', cursor:'pointer', fontWeight:'bold'}}>ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œ</button>
-                        <button onClick={(e) => { e.preventDefault(); setAddingPhaseFor(null); setNewPhaseLabel(''); }} style={{background:B.redLight, color:B.red, border:'none', borderRadius:7, padding:'0 10px', cursor:'pointer', fontWeight:'bold'}}>ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢</button>
+                        <button onClick={(e) => { e.preventDefault(); handleAddPhase(step.id); }} style={{background:B.green, color:B.white, border:'none', borderRadius:7, padding:'0 10px', cursor:'pointer', fontWeight:'bold'}}>OK</button>
+                        <button onClick={(e) => { e.preventDefault(); setAddingPhaseFor(null); setNewPhaseLabel(''); }} style={{background:B.redLight, color:B.red, border:'none', borderRadius:7, padding:'0 10px', cursor:'pointer', fontWeight:'bold'}}>×</button>
                     </div>
                 ) : (
                     <div style={{display:'flex', gap: 4}}>
                         <select value={step.phase} onChange={e=>updStep(step.id,'phase',e.target.value)} style={{...inpSt, flex:1}}>
-                            <option value="">ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â Selecione uma fase ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â</option>
+                            <option value="">Selecione uma fase</option>
                             {phaseOptions.map(p=><option key={p.id} value={p.label}>{p.label}</option>)}
                         </select>
                         <button onClick={(e) => { e.preventDefault(); setAddingPhaseFor(step.id); setNewPhaseLabel(''); }} style={{background:B.purpleLight, color:B.purple, border:'none', borderRadius:7, padding:'0 10px', cursor:'pointer', fontWeight:'bold', fontSize:16}}>+</button>
@@ -2269,12 +2269,12 @@ const AdminProtForm = ({ prot, products, protocols, indications, categories, pha
                   {getProductOptions(step.productId).map(o=><option key={o.v} value={o.v}>{o.l}</option>)}
                 </select>
                 {step.productId&&costPerApp(products.find(x=>x.id===step.productId))!=null&&(
-                  <div style={{fontSize:11,color:B.green,fontWeight:700,marginTop:3}}>ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â°ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¸ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â° {fmtCurrency(costPerApp(products.find(x=>x.id===step.productId)))}/aplicaÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â£o</div>
+                  <div style={{fontSize:11,color:B.green,fontWeight:700,marginTop:3}}>Custo: {fmtCurrency(costPerApp(products.find(x=>x.id===step.productId)))}/aplicacao</div>
                 )}
               </div>
             </div>
             <div>
-              <Field multi label="InstruÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â£o" value={step.instruction} onChange={v=>updStep(step.id,'instruction',v)} rows={2} />
+              <Field multi label="Instrucao" value={step.instruction} onChange={v=>updStep(step.id,'instruction',v)} rows={2} />
             </div>
           </div>
         ))}
@@ -2321,7 +2321,7 @@ const AdminProtForm = ({ prot, products, protocols, indications, categories, pha
                   <select value={item.productId||''} onChange={e=>updHome(sl,i,'productId',e.target.value||null)} style={{...inpSt,marginBottom:6,paddingRight:24}}>
                     {getProductOptions(item.productId).map(o=><option key={o.v} value={o.v}>{o.l}</option>)}
                   </select>
-                  <Field multi value={item.instruction} onChange={v=>updHome(sl,i,'instruction',v)} placeholder="InstruÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â£o de uso" />
+                  <Field multi value={item.instruction} onChange={v=>updHome(sl,i,'instruction',v)} placeholder="Instrucao de uso" />
                 </div>
               ))}
               {f.homeUse[sl].length===0&&<div style={{fontSize:12,color:B.muted,fontStyle:'italic'}}>Nenhum produto adicionado</div>}
@@ -2358,7 +2358,7 @@ const AdminAlerts = ({ products, protocols, saveProducts, setEditProt, setAView 
 
       {allIssues.length === 0 && (
         <div style={{background:B.greenLight,borderRadius:14,padding:'36px 28px',textAlign:'center',border:`1px solid ${B.green}`}}>
-          <div style={{fontSize:40,marginBottom:12}}>ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¦</div>
+          <div style={{fontSize:40,marginBottom:12}}>✓</div>
           <div style={{fontSize:16,fontWeight:700,color:B.green}}>Tudo certo!</div>
           <div style={{fontSize:14,color:B.muted,marginTop:4}}>Nenhum protocolo publicado possui produtos inativos vinculados.</div>
         </div>
@@ -2366,7 +2366,7 @@ const AdminAlerts = ({ products, protocols, saveProducts, setEditProt, setAView 
 
       {allIssues.length > 0 && (
         <div style={{background:B.redLight,borderRadius:12,padding:'16px 20px',marginBottom:24,border:`1px solid ${B.red}`,display:'flex',alignItems:'center',gap:14}}>
-          <span style={{fontSize:28}}>ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¯ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¸ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â</span>
+          <span style={{fontSize:28}}>!</span>
           <div>
             <div style={{fontWeight:700,fontSize:15,color:B.red}}>{allIssues.length} produto{allIssues.length>1?'s inativos afetam':' inativo afeta'} {orphanProtocols.length} protocolo{orphanProtocols.length>1?'s':''}</div>
             <div style={{fontSize:13,color:B.muted,marginTop:2}}>Revise os protocolos abaixo ou reative os produtos.</div>
@@ -2379,7 +2379,7 @@ const AdminAlerts = ({ products, protocols, saveProducts, setEditProt, setAView 
           <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:16}}>
             <div>
               <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:4}}>
-                <span style={{background:B.redLight,color:B.red,padding:'2px 10px',borderRadius:20,fontSize:11,fontWeight:700}}>ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â°ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¸ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â« INATIVO</span>
+                <span style={{background:B.redLight,color:B.red,padding:'2px 10px',borderRadius:20,fontSize:11,fontWeight:700}}>INATIVO</span>
               </div>
               <div style={{fontWeight:700,fontSize:16,color:B.text}}>{prod.name}</div>
               {prod.actives && <div style={{fontSize:13,color:B.muted,marginTop:2}}>Ativos: {prod.actives}</div>}
@@ -2388,7 +2388,7 @@ const AdminAlerts = ({ products, protocols, saveProducts, setEditProt, setAView 
               onClick={() => saveProducts(products.map(x => x.id === prod.id ? {...x, active: true} : x))}
               style={{background:B.green,color:B.white,border:'none',padding:'8px 18px',borderRadius:8,fontWeight:700,fontSize:13,cursor:'pointer',fontFamily:'inherit',flexShrink:0}}
             >
-              ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¦ Reativar produto
+              Reativar produto
             </button>
           </div>
 
@@ -2400,7 +2400,7 @@ const AdminAlerts = ({ products, protocols, saveProducts, setEditProt, setAView 
               const inCabine = prot.steps.some(s => s.productId === prod.id);
               const inMorning = prot.homeUse?.morning?.some(h => h.productId === prod.id);
               const inNight = prot.homeUse?.night?.some(h => h.productId === prod.id);
-              const where = [inCabine&&'Cabine', inMorning&&'Home Care ManhÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â£', inNight&&'Home Care Noite'].filter(Boolean).join(', ');
+              const where = [inCabine&&'Cabine', inMorning&&'Home Care Manha', inNight&&'Home Care Noite'].filter(Boolean).join(', ');
               return (
                 <div key={prot.id} style={{background:B.cream,borderRadius:10,padding:'12px 16px',display:'flex',justifyContent:'space-between',alignItems:'center'}}>
                   <div>
