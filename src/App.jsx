@@ -2043,6 +2043,9 @@ const AdminProtocols = ({ products, protocols, indications, categories, saveProt
     const matchInd = filters.indication === 'all' || (p.concerns && p.concerns.includes(filters.indication));
     return matchSearch && matchStatus && matchCat && matchInd;
   });
+  const publishedCount = protocols.filter(p=>p.published).length;
+  const draftCount = protocols.length - publishedCount;
+  const homeRoutineCount = protocols.filter(p=>(p.homeUse?.morning?.length||0) + (p.homeUse?.night?.length||0) > 0).length;
 
   return (
     <div>
@@ -2079,30 +2082,72 @@ const AdminProtocols = ({ products, protocols, indications, categories, saveProt
         </div>
       </div>
 
+      <div style={{display:'grid',gridTemplateColumns:isMobile?'1fr':'repeat(3, minmax(0, 1fr))',gap:12,marginBottom:20}}>
+        <div style={{background:B.white,border:`1px solid ${B.border}`,borderRadius:14,padding:'14px 16px',boxShadow:'0 10px 24px rgba(44,31,64,0.04)'}}>
+          <div style={{fontSize:11,fontWeight:700,color:B.muted,textTransform:'uppercase',letterSpacing:'0.08em',marginBottom:5}}>Publicados</div>
+          <div style={{fontSize:26,fontWeight:800,color:B.green}}>{publishedCount}</div>
+        </div>
+        <div style={{background:B.white,border:`1px solid ${B.border}`,borderRadius:14,padding:'14px 16px',boxShadow:'0 10px 24px rgba(44,31,64,0.04)'}}>
+          <div style={{fontSize:11,fontWeight:700,color:B.muted,textTransform:'uppercase',letterSpacing:'0.08em',marginBottom:5}}>Rascunhos</div>
+          <div style={{fontSize:26,fontWeight:800,color:B.purpleDark}}>{draftCount}</div>
+        </div>
+        <div style={{background:B.white,border:`1px solid ${B.border}`,borderRadius:14,padding:'14px 16px',boxShadow:'0 10px 24px rgba(44,31,64,0.04)'}}>
+          <div style={{fontSize:11,fontWeight:700,color:B.muted,textTransform:'uppercase',letterSpacing:'0.08em',marginBottom:5}}>Com rotina em casa</div>
+          <div style={{fontSize:26,fontWeight:800,color:B.purple}}>{homeRoutineCount}</div>
+        </div>
+      </div>
+
       <div style={{display:'flex',flexDirection:'column',gap:12}}>
         {filtered.map(p=>(
-          <div key={p.id} style={{background:B.white,borderRadius:12,border:`1px solid ${B.border}`,padding:isMobile?'16px':'16px 20px',display:'flex',justifyContent:'space-between',alignItems:isMobile?'flex-start':'center',flexDirection:isMobile?'column':'row',gap:isMobile?12:16}}>
-            <div style={{width:isMobile?'100%':'auto'}}>
-              <div style={{fontWeight:700,fontSize:15,color:B.text,marginBottom:5}}>{p.name}</div>
-              <div style={{display:'flex',gap:6,flexWrap:'wrap',alignItems:'center'}}>
+          <div key={p.id} style={{background:B.white,borderRadius:16,border:`1px solid ${B.border}`,padding:isMobile?'16px':'18px 20px',display:'flex',justifyContent:'space-between',alignItems:isMobile?'flex-start':'center',flexDirection:isMobile?'column':'row',gap:isMobile?14:18,boxShadow:'0 12px 28px rgba(44,31,64,0.05)'}}>
+            <div style={{width:isMobile?'100%':'auto',flex:1}}>
+              <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',gap:10,marginBottom:8,flexDirection:isMobile?'column':'row'}}>
+                <div style={{flex:1,minWidth:0}}>
+                  <div style={{fontWeight:700,fontSize:17,color:B.text,marginBottom:6,lineHeight:1.3}}>{p.name}</div>
+                  {p.description && <div style={{fontSize:13,color:B.muted,lineHeight:1.55,marginBottom:10}} dangerouslySetInnerHTML={{__html: clean((p.description||'').slice(0,140) + ((p.description||'').length>140?'...':''))}} />}
+                </div>
+                {hasPerm(loggedUser,'protocols','publish')
+                  ? <button onClick={()=>toggle(p.id)} style={{padding:'6px 12px',borderRadius:999,border:'none',background:p.published?B.greenLight:B.goldLight,color:p.published?B.green:'#7A5C1E',fontSize:12,fontWeight:700,cursor:'pointer',fontFamily:'inherit',whiteSpace:'nowrap'}}>{p.published?'Publicado':'Rascunho'}</button>
+                  : <span style={{padding:'6px 12px',borderRadius:999,background:p.published?B.greenLight:B.goldLight,color:p.published?B.green:'#7A5C1E',fontSize:12,fontWeight:700,whiteSpace:'nowrap'}}>{p.published?'Publicado':'Rascunho'}</span>
+                }
+              </div>
+              <div style={{display:'flex',gap:6,flexWrap:'wrap',alignItems:'center',marginBottom:10}}>
                 {(p.concerns || []).map(c=><Tag key={c} label={indications.find(x=>x.id===c)?.label||c} />)}
-                <div style={{display:'flex',gap:4,flexShrink:0}}><Tag label={categories.find(c => c.id === p.category)?.label || p.category} color={B.goldLight} text={'#7A5C1E'} />{(p.uso||[]).includes('homecare')&&<Tag label='Home Care' color='#E8F5E9' text='#1E7E46' />}{(p.uso||[]).includes('profissional')&&<Tag label='Profissional' color='#EBF5FF' text='#1A56DB' />}</div>
-                <span style={{fontSize:12,color:B.muted}}>{p.steps.length} etapas</span>
+                <div style={{display:'flex',gap:4,flexShrink:0}}><Tag label={categories.find(c => c.id === p.category)?.label || p.category} color={B.goldLight} text={'#7A5C1E'} /></div>
                 {p.youtubeUrl&&<span style={{fontSize:12,background:'#FF0000',color:B.white,padding:'1px 7px',borderRadius:10,fontWeight:700}}>YT</span>}
                 {(()=>{const n=p.steps.filter(s=>s.productId&&!isActive(products.find(x=>x.id===s.productId))).length;return n>0&&<span style={{fontSize:12,background:B.redLight,color:B.red,padding:'2px 8px',borderRadius:10,fontWeight:700,border:`1px solid ${B.red}`}}>{n} inativo{n>1?'s':''}</span>;})()}
-                {(()=>{const inact=p.steps.filter(s=>s.productId&&!isActive(products.find(x=>x.id===s.productId))).length;return inact>0&&<span style={{fontSize:12,background:B.redLight,color:B.red,padding:'1px 8px',borderRadius:10,fontWeight:700,border:`1px solid ${B.red}`}}>{inact} produto{inact>1?'s':''} inativo{inact>1?'s':''}</span>;})()}
+              </div>
+              <div style={{display:'grid',gridTemplateColumns:isMobile?'1fr':'repeat(4, minmax(0, 1fr))',gap:10}}>
+                <div style={{background:B.cream,border:`1px solid ${B.border}`,borderRadius:12,padding:'10px 12px'}}>
+                  <div style={{fontSize:10,fontWeight:700,color:B.muted,textTransform:'uppercase',letterSpacing:'0.08em',marginBottom:4}}>Cabine</div>
+                  <div style={{fontSize:18,fontWeight:800,color:B.purpleDark}}>{p.steps.length}</div>
+                  <div style={{fontSize:11,color:B.muted,marginTop:2}}>etapas cadastradas</div>
+                </div>
+                <div style={{background:B.cream,border:`1px solid ${B.border}`,borderRadius:12,padding:'10px 12px'}}>
+                  <div style={{fontSize:10,fontWeight:700,color:B.muted,textTransform:'uppercase',letterSpacing:'0.08em',marginBottom:4}}>Casa</div>
+                  <div style={{fontSize:18,fontWeight:800,color:B.purpleDark}}>{(p.homeUse?.morning?.length||0) + (p.homeUse?.night?.length||0)}</div>
+                  <div style={{fontSize:11,color:B.muted,marginTop:2}}>passos de rotina</div>
+                </div>
+                <div style={{background:B.cream,border:`1px solid ${B.border}`,borderRadius:12,padding:'10px 12px'}}>
+                  <div style={{fontSize:10,fontWeight:700,color:B.muted,textTransform:'uppercase',letterSpacing:'0.08em',marginBottom:4}}>Kits</div>
+                  <div style={{fontSize:18,fontWeight:800,color:B.purpleDark}}>{(p.professionalKitId?1:0) + (p.homeKitId?1:0)}</div>
+                  <div style={{fontSize:11,color:B.muted,marginTop:2}}>vinculados</div>
+                </div>
+                <div style={{background:B.cream,border:`1px solid ${B.border}`,borderRadius:12,padding:'10px 12px'}}>
+                  <div style={{fontSize:10,fontWeight:700,color:B.muted,textTransform:'uppercase',letterSpacing:'0.08em',marginBottom:4}}>Material</div>
+                  <div style={{fontSize:18,fontWeight:800,color:B.purpleDark}}>{(p.youtubeUrl?1:0) + (p.featuredImage?1:0)}</div>
+                  <div style={{fontSize:11,color:B.muted,marginTop:2}}>extras ativos</div>
+                </div>
               </div>
             </div>
-            <div style={{display:'flex',gap:8,alignItems:'center',flexShrink:0,flexWrap:'wrap',width:isMobile?'100%':'auto'}}>
-              {hasPerm(loggedUser,'protocols','publish')
-                ? <button onClick={()=>toggle(p.id)} style={{padding:'5px 12px',borderRadius:20,border:'none',background:p.published?B.greenLight:B.goldLight,color:p.published?B.green:'#7A5C1E',fontSize:12,fontWeight:700,cursor:'pointer',fontFamily:'inherit'}}>{p.published?'Publicado':'Rascunho'}</button>
-                : <span style={{padding:'5px 12px',borderRadius:20,background:p.published?B.greenLight:B.goldLight,color:p.published?B.green:'#7A5C1E',fontSize:12,fontWeight:700}}>{p.published?'Publicado':'Rascunho'}</span>
-              }
-              {hasPerm(loggedUser,'protocols','edit')&&<button onClick={()=>moveProtocol(p.id,-1)} title="Mover para cima" style={{background:'none',border:`1px solid ${B.border}`,borderRadius:6,padding:'4px 8px',cursor:'pointer',fontSize:13}}>↑</button>}
-              {hasPerm(loggedUser,'protocols','edit')&&<button onClick={()=>moveProtocol(p.id,1)} title="Mover para baixo" style={{background:'none',border:`1px solid ${B.border}`,borderRadius:6,padding:'4px 8px',cursor:'pointer',fontSize:13}}>↓</button>}
-              {hasPerm(loggedUser,'protocols','edit')&&<Btn size="sm" variant="secondary" onClick={()=>setEditProt(p)}>Editar</Btn>}
-              {hasPerm(loggedUser,'protocols','edit')&&<Btn size="sm" variant="ghost" onClick={()=>duplicate(p)}>Duplicar</Btn>}
-              {hasPerm(loggedUser,'protocols','delete')&&<Btn size="sm" variant="danger" onClick={()=>del(p.id)}>Excluir</Btn>}
+            <div style={{display:'flex',gap:8,alignItems:'stretch',justifyContent:isMobile?'stretch':'flex-start',flexDirection:isMobile?'column':'row',flexShrink:0,flexWrap:'wrap',width:isMobile?'100%':'auto',minWidth:isMobile?'100%':220}}>
+              <div style={{display:'flex',gap:8,width:isMobile?'100%':'auto'}}>
+                {hasPerm(loggedUser,'protocols','edit')&&<button onClick={()=>moveProtocol(p.id,-1)} title="Mover para cima" style={{background:B.white,border:`1px solid ${B.border}`,borderRadius:10,padding:'8px 11px',cursor:'pointer',fontSize:13,flex:isMobile?1:'0 0 auto'}}>↑</button>}
+                {hasPerm(loggedUser,'protocols','edit')&&<button onClick={()=>moveProtocol(p.id,1)} title="Mover para baixo" style={{background:B.white,border:`1px solid ${B.border}`,borderRadius:10,padding:'8px 11px',cursor:'pointer',fontSize:13,flex:isMobile?1:'0 0 auto'}}>↓</button>}
+              </div>
+              {hasPerm(loggedUser,'protocols','edit')&&<Btn size="sm" variant="secondary" onClick={()=>setEditProt(p)} sx={isMobile?{width:'100%'}:{minWidth:88}}>Editar</Btn>}
+              {hasPerm(loggedUser,'protocols','edit')&&<Btn size="sm" variant="ghost" onClick={()=>duplicate(p)} sx={isMobile?{width:'100%'}:{minWidth:88}}>Duplicar</Btn>}
+              {hasPerm(loggedUser,'protocols','delete')&&<Btn size="sm" variant="danger" onClick={()=>del(p.id)} sx={isMobile?{width:'100%'}:{minWidth:88}}>Excluir</Btn>}
             </div>
           </div>
         ))}
@@ -2212,9 +2257,9 @@ const AdminProtForm = ({ prot, products, protocols, indications, categories, pha
   const inpSt={width:'100%',padding:'7px 10px',border:`1.5px solid ${B.border}`,borderRadius:7,fontSize:13,outline:'none',boxSizing:'border-box',fontFamily:'inherit',background:B.white};
   const flowCards = [
     { n:'1', title:'Base do protocolo', desc:'Nome, descricao, categoria e indicacoes.' },
-    { n:'2', title:'Kits e destaque', desc:'Kits vinculados, imagem final e CTA.' },
-    { n:'3', title:'Cabine', desc:'Monte as etapas e a ordem do atendimento.' },
-    { n:'4', title:'Uso em casa', desc:'Defina a rotina que o cliente vai seguir.' },
+    { n:'2', title:'Cabine', desc:'Monte as etapas e a ordem do atendimento.' },
+    { n:'3', title:'Uso em casa', desc:'Defina a rotina que o cliente vai seguir.' },
+    { n:'4', title:'Kits e destaque', desc:'Kits vinculados, imagem final e CTA.' },
     { n:'5', title:'Revisao', desc:'Confira e publique quando estiver pronto.' }
   ];
   const sectionBoxStyle = {background:B.white,borderRadius:16,border:`1px solid ${B.border}`,padding:isMobile?18:24,marginBottom:16,boxShadow:'0 10px 26px rgba(44,31,64,0.04)'};
@@ -2260,7 +2305,8 @@ const AdminProtForm = ({ prot, products, protocols, indications, categories, pha
         </div>
       </div>
 
-      <div style={sectionBoxStyle}>
+      <div style={{display:'flex',flexDirection:'column'}}>
+      <div style={{...sectionBoxStyle,order:1}}>
         <div style={sectionHeadingStyle}>
           <div style={sectionStepStyle}>1</div>
           <div>
@@ -2300,9 +2346,9 @@ const AdminProtForm = ({ prot, products, protocols, indications, categories, pha
         </div>
       </div>
 
-      <div style={sectionBoxStyle}>
+      <div style={{...sectionBoxStyle,order:4}}>
         <div style={sectionHeadingStyle}>
-          <div style={sectionStepStyle}>2</div>
+          <div style={sectionStepStyle}>4</div>
           <div>
             <SectionTitle>Kits e Destaques</SectionTitle>
             <div style={{fontSize:13,color:B.muted,marginTop:4}}>Aqui voce vincula os kits finais e prepara o material visual que aparece no fechamento do protocolo.</div>
@@ -2356,10 +2402,10 @@ const AdminProtForm = ({ prot, products, protocols, indications, categories, pha
         </div>
       </div>
 
-      <div style={sectionBoxStyle}>
+      <div style={{...sectionBoxStyle,order:2}}>
         <div style={{...sectionHeadingStyle,justifyContent:'space-between',alignItems:isMobile?'stretch':'center'}}>
           <div style={{display:'flex',alignItems:'flex-start',gap:12,flex:1,flexDirection:isMobile?'column':'row'}}>
-            <div style={sectionStepStyle}>3</div>
+            <div style={sectionStepStyle}>2</div>
             <div>
               <SectionTitle>Passos em Cabine</SectionTitle>
               <div style={{fontSize:13,color:B.muted,marginTop:4}}>Monte a sequencia do atendimento profissional. Cada etapa pode ter fase, produto e instrucao.</div>
@@ -2377,17 +2423,23 @@ const AdminProtForm = ({ prot, products, protocols, indications, categories, pha
             onDragStart={(e) => handleDragStart(e, i)}
             onDragOver={(e) => handleDragOver(e, i)}
             onDragEnd={handleDragEnd}
-            style={{background: draggedIdx === i ? B.purpleLight : B.cream, borderRadius:10, padding:16, marginBottom:10, border:`1px solid ${draggedIdx === i ? B.purple : B.border}`, cursor: 'grab', opacity: draggedIdx === i ? 0.5 : 1}}
+            style={{background: draggedIdx === i ? B.purpleLight : B.white, borderRadius:14, padding:16, marginBottom:12, border:`1px solid ${draggedIdx === i ? B.purple : B.border}`, cursor: 'grab', opacity: draggedIdx === i ? 0.5 : 1, boxShadow:'0 8px 20px rgba(44,31,64,0.04)'}}
           >
-            <div style={{display:'flex',justifyContent:'space-between',marginBottom:10, alignItems: 'center'}}>
+            <div style={{display:'flex',justifyContent:'space-between',marginBottom:14, alignItems: 'center'}}>
               <div style={{display: 'flex', alignItems: 'center', gap: 10}}>
-              <span style={{cursor: 'grab', fontSize: 18, color: B.muted}}>≡</span>
-                <span style={{fontSize:11,fontWeight:700,color:B.purple,textTransform:'uppercase',letterSpacing:'0.08em'}}>Etapa {i+1} do atendimento</span>
+                <div style={{width:30,height:30,borderRadius:'50%',background:B.purple,color:B.white,display:'flex',alignItems:'center',justifyContent:'center',fontSize:12,fontWeight:800,flexShrink:0}}>{i+1}</div>
+                <div>
+                  <div style={{fontSize:11,fontWeight:700,color:B.purple,textTransform:'uppercase',letterSpacing:'0.08em'}}>Etapa {i+1} do atendimento</div>
+                  <div style={{fontSize:12,color:B.muted,marginTop:2}}>Arraste para reorganizar a sequencia</div>
+                </div>
               </div>
-              <button onClick={(e)=>{e.preventDefault(); rmStep(step.id);}} style={{background:'none',border:'none',color:B.red,cursor:'pointer',fontSize:16,lineHeight:1}}>×</button>
+              <div style={{display:'flex',alignItems:'center',gap:10}}>
+                <span style={{cursor: 'grab', fontSize: 18, color: B.muted}}>≡</span>
+                <button onClick={(e)=>{e.preventDefault(); rmStep(step.id);}} style={{background:'none',border:'none',color:B.red,cursor:'pointer',fontSize:16,lineHeight:1}}>×</button>
+              </div>
             </div>
-            <div style={{display:'grid',gridTemplateColumns:'1fr 2fr',gap:10,marginBottom:10}}>
-              <div>
+            <div style={{display:'grid',gridTemplateColumns:isMobile?'1fr':'1fr 2fr',gap:12,marginBottom:12}}>
+              <div style={{background:B.cream,border:`1px solid ${B.border}`,borderRadius:12,padding:'12px 12px 10px'}}>
                 <div style={{fontSize:11,fontWeight:700,color:B.muted,marginBottom:4}}>Nome da fase</div>
                 {addingPhaseFor === step.id ? (
                     <div style={{display:'flex', gap: 4}}>
@@ -2412,7 +2464,7 @@ const AdminProtForm = ({ prot, products, protocols, indications, categories, pha
                     </div>
                 )}
               </div>
-              <div>
+              <div style={{background:B.cream,border:`1px solid ${B.border}`,borderRadius:12,padding:'12px 12px 10px'}}>
                 <div style={{fontSize:11,fontWeight:700,color:B.muted,marginBottom:4}}>Produto usado nesta etapa</div>
                 <select value={step.productId||''} onChange={e=>updStep(step.id,'productId',e.target.value||null)} style={inpSt}>
                   {getProductOptions(step.productId).map(o=><option key={o.v} value={o.v}>{o.l}</option>)}
@@ -2422,7 +2474,7 @@ const AdminProtForm = ({ prot, products, protocols, indications, categories, pha
                 )}
               </div>
             </div>
-            <div>
+            <div style={{background:B.cream,border:`1px solid ${B.border}`,borderRadius:12,padding:'12px 12px 2px'}}>
               <Field multi label="O que fazer nesta etapa" value={step.instruction} onChange={v=>updStep(step.id,'instruction',v)} rows={2} placeholder="Descreva a execucao: como aplicar, tempo, cuidados e observacoes." />
             </div>
           </div>
@@ -2452,9 +2504,9 @@ const AdminProtForm = ({ prot, products, protocols, indications, categories, pha
         {f.steps.length===0&&<div style={{textAlign:'center',padding:'16px 0',color:B.muted,fontSize:13}}>Nenhuma etapa adicionada</div>}
       </div>
 
-      <div style={sectionBoxStyle}>
+      <div style={{...sectionBoxStyle,order:3}}>
         <div style={sectionHeadingStyle}>
-          <div style={sectionStepStyle}>4</div>
+          <div style={sectionStepStyle}>3</div>
           <div>
             <SectionTitle>Uso em Casa</SectionTitle>
             <div style={{fontSize:13,color:B.muted,marginTop:4}}>Defina a rotina que o cliente vai continuar em casa, separando o que acontece de manha e a noite.</div>
@@ -2471,12 +2523,24 @@ const AdminProtForm = ({ prot, products, protocols, indications, categories, pha
                 <Btn size="sm" variant="secondary" onClick={(e)=>{e.preventDefault(); addHome(sl);}}>+ Adicionar</Btn>
               </div>
               {f.homeUse[sl].map((item,i)=>(
-                <div key={i} style={{background:B.cream,borderRadius:8,padding:'10px 12px',marginBottom:8,position:'relative'}}>
-                  <button onClick={(e)=>{e.preventDefault(); rmHome(sl,i);}} style={{position:'absolute',top:7,right:8,background:'none',border:'none',color:B.red,cursor:'pointer',fontSize:14}}>×</button>
-                  <select value={item.productId||''} onChange={e=>updHome(sl,i,'productId',e.target.value||null)} style={{...inpSt,marginBottom:6,paddingRight:24}}>
-                    {getProductOptions(item.productId).map(o=><option key={o.v} value={o.v}>{o.l}</option>)}
-                  </select>
-                  <Field multi value={item.instruction} onChange={v=>updHome(sl,i,'instruction',v)} placeholder="Ex: aplicar sobre a pele limpa, massagear e nao remover." />
+                <div key={i} style={{background:B.white,borderRadius:14,padding:'14px 14px 10px',marginBottom:10,position:'relative',border:`1px solid ${B.border}`,boxShadow:'0 8px 18px rgba(44,31,64,0.04)'}}>
+                  <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:10,gap:10}}>
+                    <div style={{display:'flex',alignItems:'center',gap:8}}>
+                      <div style={{width:26,height:26,borderRadius:'50%',background:B.purple,color:B.white,display:'flex',alignItems:'center',justifyContent:'center',fontSize:11,fontWeight:800}}>{i+1}</div>
+                      <div style={{fontSize:12,fontWeight:700,color:B.purpleDark}}>Passo da rotina</div>
+                    </div>
+                    <button onClick={(e)=>{e.preventDefault(); rmHome(sl,i);}} style={{background:'none',border:'none',color:B.red,cursor:'pointer',fontSize:16,lineHeight:1}}>×</button>
+                  </div>
+                  <div style={{background:B.cream,border:`1px solid ${B.border}`,borderRadius:12,padding:'12px 12px 10px',marginBottom:10}}>
+                    <div style={{fontSize:11,fontWeight:700,color:B.muted,marginBottom:4}}>Produto indicado</div>
+                    <select value={item.productId||''} onChange={e=>updHome(sl,i,'productId',e.target.value||null)} style={{...inpSt,marginBottom:0}}>
+                      {getProductOptions(item.productId).map(o=><option key={o.v} value={o.v}>{o.l}</option>)}
+                    </select>
+                  </div>
+                  <div style={{background:B.cream,border:`1px solid ${B.border}`,borderRadius:12,padding:'12px 12px 2px'}}>
+                    <div style={{fontSize:11,fontWeight:700,color:B.muted,marginBottom:6}}>Como orientar a cliente</div>
+                    <Field multi value={item.instruction} onChange={v=>updHome(sl,i,'instruction',v)} placeholder="Ex: aplicar sobre a pele limpa, massagear e nao remover." />
+                  </div>
                 </div>
               ))}
               {f.homeUse[sl].length===0&&<div style={{fontSize:12,color:B.muted,fontStyle:'italic'}}>Nenhum produto adicionado</div>}
@@ -2485,7 +2549,7 @@ const AdminProtForm = ({ prot, products, protocols, indications, categories, pha
         </div>
       </div>
 
-      <div style={{...sectionBoxStyle,padding:isMobile?18:20,marginBottom:0}}>
+      <div style={{...sectionBoxStyle,padding:isMobile?18:20,marginBottom:0,order:5}}>
         <div style={sectionHeadingStyle}>
           <div style={sectionStepStyle}>5</div>
           <div>
@@ -2515,6 +2579,7 @@ const AdminProtForm = ({ prot, products, protocols, indications, categories, pha
           <Btn variant="secondary" onClick={(e)=>{e.preventDefault(); doSave(false);}} sx={isMobile?{width:'100%'}:undefined}>Salvar Rascunho</Btn>
           <Btn variant="ghost" onClick={(e)=>{e.preventDefault(); setEditProt(null);}} sx={isMobile?{width:'100%'}:undefined}>Cancelar</Btn>
         </div>
+      </div>
       </div>
     </div>
   );
