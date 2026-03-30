@@ -2210,6 +2210,16 @@ const AdminProtForm = ({ prot, products, protocols, indications, categories, pha
   };
   
   const inpSt={width:'100%',padding:'7px 10px',border:`1.5px solid ${B.border}`,borderRadius:7,fontSize:13,outline:'none',boxSizing:'border-box',fontFamily:'inherit',background:B.white};
+  const flowCards = [
+    { n:'1', title:'Base do protocolo', desc:'Nome, descricao, categoria e indicacoes.' },
+    { n:'2', title:'Kits e destaque', desc:'Kits vinculados, imagem final e CTA.' },
+    { n:'3', title:'Cabine', desc:'Monte as etapas e a ordem do atendimento.' },
+    { n:'4', title:'Uso em casa', desc:'Defina a rotina que o cliente vai seguir.' },
+    { n:'5', title:'Revisao', desc:'Confira e publique quando estiver pronto.' }
+  ];
+  const sectionBoxStyle = {background:B.white,borderRadius:16,border:`1px solid ${B.border}`,padding:isMobile?18:24,marginBottom:16,boxShadow:'0 10px 26px rgba(44,31,64,0.04)'};
+  const sectionHeadingStyle = {display:'flex',alignItems:'flex-start',gap:12,marginBottom:16,flexDirection:isMobile?'column':'row'};
+  const sectionStepStyle = {width:34,height:34,borderRadius:'50%',background:B.purple,color:B.white,display:'flex',alignItems:'center',justifyContent:'center',fontSize:14,fontWeight:800,flexShrink:0};
   
   // CÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂLCULOS DE RENTABILIDADE NO ADMIN
   const protocolProducts = f.steps.filter(s=>s.productId).map(s=>products.find(x=>x.id===s.productId)).filter(Boolean);
@@ -2235,40 +2245,74 @@ const AdminProtForm = ({ prot, products, protocols, indications, categories, pha
         <h2 style={{margin:0,color:B.purpleDark,fontSize:20,fontFamily:'Georgia, serif'}}>{prot._new?'Novo Protocolo':'Editar Protocolo'}</h2>
       </div>
 
-      <div style={{background:B.white,borderRadius:12,border:`1px solid ${B.border}`,padding:24,marginBottom:16}}>
-        <SectionTitle>Informacoes Basicas</SectionTitle>
-        <Field label="Nome do protocolo *" value={f.name} onChange={v=>setF({...f,name:v})} placeholder="Ex: Peeling de Diamante - Clareamento" />
-        <Field label="Badge de Destaque" value={f.badge||''} onChange={v=>setF({...f,badge:v})} placeholder="Ex: Lancamento, Novo, Exclusivo" note="Aparece como etiqueta dourada sobre o card na home." />
-        <Field label="Descricao" value={f.description} onChange={v=>setF({...f,description:v})} placeholder="Objetivo e indicacao do protocolo" multi rows={3} />
-        <div style={{display:'grid',gridTemplateColumns:isMobile?'1fr':'1fr 1fr',gap:14}}>
-          <Sel label="Categoria" value={f.category} onChange={v=>setF({...f,category:v})} options={[{v:'',l:'Selecione'}, ...categories.map(c => ({v: c.id, l: c.label}))]} />
-          <Field label="Frequencia" value={f.frequency} onChange={v=>setF({...f,frequency:v})} placeholder="1 sessao a cada 15 dias" />
+      <div style={{background:`linear-gradient(135deg, ${B.purpleDark}, ${B.purple})`,borderRadius:18,padding:isMobile?'18px 16px':'22px 22px 20px',marginBottom:18,color:B.white,boxShadow:'0 18px 38px rgba(44,31,64,0.18)'}}>
+        <div style={{fontSize:11,fontWeight:700,letterSpacing:'0.14em',textTransform:'uppercase',color:'rgba(255,255,255,0.7)',marginBottom:8}}>Fluxo de montagem</div>
+        <div style={{fontSize:isMobile?20:22,fontWeight:700,fontFamily:'Georgia, serif',marginBottom:8}}>Preencha o protocolo em sequencia</div>
+        <div style={{fontSize:13,lineHeight:1.6,color:'rgba(255,255,255,0.78)',marginBottom:16}}>Organizei o cadastro para voce montar o protocolo de forma mais natural: contexto, kits, cabine, rotina de casa e publicacao.</div>
+        <div style={{display:'grid',gridTemplateColumns:isMobile?'1fr':'repeat(5, minmax(0, 1fr))',gap:10}}>
+          {flowCards.map(card=>(
+            <div key={card.n} style={{background:'rgba(255,255,255,0.08)',border:'1px solid rgba(255,255,255,0.12)',borderRadius:14,padding:'12px 12px 10px'}}>
+              <div style={{width:26,height:26,borderRadius:'50%',background:B.gold,color:B.white,display:'flex',alignItems:'center',justifyContent:'center',fontSize:12,fontWeight:800,marginBottom:8}}>{card.n}</div>
+              <div style={{fontSize:13,fontWeight:700,marginBottom:4}}>{card.title}</div>
+              <div style={{fontSize:11,lineHeight:1.45,color:'rgba(255,255,255,0.72)'}}>{card.desc}</div>
+            </div>
+          ))}
         </div>
-        <Field label="Associacoes (equipamentos)" value={f.associations} onChange={v=>setF({...f,associations:v})} placeholder="Ex: Peeling de diamante, LED" />
-        <Field label="Link do video no YouTube" value={f.youtubeUrl} onChange={v=>setF({...f,youtubeUrl:v})} placeholder="https://youtube.com/watch?v=..." note="Aparecera como botao no protocolo publico" />
+      </div>
+
+      <div style={sectionBoxStyle}>
+        <div style={sectionHeadingStyle}>
+          <div style={sectionStepStyle}>1</div>
+          <div>
+            <SectionTitle>Informacoes Principais</SectionTitle>
+            <div style={{fontSize:13,color:B.muted,marginTop:4}}>Comece definindo o posicionamento do protocolo, para que ele ja nasca bem organizado na area publica.</div>
+          </div>
+        </div>
+        <div style={{background:B.cream,border:`1px solid ${B.border}`,borderRadius:12,padding:'12px 14px',marginBottom:16,fontSize:12,color:B.muted,lineHeight:1.6}}>
+          Dica: pense nessa etapa como a vitrine do protocolo. Se alguem olhar so o card da home, essas informacoes ja precisam explicar o valor dele.
+        </div>
+        <Field label="Nome do protocolo *" value={f.name} onChange={v=>setF({...f,name:v})} placeholder="Ex: Peeling de Diamante para Clareamento e Uniformizacao" note="Use um nome que a equipe reconheca rapido e que tambem fique claro para consulta futura." />
+        <Field label="Etiqueta de destaque" value={f.badge||''} onChange={v=>setF({...f,badge:v})} placeholder="Ex: Lancamento, Novo, Exclusivo" note="Aparece como selo no card da home. Use so quando realmente quiser destacar." />
+        <Field label="Resumo do protocolo" value={f.description} onChange={v=>setF({...f,description:v})} placeholder="Explique o objetivo principal, para quem ele foi pensado e o resultado esperado." multi rows={3} />
+        <div style={{display:'grid',gridTemplateColumns:isMobile?'1fr':'1fr 1fr',gap:14}}>
+          <Sel label="Categoria visual" value={f.category} onChange={v=>setF({...f,category:v})} options={[{v:'',l:'Selecione'}, ...categories.map(c => ({v: c.id, l: c.label}))]} />
+          <Field label="Frequencia recomendada" value={f.frequency} onChange={v=>setF({...f,frequency:v})} placeholder="Ex: 1 sessao a cada 15 dias" />
+        </div>
+        <Field label="Associacoes e recursos complementares" value={f.associations} onChange={v=>setF({...f,associations:v})} placeholder="Ex: Peeling de diamante, LED, vapor de ozonio" note="Use para citar equipamentos ou tecnicas que combinam com esse protocolo." />
+        <Field label="Video demonstrativo no YouTube" value={f.youtubeUrl} onChange={v=>setF({...f,youtubeUrl:v})} placeholder="https://youtube.com/watch?v=..." note="Se preencher, aparecera um botao extra no protocolo publico." />
         
         <div style={{marginTop: 16, paddingTop: 16, borderTop: `1px dashed ${B.border}`}}>
-          <div style={{fontSize:12,fontWeight:700,color:B.muted,marginBottom:8,textTransform:'uppercase',letterSpacing:'0.06em'}}>Destaque do Protocolo (Rodape)</div>
-          <div style={{display:'flex',gap:14,alignItems:'flex-start', marginBottom: 14}}>
-            {f.featuredImage && <img src={f.featuredImage} alt="destaque" style={{width: 120, height: 'auto', objectFit:'contain',borderRadius:10,border:`1px solid ${B.border}`,background:B.cream,flexShrink:0}} />}
-            <div style={{flex:1}}>
-              <label style={{display:'inline-block',padding:'9px 18px',background:B.purpleLight,color:B.purple,borderRadius:8,fontWeight:700,fontSize:13,cursor:'pointer',border:`1.5px dashed ${B.purple}`}}>
-                {f.featuredImage?'Trocar Imagem':'Enviar Imagem Destaque'}
-                <input type="file" accept="image/*" style={{display:'none'}} onChange={async (e)=>{
-                  const file = e.target.files[0];
-                  if (!file) return;
-                  const url = await uploadImageSafe(file);
-                  setF(x => ({...x, featuredImage: url}));
-                }} />
-              </label>
-              {f.featuredImage&&<button onClick={(e)=>{e.preventDefault(); setF(x=>({...x,featuredImage:''}));}} style={{marginLeft:10,background:'none',border:'none',color:B.red,fontSize:12,cursor:'pointer',fontFamily:'inherit',fontWeight:700}}>Remover</button>}
-              <div style={{fontSize:11,color:B.muted,marginTop:6}}>Imagem retangular ou quadrada para o final do protocolo.</div>
-            </div>
+          <div style={{fontSize:12,fontWeight:700,color:B.muted,marginBottom:8,textTransform:'uppercase',letterSpacing:'0.06em'}}>Preocupacoes / Indicacoes</div>
+          <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
+            {[...indications].sort((a,b)=>a.label.localeCompare(b.label)).map(c=>(
+              <button key={c.id} onClick={(e)=>{e.preventDefault(); togConcern(c.id);}} style={{padding:'6px 14px',borderRadius:20,border:`1.5px solid ${f.concerns.includes(c.id)?B.purple:B.border}`,background:f.concerns.includes(c.id)?B.purple:B.white,color:f.concerns.includes(c.id)?B.white:B.text,fontSize:13,cursor:'pointer',fontWeight:700,fontFamily:'inherit'}}>{c.label}</button>
+            ))}
+            {!showNewIndication ? (
+              <button onClick={(e) => {e.preventDefault(); setShowNewIndication(true);}} style={{padding:'6px 14px',borderRadius:20,border:`1.5px dashed ${B.purple}`,background:'transparent',color:B.purple,fontSize:13,cursor:'pointer',fontWeight:700}}>+ Nova Indicacao</button>
+            ) : (
+              <div style={{display:'flex', gap: 5}}>
+                 <input value={newIndication} onChange={e=>setNewIndication(e.target.value)} onKeyDown={(e) => { if(e.key === 'Enter') { e.preventDefault(); handleAddIndication(); } }} placeholder="Nome..." style={{padding:'6px 10px', borderRadius:20, border:`1px solid ${B.border}`, fontSize:13, outline:'none'}} autoFocus />
+                 <button onClick={(e)=>{e.preventDefault(); handleAddIndication();}} style={{padding:'6px 10px', borderRadius:20, border:'none', background:B.green, color:B.white, cursor:'pointer', fontWeight:700}}>OK</button>
+                 <button onClick={(e)=>{e.preventDefault(); setShowNewIndication(false);}} style={{padding:'6px 10px', borderRadius:20, border:'none', background:B.redLight, color:B.red, cursor:'pointer', fontWeight:700}}>×</button>
+              </div>
+            )}
           </div>
-        <Field label="Link do Botao Comprar (Imagem Destaque)" value={f.featuredLink} onChange={v=>setF({...f,featuredLink:v})} placeholder="https://..." />
+        </div>
+      </div>
+
+      <div style={sectionBoxStyle}>
+        <div style={sectionHeadingStyle}>
+          <div style={sectionStepStyle}>2</div>
+          <div>
+            <SectionTitle>Kits e Destaques</SectionTitle>
+            <div style={{fontSize:13,color:B.muted,marginTop:4}}>Aqui voce vincula os kits finais e prepara o material visual que aparece no fechamento do protocolo.</div>
+          </div>
+        </div>
+        <div style={{background:B.cream,border:`1px solid ${B.border}`,borderRadius:12,padding:'12px 14px',marginBottom:16,fontSize:12,color:B.muted,lineHeight:1.6}}>
+          Dica: os kits entram como recomendacao final. Eles nao entram nas etapas, mas ajudam a vender melhor o fechamento do protocolo.
         </div>
 
-        <div style={{marginTop: 16, paddingTop: 16, borderTop: `1px dashed ${B.border}`}}>
+        <div style={{marginBottom: 16, paddingBottom: 16, borderBottom: `1px dashed ${B.border}`}}>
           <div style={{fontSize:12,fontWeight:700,color:B.muted,marginBottom:10,textTransform:'uppercase',letterSpacing:'0.06em'}}>Kits Vinculados ao Protocolo</div>
           <div style={{display:'grid',gridTemplateColumns:isMobile?'1fr':'1fr 1fr',gap:14}}>
             <div>
@@ -2291,35 +2335,40 @@ const AdminProtForm = ({ prot, products, protocols, indications, categories, pha
         </div>
 
         <div>
-          <div style={{fontSize:12,fontWeight:700,color:B.muted,marginBottom:8,textTransform:'uppercase',letterSpacing:'0.06em'}}>Preocupacoes / Indicacoes</div>
-          <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
-            {[...indications].sort((a,b)=>a.label.localeCompare(b.label)).map(c=>(
-              <button key={c.id} onClick={(e)=>{e.preventDefault(); togConcern(c.id);}} style={{padding:'6px 14px',borderRadius:20,border:`1.5px solid ${f.concerns.includes(c.id)?B.purple:B.border}`,background:f.concerns.includes(c.id)?B.purple:B.white,color:f.concerns.includes(c.id)?B.white:B.text,fontSize:13,cursor:'pointer',fontWeight:700,fontFamily:'inherit'}}>{c.label}</button>
-            ))}
-            {!showNewIndication ? (
-              <button onClick={(e) => {e.preventDefault(); setShowNewIndication(true);}} style={{padding:'6px 14px',borderRadius:20,border:`1.5px dashed ${B.purple}`,background:'transparent',color:B.purple,fontSize:13,cursor:'pointer',fontWeight:700}}>+ Nova Indicacao</button>
-            ) : (
-              <div style={{display:'flex', gap: 5}}>
-                 <input 
-                    value={newIndication} 
-                    onChange={e=>setNewIndication(e.target.value)} 
-                    onKeyDown={(e) => { if(e.key === 'Enter') { e.preventDefault(); handleAddIndication(); } }}
-                    placeholder="Nome..." 
-                    style={{padding:'6px 10px', borderRadius:20, border:`1px solid ${B.border}`, fontSize:13, outline:'none'}} 
-                    autoFocus 
-                 />
-                    <button onClick={(e)=>{e.preventDefault(); handleAddIndication();}} style={{padding:'6px 10px', borderRadius:20, border:'none', background:B.green, color:B.white, cursor:'pointer', fontWeight:700}}>OK</button>
-                    <button onClick={(e)=>{e.preventDefault(); setShowNewIndication(false);}} style={{padding:'6px 10px', borderRadius:20, border:'none', background:B.redLight, color:B.red, cursor:'pointer', fontWeight:700}}>×</button>
-              </div>
-            )}
+          <div style={{fontSize:12,fontWeight:700,color:B.muted,marginBottom:8,textTransform:'uppercase',letterSpacing:'0.06em'}}>Oferta final do protocolo</div>
+          <div style={{display:'flex',gap:14,alignItems:'flex-start', marginBottom: 14}}>
+            {f.featuredImage && <img src={f.featuredImage} alt="destaque" style={{width: 120, height: 'auto', objectFit:'contain',borderRadius:10,border:`1px solid ${B.border}`,background:B.cream,flexShrink:0}} />}
+            <div style={{flex:1}}>
+              <label style={{display:'inline-block',padding:'9px 18px',background:B.purpleLight,color:B.purple,borderRadius:8,fontWeight:700,fontSize:13,cursor:'pointer',border:`1.5px dashed ${B.purple}`}}>
+                {f.featuredImage?'Trocar Imagem':'Enviar Imagem Destaque'}
+                <input type="file" accept="image/*" style={{display:'none'}} onChange={async (e)=>{
+                  const file = e.target.files[0];
+                  if (!file) return;
+                  const url = await uploadImageSafe(file);
+                  setF(x => ({...x, featuredImage: url}));
+                }} />
+              </label>
+              {f.featuredImage&&<button onClick={(e)=>{e.preventDefault(); setF(x=>({...x,featuredImage:''}));}} style={{marginLeft:10,background:'none',border:'none',color:B.red,fontSize:12,cursor:'pointer',fontFamily:'inherit',fontWeight:700}}>Remover</button>}
+              <div style={{fontSize:11,color:B.muted,marginTop:6}}>Imagem retangular ou quadrada para o final do protocolo.</div>
+            </div>
           </div>
+        <Field label="Link do botao da oferta final" value={f.featuredLink} onChange={v=>setF({...f,featuredLink:v})} placeholder="https://..." note="Esse link sera usado no CTA que aparece junto da imagem de destaque no final da pagina." />
         </div>
       </div>
 
-      <div style={{background:B.white,borderRadius:12,border:`1px solid ${B.border}`,padding:24,marginBottom:16}}>
-        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:16}}>
-          <SectionTitle>Passos em Cabine (Pode arrastar para reordenar)</SectionTitle>
+      <div style={sectionBoxStyle}>
+        <div style={{...sectionHeadingStyle,justifyContent:'space-between',alignItems:isMobile?'stretch':'center'}}>
+          <div style={{display:'flex',alignItems:'flex-start',gap:12,flex:1,flexDirection:isMobile?'column':'row'}}>
+            <div style={sectionStepStyle}>3</div>
+            <div>
+              <SectionTitle>Passos em Cabine</SectionTitle>
+              <div style={{fontSize:13,color:B.muted,marginTop:4}}>Monte a sequencia do atendimento profissional. Cada etapa pode ter fase, produto e instrucao.</div>
+            </div>
+          </div>
           <Btn size="sm" onClick={(e)=>{e.preventDefault(); addStep();}}>+ Adicionar Etapa</Btn>
+        </div>
+        <div style={{background:B.cream,border:`1px solid ${B.border}`,borderRadius:12,padding:'12px 14px',marginBottom:16,fontSize:12,color:B.muted,lineHeight:1.6}}>
+          Preencha aqui apenas o que acontece na cabine. Se um produto for vendido no fechamento ou usado em casa, vincule como kit ou rotina, nao como etapa.
         </div>
         {f.steps.map((step,i)=>(
           <div 
@@ -2333,13 +2382,13 @@ const AdminProtForm = ({ prot, products, protocols, indications, categories, pha
             <div style={{display:'flex',justifyContent:'space-between',marginBottom:10, alignItems: 'center'}}>
               <div style={{display: 'flex', alignItems: 'center', gap: 10}}>
               <span style={{cursor: 'grab', fontSize: 18, color: B.muted}}>≡</span>
-                <span style={{fontSize:11,fontWeight:700,color:B.purple,textTransform:'uppercase',letterSpacing:'0.08em'}}>Etapa {i+1}</span>
+                <span style={{fontSize:11,fontWeight:700,color:B.purple,textTransform:'uppercase',letterSpacing:'0.08em'}}>Etapa {i+1} do atendimento</span>
               </div>
               <button onClick={(e)=>{e.preventDefault(); rmStep(step.id);}} style={{background:'none',border:'none',color:B.red,cursor:'pointer',fontSize:16,lineHeight:1}}>×</button>
             </div>
             <div style={{display:'grid',gridTemplateColumns:'1fr 2fr',gap:10,marginBottom:10}}>
               <div>
-                <div style={{fontSize:11,fontWeight:700,color:B.muted,marginBottom:4}}>FASE</div>
+                <div style={{fontSize:11,fontWeight:700,color:B.muted,marginBottom:4}}>Nome da fase</div>
                 {addingPhaseFor === step.id ? (
                     <div style={{display:'flex', gap: 4}}>
                         <input 
@@ -2364,7 +2413,7 @@ const AdminProtForm = ({ prot, products, protocols, indications, categories, pha
                 )}
               </div>
               <div>
-                <div style={{fontSize:11,fontWeight:700,color:B.muted,marginBottom:4}}>PRODUTO VINCULADO</div>
+                <div style={{fontSize:11,fontWeight:700,color:B.muted,marginBottom:4}}>Produto usado nesta etapa</div>
                 <select value={step.productId||''} onChange={e=>updStep(step.id,'productId',e.target.value||null)} style={inpSt}>
                   {getProductOptions(step.productId).map(o=><option key={o.v} value={o.v}>{o.l}</option>)}
                 </select>
@@ -2374,7 +2423,7 @@ const AdminProtForm = ({ prot, products, protocols, indications, categories, pha
               </div>
             </div>
             <div>
-              <Field multi label="Instrucao" value={step.instruction} onChange={v=>updStep(step.id,'instruction',v)} rows={2} />
+              <Field multi label="O que fazer nesta etapa" value={step.instruction} onChange={v=>updStep(step.id,'instruction',v)} rows={2} placeholder="Descreva a execucao: como aplicar, tempo, cuidados e observacoes." />
             </div>
           </div>
         ))}
@@ -2403,11 +2452,17 @@ const AdminProtForm = ({ prot, products, protocols, indications, categories, pha
         {f.steps.length===0&&<div style={{textAlign:'center',padding:'16px 0',color:B.muted,fontSize:13}}>Nenhuma etapa adicionada</div>}
       </div>
 
-      <div style={{background:B.white,borderRadius:12,border:`1px solid ${B.border}`,padding:24,marginBottom:24}}>
-        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:4}}>
-          <SectionTitle>Uso em Casa</SectionTitle>
+      <div style={sectionBoxStyle}>
+        <div style={sectionHeadingStyle}>
+          <div style={sectionStepStyle}>4</div>
+          <div>
+            <SectionTitle>Uso em Casa</SectionTitle>
+            <div style={{fontSize:13,color:B.muted,marginTop:4}}>Defina a rotina que o cliente vai continuar em casa, separando o que acontece de manha e a noite.</div>
+          </div>
         </div>
-        <div style={{fontSize:13,color:B.muted,marginBottom:16}}>Orientacoes de rotina domiciliar para potencializar os resultados</div>
+        <div style={{background:B.cream,border:`1px solid ${B.border}`,borderRadius:12,padding:'12px 14px',marginBottom:16,fontSize:12,color:B.muted,lineHeight:1.6}}>
+          Pense nessa parte como a mensagem pronta para a cliente. Quanto mais claro estiver aqui, mais valor a plataforma entrega para a esteticista.
+        </div>
         <div style={{display:'grid',gridTemplateColumns:isMobile?'1fr':'1fr 1fr',gap:20}}>
           {[{sl:'morning',lbl:'Manha'},{sl:'night',lbl:'Noite'}].map(({sl,lbl})=>(
             <div key={sl}>
@@ -2421,7 +2476,7 @@ const AdminProtForm = ({ prot, products, protocols, indications, categories, pha
                   <select value={item.productId||''} onChange={e=>updHome(sl,i,'productId',e.target.value||null)} style={{...inpSt,marginBottom:6,paddingRight:24}}>
                     {getProductOptions(item.productId).map(o=><option key={o.v} value={o.v}>{o.l}</option>)}
                   </select>
-                  <Field multi value={item.instruction} onChange={v=>updHome(sl,i,'instruction',v)} placeholder="Instrucao de uso" />
+                  <Field multi value={item.instruction} onChange={v=>updHome(sl,i,'instruction',v)} placeholder="Ex: aplicar sobre a pele limpa, massagear e nao remover." />
                 </div>
               ))}
               {f.homeUse[sl].length===0&&<div style={{fontSize:12,color:B.muted,fontStyle:'italic'}}>Nenhum produto adicionado</div>}
@@ -2430,10 +2485,36 @@ const AdminProtForm = ({ prot, products, protocols, indications, categories, pha
         </div>
       </div>
 
-      <div style={{display:'flex',gap:10}}>
-        {hasPerm(loggedUser,'protocols','publish')&&<Btn onClick={(e)=>{e.preventDefault(); doSave(true);}} sx={{flex:1,padding:'12px 0'}}>Salvar e Publicar</Btn>}
-        <Btn variant="secondary" onClick={(e)=>{e.preventDefault(); doSave(false);}}>Salvar Rascunho</Btn>
-        <Btn variant="ghost" onClick={(e)=>{e.preventDefault(); setEditProt(null);}}>Cancelar</Btn>
+      <div style={{...sectionBoxStyle,padding:isMobile?18:20,marginBottom:0}}>
+        <div style={sectionHeadingStyle}>
+          <div style={sectionStepStyle}>5</div>
+          <div>
+            <SectionTitle>Revisar e Publicar</SectionTitle>
+            <div style={{fontSize:13,color:B.muted,marginTop:4}}>Feche o cadastro escolhendo se o protocolo sai como rascunho ou ja vai para a area publica.</div>
+          </div>
+        </div>
+        <div style={{background:B.cream,border:`1px solid ${B.border}`,borderRadius:12,padding:'12px 14px',marginBottom:16,fontSize:12,color:B.muted,lineHeight:1.6}}>
+          Se ainda estiver montando ou revisando com a equipe, salve como rascunho. Quando estiver pronto para uso comercial, publique.
+        </div>
+        <div style={{display:'grid',gridTemplateColumns:isMobile?'1fr':'repeat(3, minmax(0, 1fr))',gap:10,marginBottom:16}}>
+          <div style={{background:B.cream,border:`1px solid ${B.border}`,borderRadius:12,padding:'12px 14px'}}>
+            <div style={{fontSize:10,fontWeight:700,color:B.muted,textTransform:'uppercase',letterSpacing:'0.08em',marginBottom:4}}>Etapas em cabine</div>
+            <div style={{fontSize:18,fontWeight:700,color:B.purpleDark}}>{f.steps.length}</div>
+          </div>
+          <div style={{background:B.cream,border:`1px solid ${B.border}`,borderRadius:12,padding:'12px 14px'}}>
+            <div style={{fontSize:10,fontWeight:700,color:B.muted,textTransform:'uppercase',letterSpacing:'0.08em',marginBottom:4}}>Rotina em casa</div>
+            <div style={{fontSize:18,fontWeight:700,color:B.purpleDark}}>{(f.homeUse?.morning?.length||0) + (f.homeUse?.night?.length||0)}</div>
+          </div>
+          <div style={{background:B.cream,border:`1px solid ${B.border}`,borderRadius:12,padding:'12px 14px'}}>
+            <div style={{fontSize:10,fontWeight:700,color:B.muted,textTransform:'uppercase',letterSpacing:'0.08em',marginBottom:4}}>Status atual</div>
+            <div style={{fontSize:18,fontWeight:700,color:f.published?B.green:B.purpleDark}}>{f.published?'Publicado':'Rascunho'}</div>
+          </div>
+        </div>
+        <div style={{display:'flex',gap:10,flexDirection:isMobile?'column':'row'}}>
+          {hasPerm(loggedUser,'protocols','publish')&&<Btn onClick={(e)=>{e.preventDefault(); doSave(true);}} sx={{flex:1,padding:'12px 0'}}>Salvar e Publicar</Btn>}
+          <Btn variant="secondary" onClick={(e)=>{e.preventDefault(); doSave(false);}} sx={isMobile?{width:'100%'}:undefined}>Salvar Rascunho</Btn>
+          <Btn variant="ghost" onClick={(e)=>{e.preventDefault(); setEditProt(null);}} sx={isMobile?{width:'100%'}:undefined}>Cancelar</Btn>
+        </div>
       </div>
     </div>
   );
