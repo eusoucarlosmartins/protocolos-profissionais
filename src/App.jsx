@@ -434,12 +434,12 @@ const Header = ({ navigate, adminAuth, setAdminAuth, brand }) => {
   const navItems = [{l:'Protocolos',v:'/'},{l:'Buscar por Produto',v:'/busca'}];
 
   return (
-    <header className="no-print" style={{background:B.purpleDark,padding:`0 ${isMobile?12:24}px`,display:'flex',alignItems:'center',justifyContent:'space-between',gap:isMobile?8:16,height:58,position:'sticky',top:0,zIndex:200,width:'100%',overflow:'clip'}}>
+    <header className="no-print" style={{background:B.purpleDark,padding:`0 ${isMobile?12:24}px`,display:'flex',alignItems:'center',justifyContent:'space-between',gap:isMobile?8:16,height:isMobile?64:58,position:'sticky',top:0,zIndex:200,width:'100%',overflow:'clip',boxShadow:isMobile?'0 10px 24px rgba(19, 10, 35, 0.18)':'none'}}>
       <div style={{display:'flex',alignItems:'center',gap:isMobile?8:10,cursor:'pointer',minWidth:0,flex:isMobile?1:'0 1 auto'}} onClick={()=>{ navigate('/'); setMenuOpen(false); }}>
         <Logo brand={brand} size={isMobile?28:34} />
         <div style={{minWidth:0}}>
           <div style={{color:B.white,fontWeight:700,fontSize:isMobile?12:14,lineHeight:1.1,fontFamily:'Georgia, serif',whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{brand?.companyName || 'Extratos da Terra'}</div>
-          <div style={{color:B.gold,fontSize:9,letterSpacing:'0.12em',fontWeight:700}}>PROTOCOLOS PRO</div>
+          <div style={{color:B.gold,fontSize:isMobile?8:9,letterSpacing:'0.12em',fontWeight:700}}>PROTOCOLOS PRO</div>
         </div>
       </div>
 
@@ -456,17 +456,23 @@ const Header = ({ navigate, adminAuth, setAdminAuth, brand }) => {
 
       {isMobile && (
         <div style={{display:'flex',alignItems:'center',gap:8,flexShrink:0}}>
-          <button onClick={()=>adminAuth?navigate('/admin'):navigate('/login')} style={{background:B.gold,color:B.white,border:'none',padding:'6px 12px',borderRadius:10,fontSize:11,fontWeight:700,cursor:'pointer',fontFamily:'inherit',whiteSpace:'nowrap'}}>{adminAuth ? 'Painel' : 'Entrar'}</button>
-          <button onClick={()=>setMenuOpen(o=>!o)} style={{background:'rgba(255,255,255,0.15)',color:B.white,border:'none',minWidth:52,height:40,padding:'0 12px',borderRadius:10,fontSize:12,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',fontWeight:700,fontFamily:'inherit',whiteSpace:'nowrap'}}>{menuOpen ? 'Fechar' : 'Menu'}</button>
+          <button onClick={()=>adminAuth?navigate('/admin'):navigate('/login')} style={{background:B.gold,color:B.white,border:'none',padding:'7px 12px',borderRadius:12,fontSize:11,fontWeight:700,cursor:'pointer',fontFamily:'inherit',whiteSpace:'nowrap',minHeight:40,boxShadow:'0 8px 18px rgba(217, 177, 94, 0.24)'}}>{adminAuth ? 'Painel' : 'Entrar'}</button>
+          <button onClick={()=>setMenuOpen(o=>!o)} style={{background:menuOpen?'rgba(255,255,255,0.22)':'rgba(255,255,255,0.12)',color:B.white,border:'1px solid rgba(255,255,255,0.08)',minWidth:54,height:40,padding:'0 12px',borderRadius:12,fontSize:12,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',fontWeight:700,fontFamily:'inherit',whiteSpace:'nowrap',backdropFilter:'blur(8px)'}}>{menuOpen ? 'Fechar' : 'Menu'}</button>
         </div>
       )}
 
       {isMobile && menuOpen && (
-        <div style={{position:'fixed',top:58,right:12,left:12,background:B.purpleDark,padding:'12px',zIndex:300,borderRadius:14,boxShadow:'0 8px 24px rgba(0,0,0,0.4)',display:'flex',flexDirection:'column',gap:6}}>
-          {navItems.map(n=>(
-            <button key={n.v} onClick={()=>{navigate(n.v);setMenuOpen(false);}} style={{background:'transparent',color:B.white,border:'none',padding:'10px 16px',borderRadius:8,fontSize:14,fontWeight:700,cursor:'pointer',fontFamily:'inherit',textAlign:'left'}}>{n.l}</button>
-          ))}
-        </div>
+        <>
+          <div onClick={()=>setMenuOpen(false)} style={{position:'fixed',inset:0,top:64,background:'rgba(23, 12, 42, 0.36)',backdropFilter:'blur(2px)',zIndex:250}} />
+          <div style={{position:'fixed',top:72,right:12,left:12,background:'linear-gradient(180deg, rgba(53,35,86,0.98) 0%, rgba(41,27,67,0.98) 100%)',padding:'12px',zIndex:300,borderRadius:18,boxShadow:'0 18px 40px rgba(0,0,0,0.34)',display:'flex',flexDirection:'column',gap:8,border:'1px solid rgba(255,255,255,0.08)'}}>
+            <div style={{padding:'4px 6px 8px',borderBottom:'1px solid rgba(255,255,255,0.08)'}}>
+              <div style={{fontSize:11,fontWeight:700,color:'rgba(255,255,255,0.64)',textTransform:'uppercase',letterSpacing:'0.08em'}}>Navegacao</div>
+            </div>
+            {navItems.map((n, idx)=>(
+              <button key={n.v} onClick={()=>{navigate(n.v);setMenuOpen(false);}} style={{background:idx===0?'rgba(255,255,255,0.08)':'transparent',color:B.white,border:'1px solid rgba(255,255,255,0.06)',padding:'12px 14px',borderRadius:12,fontSize:14,fontWeight:700,cursor:'pointer',fontFamily:'inherit',textAlign:'left'}}>{n.l}</button>
+            ))}
+          </div>
+        </>
       )}
     </header>
   );
@@ -584,7 +590,7 @@ const ProtocolCard = ({ protocol:p, products, indications, categories, onClick, 
 
   return (
     <div onClick={onClick} onMouseEnter={()=>setHov(true)} onMouseLeave={()=>setHov(false)}
-      style={{position:'relative', background:B.white,borderRadius:14,border:`1px solid ${hov?B.purpleMid:B.border}`,padding:22,cursor:'pointer',transition:'all 0.18s',transform:hov?'translateY(-3px)':'none',boxShadow:hov?'0 10px 35px rgba(94,61,143,0.13)':'none'}}>
+      style={{position:'relative', background:B.white,borderRadius:16,border:`1px solid ${hov?B.purpleMid:B.border}`,padding:22,cursor:'pointer',transition:'all 0.18s',transform:hov?'translateY(-3px)':'none',boxShadow:hov?'0 14px 36px rgba(94,61,143,0.14)':'0 8px 22px rgba(44,31,64,0.05)'}}>
       {p.badge&&<span style={{position:'absolute',top:-8,left:14,background:B.gold,color:'#fff',fontSize:10,fontWeight:700,padding:'3px 10px',borderRadius:20,textTransform:'uppercase',letterSpacing:'0.07em',zIndex:3}}>{p.badge}</span>}
       <button onClick={toggleFav} style={{position:'absolute', top: 18, right: 18, background:'none', border:'none', fontSize: 22, cursor:'pointer', color: isFav ? B.red : B.border, zIndex: 2}}>
         {isFav ? '♥' : '♡'}
@@ -598,6 +604,7 @@ const ProtocolCard = ({ protocol:p, products, indications, categories, onClick, 
       <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',borderTop:`1px solid ${B.border}`,paddingTop:12}}>
         <div style={{display:'flex',flexDirection:'column',gap:2}}>
           <span style={{fontSize:12,color:B.muted}}>{p.steps.length} etapas - {prodCount} produtos</span>
+          {totalCost > 0 && <span style={{fontSize:12,color:B.green,fontWeight:700}}>Custo estimado: {fmtCurrency(totalCost)}</span>}
         </div>
         <span style={{fontSize:13,color:B.purple,fontWeight:700}}>Ver protocolo -&gt;</span>
       </div>
@@ -650,8 +657,11 @@ const ProtocolDetail = ({ protocol:p, products, indications, categories, navigat
 
   return (
     <div style={{background:B.cream, flex: 1}}>
-      <div className="no-print rp-bkbar" style={{background:B.white,borderBottom:`1px solid ${B.border}`,padding:isMobile?'10px 12px':'10px 24px',display:'flex',justifyContent:'space-between',alignItems:isMobile?'stretch':'center',gap:10,flexDirection:isMobile?'column':'row',overflowX:'hidden'}}>
-        <button onClick={()=>navigate('/')} style={{background:'none',border:'none',color:B.purple,fontWeight:700,cursor:'pointer',fontSize:14,fontFamily:'inherit'}}>Voltar</button>
+      <div className="no-print rp-bkbar" style={{background:B.white,borderBottom:`1px solid ${B.border}`,padding:isMobile?'12px':'10px 24px',display:'flex',justifyContent:'space-between',alignItems:isMobile?'stretch':'center',gap:10,flexDirection:isMobile?'column':'row',overflowX:'hidden'}}>
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',gap:10,width:isMobile?'100%':'auto'}}>
+          <button onClick={()=>navigate('/')} style={{background:isMobile?B.purpleLight:'none',border:isMobile?`1px solid ${B.border}`:'none',color:B.purple,fontWeight:700,cursor:'pointer',fontSize:14,fontFamily:'inherit',borderRadius:isMobile?10:0,padding:isMobile?'10px 12px':0}}>Voltar</button>
+          {isMobile && <span style={{fontSize:11,fontWeight:700,color:B.muted,letterSpacing:'0.08em',textTransform:'uppercase'}}>Acoes do protocolo</span>}
+        </div>
         <div style={{display:'flex', gap:8, flexWrap:'wrap', width:isMobile?'100%':'auto'}}>
           <button onClick={()=>{navigator.clipboard.writeText(window.location.href); alert('Link copiado!');}} style={{background:B.purpleLight,color:B.purple,border:'none',padding:'8px 14px',borderRadius:8,fontWeight:700,fontSize:isMobile?12:13,cursor:'pointer',fontFamily:'inherit',flex:isMobile?'1 1 120px':'0 0 auto'}}>Copiar link</button>
           <a href={`https://api.whatsapp.com/send?text=${shareText}`} target="_blank" rel="noreferrer" style={{background:'#25D366',color:B.white,textDecoration:'none',padding:'8px 16px',borderRadius:8,fontWeight:700,fontSize:isMobile?12:13,display:'inline-flex',alignItems:'center',justifyContent:'center',flex:isMobile?'1 1 120px':'0 0 auto'}}>Compartilhar</a>
@@ -659,7 +669,7 @@ const ProtocolDetail = ({ protocol:p, products, indications, categories, navigat
         </div>
       </div>
 
-      <div id="protocol-content" style={{maxWidth:740,margin:'0 auto',padding:isMobile?'16px 12px':'36px 24px', background: B.cream}}>
+      <div id="protocol-content" style={{maxWidth:740,margin:'0 auto',padding:isMobile?'18px 12px 26px':'36px 24px', background: B.cream}}>
         
           {/* Header para impressao */}
         <div className="print-only" style={{ textAlign: 'center', marginBottom: '30px', borderBottom: `2px solid ${B.purple}`, paddingBottom: '20px' }}>
@@ -671,7 +681,7 @@ const ProtocolDetail = ({ protocol:p, products, indications, categories, navigat
         </div>
 
         {/* Header */}
-        <div style={{background:B.white,borderRadius:14,border:`1px solid ${B.border}`,padding:pad,marginBottom:16}}>
+        <div style={{background:B.white,borderRadius:isMobile?16:14,border:`1px solid ${B.border}`,padding:pad,marginBottom:16,boxShadow:isMobile?'0 10px 28px rgba(44,31,64,0.05)':'0 8px 22px rgba(44,31,64,0.04)'}}>
           <div className="no-print" style={{display:'flex',gap:6,marginBottom:12,flexWrap:'wrap'}}>
             {(p.concerns || []).map(c=><Tag key={c} label={indications.find(x=>x.id===c)?.label||c} size="md" />)}
             {categoryLabel && <Tag label={categoryLabel} color={B.goldLight} text={'#7A5C1E'} size="md" />}
@@ -688,7 +698,7 @@ const ProtocolDetail = ({ protocol:p, products, indications, categories, navigat
         </div>
 
         {/* Steps */}
-        <div style={{background:B.white,borderRadius:14,border:`1px solid ${B.border}`,padding:secPad,marginBottom:16}}>
+        <div style={{background:B.white,borderRadius:16,border:`1px solid ${B.border}`,padding:secPad,marginBottom:16,boxShadow:'0 8px 22px rgba(44,31,64,0.04)'}}>
           <h2 style={{margin:'0 0 20px',fontSize:15,fontWeight:700,color:B.text}}>Protocolo em Cabine</h2>
           {p.steps.map((step,i)=>{
             const prod = step.productId ? get(step.productId) : null;
@@ -730,13 +740,13 @@ const ProtocolDetail = ({ protocol:p, products, indications, categories, navigat
 
         {/* Home Use */}
         {p.homeUse&&(p.homeUse.morning?.length>0||p.homeUse.night?.length>0)&&(
-          <div className="avoid-break" style={{background:B.white,borderRadius:14,border:`1px solid ${B.border}`,padding:secPad,marginBottom:16}}>
+          <div className="avoid-break" style={{background:B.white,borderRadius:16,border:`1px solid ${B.border}`,padding:secPad,marginBottom:16,boxShadow:'0 8px 22px rgba(44,31,64,0.04)'}}>
             <h2 style={{margin:'0 0 4px',fontSize:15,fontWeight:700,color:B.text}}>Uso em Casa</h2>
             <p style={{margin:'0 0 16px',fontSize:12,color:B.muted}}>Orientacoes de rotina domiciliar para potencializar os resultados entre as sessoes</p>
             <div className="rp-grid-home" style={{display:'grid',gap:12}}>
               {[{slot:'morning',icon:'AM',label:'Manha'},{slot:'night',icon:'PM',label:'Noite'}].map(({slot,icon,label})=>
                 p.homeUse[slot]?.length>0&&(
-                  <div key={slot} style={{background:B.cream,borderRadius:10,padding:'14px 16px'}}>
+                  <div key={slot} style={{background:B.cream,borderRadius:12,padding:isMobile?'14px 12px':'14px 16px',border:isMobile?`1px solid ${B.border}`:'none'}}>
                     <div style={{fontWeight:700,fontSize:13,color:B.text,marginBottom:12}}>{icon} {label}</div>
                     {p.homeUse[slot].map((item,i)=>{
                       const prod = item.productId ? get(item.productId) : null;
@@ -775,7 +785,7 @@ const ProtocolDetail = ({ protocol:p, products, indications, categories, navigat
 
         {/* Product & Cost Summary */}
         {uniqueProducts.length > 0 && (
-          <div className="rp-cost-summary avoid-break" style={{background:`linear-gradient(135deg, ${B.purpleLight}, ${B.goldLight})`,borderRadius:14,border:`1px solid ${B.border}`,padding:'22px 28px', pageBreakInside: 'avoid'}}>
+          <div className="rp-cost-summary avoid-break" style={{background:`linear-gradient(135deg, ${B.purpleLight}, ${B.goldLight})`,borderRadius:16,border:`1px solid ${B.border}`,padding:'22px 28px', pageBreakInside: 'avoid', boxShadow:'0 10px 28px rgba(44,31,64,0.06)'}}>
             <h2 style={{margin:'0 0 14px',fontSize:16,fontWeight:700,color:B.purpleDark}}>Resumo de Produtos do Protocolo</h2>
             <div style={{display:'flex',flexDirection:'column',gap:8,marginBottom:16}}>
               {uniqueProducts.map(pr=>{
@@ -913,16 +923,19 @@ const PublicProductPage = ({ product: p, protocols, categories, navigate, brand,
 
   return (
     <div style={{background:B.cream, flex: 1}}>
-      <div className="no-print" style={{background:B.white,borderBottom:`1px solid ${B.border}`,padding:`10px ${isMobile?12:24}px`,display:'flex',justifyContent:'space-between',alignItems:isMobile?'stretch':'center',flexDirection:isMobile?'column':'row',gap:10,overflowX:'hidden'}}>
-        <button onClick={()=>navigate('/')} style={{background:'none',border:'none',color:B.purple,fontWeight:700,cursor:'pointer',fontSize:14,fontFamily:'inherit'}}>Voltar</button>
+      <div className="no-print" style={{background:B.white,borderBottom:`1px solid ${B.border}`,padding:`${isMobile?12:10}px ${isMobile?12:24}px`,display:'flex',justifyContent:'space-between',alignItems:isMobile?'stretch':'center',flexDirection:isMobile?'column':'row',gap:10,overflowX:'hidden'}}>
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',gap:10,width:isMobile?'100%':'auto'}}>
+          <button onClick={()=>navigate('/')} style={{background:isMobile?B.purpleLight:'none',border:isMobile?`1px solid ${B.border}`:'none',color:B.purple,fontWeight:700,cursor:'pointer',fontSize:14,fontFamily:'inherit',borderRadius:isMobile?10:0,padding:isMobile?'10px 12px':0}}>Voltar</button>
+          {isMobile && <span style={{fontSize:11,fontWeight:700,color:B.muted,letterSpacing:'0.08em',textTransform:'uppercase'}}>Acoes do produto</span>}
+        </div>
         <div style={{display:'flex', gap:8, flexWrap:'wrap', width:isMobile?'100%':'auto'}}>
           <a href={`https://api.whatsapp.com/send?text=${shareText}`} target="_blank" rel="noreferrer" style={{background:'#25D366',color:B.white,textDecoration:'none',padding:isMobile?'8px 14px':'9px 22px',borderRadius:8,fontWeight:700,fontSize:isMobile?12:14,display:'inline-flex',alignItems:'center',justifyContent:'center',flex:isMobile?'1 1 120px':'0 0 auto'}}>Compartilhar</a>
           <BuyLink href={p.siteUrl} isMobile={isMobile} sx={{flex:isMobile?'1 1 140px':'0 0 auto'}}>Ver produto</BuyLink>
         </div>
       </div>
 
-      <div style={{maxWidth:860,margin:'0 auto',padding:isMobile?'14px 12px':'36px 24px'}}>
-        <div style={{background:B.white,borderRadius:14,border:`1px solid ${B.border}`,padding:isMobile?'18px 14px':'32px',marginBottom:16,display:'flex',flexDirection:isMobile?'column':'row',gap:isMobile?14:32,alignItems:'flex-start'}}>
+      <div style={{maxWidth:860,margin:'0 auto',padding:isMobile?'18px 12px 26px':'36px 24px'}}>
+        <div style={{background:B.white,borderRadius:isMobile?16:14,border:`1px solid ${B.border}`,padding:isMobile?'18px 14px':'32px',marginBottom:16,display:'flex',flexDirection:isMobile?'column':'row',gap:isMobile?14:32,alignItems:'flex-start',boxShadow:isMobile?'0 10px 28px rgba(44,31,64,0.05)':'0 8px 22px rgba(44,31,64,0.04)'}}>
           {p.image && (
             <div style={{width:isMobile?80:180,height:isMobile?80:180,flexShrink:0,borderRadius:12,background:B.cream,display:'flex',alignItems:'center',justifyContent:'center',overflow:'hidden',border:`1px solid ${B.border}`}}>
               <img src={p.image} alt={p.name} style={{width:'100%',height:'100%',objectFit:'contain'}} />
@@ -1078,17 +1091,26 @@ const ProductSearch = ({ products, protocols, indications, categories, navigate 
           const protos=getProtos(prod.id);
           const cpa=costPerApp(prod);
           return (
-            <div key={prod.id} style={{background:B.white,borderRadius:12,border:`1px solid ${B.border}`,padding:isMobile?'18px 16px':'20px 22px',marginBottom:16,overflow:'hidden'}}>
-              <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:10,gap:isMobile?14:18,flexDirection:isMobile?'column':'row'}}>
-                <div style={{minWidth:0,flex:1}}>
+            <div key={prod.id} style={{background:B.white,borderRadius:16,border:`1px solid ${B.border}`,padding:isMobile?'18px 16px':'20px 22px',marginBottom:16,overflow:'hidden',boxShadow:'0 10px 28px rgba(44,31,64,0.06)'}}>
+              <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:12,gap:isMobile?14:18,flexDirection:isMobile?'column':'row'}}>
+                <div style={{display:'flex',gap:isMobile?12:16,alignItems:'flex-start',minWidth:0,flex:1,width:'100%'}}>
+                  <div style={{width:isMobile?72:84,height:isMobile?72:84,borderRadius:12,background:B.cream,display:'flex',alignItems:'center',justifyContent:'center',overflow:'hidden',border:`1px solid ${B.border}`,flexShrink:0}}>
+                    {prod.image ? (
+                      <img src={prod.image} alt={prod.name} style={{width:'100%',height:'100%',objectFit:'contain'}} />
+                    ) : (
+                      <div style={{fontSize:isMobile?24:28,color:B.purple}}>P</div>
+                    )}
+                  </div>
+                  <div style={{minWidth:0,flex:1}}>
                   <h3 style={{margin:'0 0 4px',color:B.purpleDark,fontSize:16,fontWeight:700}}>{prod.name}</h3>
-                  {prod.actives&&<div style={{fontSize:13,color:B.muted,marginBottom:2}} dangerouslySetInnerHTML={{__html: clean('Ativos: ' + prod.actives.slice(0, 100))}} /> }
-                  {cpa!=null&&<div style={{fontSize:13,color:B.green,fontWeight:700}}>Custo/aplicacao: {fmtCurrency(cpa)}</div>}
+                    {prod.actives&&<div style={{fontSize:13,color:B.muted,marginBottom:4,lineHeight:1.5}} dangerouslySetInnerHTML={{__html: clean('Ativos: ' + prod.actives.slice(0, 100))}} /> }
+                    {cpa!=null&&<div style={{fontSize:13,color:B.green,fontWeight:700}}>Custo/aplicacao: {fmtCurrency(cpa)}</div>}
+                  </div>
                 </div>
                 <div style={{display:'flex',flexDirection:'column',gap:10,alignItems:isMobile?'stretch':'flex-end',width:isMobile?'100%':'auto'}}>
                   <div style={{display:'flex',gap:4,flexWrap:'wrap',justifyContent:isMobile?'flex-start':'flex-end'}}>{(prod.categories||[prod.category]).map(c=><Tag key={c} label={categories.find(cat=>cat.id===c)?.label||c} color={B.goldLight} text={'#7A5C1E'} />)}{(prod.uso||[]).includes('homecare')&&<Tag label='Home Care' color='#E8F5E9' text='#1E7E46' />}</div>
-                  <div style={{display:'flex', gap:8, alignItems:'stretch', flexDirection:isMobile?'column':'row', width:isMobile?'100%':'auto'}}>
-                    <button onClick={()=>navigate(`/produto/${prod.id}`)} style={{background:B.purpleLight,border:`1px solid ${B.border}`,color:B.purple,fontWeight:700,fontSize:12,cursor:'pointer',fontFamily:'inherit',padding:'10px 12px',borderRadius:10,minHeight:42,textAlign:'center'}}>Ver produto</button>
+                  <div style={{display:'flex', gap:8, alignItems:'stretch', flexDirection:isMobile?'row':'row', width:isMobile?'100%':'auto'}}>
+                    <button onClick={()=>navigate(`/produto/${prod.id}`)} style={{background:B.purpleLight,border:`1px solid ${B.border}`,color:B.purple,fontWeight:700,fontSize:12,cursor:'pointer',fontFamily:'inherit',padding:'10px 12px',borderRadius:10,minHeight:42,textAlign:'center',flex:isMobile?1:'0 0 auto'}}>Ver produto</button>
                     <BuyLink href={prod.siteUrl} isMobile={isMobile} sx={{padding: '10px 14px', fontSize: 12, minHeight:42}} />
                   </div>
                 </div>
@@ -1096,7 +1118,7 @@ const ProductSearch = ({ products, protocols, indications, categories, navigate 
               {protos.length>0
                 ? <><div style={{fontSize:13,fontWeight:700,color:B.text,marginBottom:10}}>Utilizado em {protos.length} protocolo(s):</div>
                     <div style={{display:'flex',flexDirection:'column',gap:8}}>
-                      {protos.map(pr=><button key={pr.id} onClick={()=>navigate(`/protocolo/${pr.id}`)} style={{background:B.purpleLight,border:`1px solid ${B.border}`,borderRadius:8,padding:'10px 14px',textAlign:'left',cursor:'pointer',fontSize:14,color:B.purple,fontWeight:700,fontFamily:'inherit'}}>{pr.name} →</button>)}
+                      {protos.map(pr=><button key={pr.id} onClick={()=>navigate(`/protocolo/${pr.id}`)} style={{background:B.purpleLight,border:`1px solid ${B.border}`,borderRadius:10,padding:'11px 14px',textAlign:'left',cursor:'pointer',fontSize:14,color:B.purple,fontWeight:700,fontFamily:'inherit'}}>{pr.name} →</button>)}
                     </div></>
                 : <div style={{fontSize:13,color:B.muted,fontStyle:'italic'}}>Nao vinculado a nenhum protocolo publicado</div>
               }
