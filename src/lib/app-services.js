@@ -17,16 +17,18 @@ const SUPABASE_ANON =
 const stripHtml = (html) => String(html || "").replace(/<[^>]*>/g, "");
 const MOJIBAKE_RE = /Ã.|Â.|â€|â€“|â€”|�/;
 
+const MOJIBAKE_RE_BROAD = /Ã|Â|â€|â€“|â€”|ï¿½|�/;
+
 const decodeMojibake = (value) => {
-  if (typeof value !== "string" || !MOJIBAKE_RE.test(value)) return value;
+  if (typeof value !== "string" || !(MOJIBAKE_RE.test(value) || MOJIBAKE_RE_BROAD.test(value))) return value;
   try {
     let current = value;
-    for (let index = 0; index < 2; index += 1) {
+    for (let index = 0; index < 5; index += 1) {
       const bytes = Uint8Array.from(Array.from(current).map((char) => char.charCodeAt(0) & 0xff));
       const next = new TextDecoder("utf-8").decode(bytes);
       if (!next || next === current) break;
       current = next;
-      if (!MOJIBAKE_RE.test(current)) break;
+      if (!(MOJIBAKE_RE.test(current) || MOJIBAKE_RE_BROAD.test(current))) break;
     }
     return current;
   } catch {
