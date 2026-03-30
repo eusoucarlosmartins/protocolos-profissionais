@@ -495,7 +495,7 @@ const PublicHome = ({ protocols, products, indications, categories, favorites, s
     const matchSearch = !search || p.name.toLowerCase().includes(search.toLowerCase()) || p.description?.toLowerCase().includes(search.toLowerCase());
     const matchInd = filterInd === 'all' || filterInd === 'favorites' || p.concerns?.includes(filterInd);
     const matchCat = filterCat === 'all' || p.category === filterCat || p.categories?.includes(filterCat);
-    const matchProd = filterProd === 'all' || p.steps?.some(s => s.productId === filterProd) || p.homeUse?.morning?.some(h => h.productId === filterProd) || p.homeUse?.night?.some(h => h.productId === filterProd);
+    const matchProd = filterProd === 'all' || p.steps?.some(s => s.productId === filterProd) || p.homeUse?.morning?.some(h => h.productId === filterProd) || p.homeUse?.night?.some(h => h.productId === filterProd) || p.professionalKitId === filterProd || p.homeKitId === filterProd;
     
     return matchSearch && matchInd && matchCat && matchProd;
   });
