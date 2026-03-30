@@ -159,6 +159,7 @@ export const EMPTY_PRODUCT = {
   name: "",
   categories: ["facial"],
   uso: ["profissional"],
+  productTypes: ["protocol"],
   active: true,
   image: "",
   mainFunction: "",
@@ -182,6 +183,13 @@ export const EMPTY_PRODUCT = {
   keywords: "",
   badge: "",
 };
+
+export const PRODUCT_TYPE_OPTIONS = [
+  { id: "protocol", label: "Produto de Protocolo" },
+  { id: "skincare", label: "Produto de Skincare" },
+  { id: "kit_professional", label: "Kit Profissional" },
+  { id: "kit_homecare", label: "Kit Home Care" },
+];
 
 export const INIT_PRODUCTS = [
   {

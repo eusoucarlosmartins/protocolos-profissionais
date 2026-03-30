@@ -1,4 +1,13 @@
 import { useIsMobile } from '../../hooks/useAppShell';
+import { PRODUCT_TYPE_OPTIONS } from '../../lib/app-constants';
+import { getProductTypes, getProductTypeLabel, productHasType } from '../../lib/app-services';
+
+const PRODUCT_TYPE_TAG_STYLES = {
+  protocol: { color: '#EBF5FF', text: '#1A56DB' },
+  skincare: { color: '#E8F5E9', text: '#1E7E46' },
+  kit_professional: { color: '#EDE5F5', text: '#2C1F40' },
+  kit_homecare: { color: '#FBF5E8', text: '#7A5C1E' },
+};
 
 export const AdminProducts = ({
   products,
@@ -25,7 +34,7 @@ export const AdminProducts = ({
   XMLImporter,
 }) => {
   const isMobile = useIsMobile();
-  const hasActiveFilters = search || filters.status !== 'all' || filters.category !== 'all' || filters.uso !== 'all';
+  const hasActiveFilters = search || filters.status !== 'all' || filters.category !== 'all' || filters.type !== 'all';
 
   const del = (id) => {
     if (window.confirm('Excluir produto?')) saveProducts(products.filter((p) => p.id !== id));
@@ -39,8 +48,8 @@ export const AdminProducts = ({
     const matchSearch = !search || product.name.toLowerCase().includes(search.toLowerCase());
     const matchStatus = filters.status === 'all' || (filters.status === 'active' ? isActive(product) : !isActive(product));
     const matchCategory = filters.category === 'all' || (product.categories || [product.category]).includes(filters.category);
-    const matchUso = filters.uso === 'all' || (product.uso || []).includes(filters.uso);
-    return matchSearch && matchStatus && matchCategory && matchUso;
+    const matchType = filters.type === 'all' || productHasType(product, filters.type);
+    return matchSearch && matchStatus && matchCategory && matchType;
   });
 
   return (
@@ -68,10 +77,9 @@ export const AdminProducts = ({
             <option value="all">Area: Todas</option>
             {[...categories].sort((a, b) => a.label.localeCompare(b.label)).map((category) => <option key={category.id} value={category.id}>{category.label}</option>)}
           </select>
-          <select value={filters.uso} onChange={(e) => setFilters({ ...filters, uso: e.target.value })} style={{ padding: '9px 12px', border: `1.5px solid ${B.border}`, borderRadius: 8, fontSize: 14, outline: 'none', fontFamily: 'inherit', background: B.white, width: isMobile ? '100%' : 'auto' }}>
-            <option value="all">Uso: Todos</option>
-            <option value="profissional">Profissional</option>
-            <option value="homecare">Home Care</option>
+          <select value={filters.type} onChange={(e) => setFilters({ ...filters, type: e.target.value })} style={{ padding: '9px 12px', border: `1.5px solid ${B.border}`, borderRadius: 8, fontSize: 14, outline: 'none', fontFamily: 'inherit', background: B.white, width: isMobile ? '100%' : 'auto' }}>
+            <option value="all">Tipo: Todos</option>
+            {PRODUCT_TYPE_OPTIONS.map((option) => <option key={option.id} value={option.id}>{option.label}</option>)}
           </select>
         </div>
         <div style={{ marginTop: 12, fontSize: 12, color: B.muted, fontWeight: 600 }}>
@@ -94,8 +102,10 @@ export const AdminProducts = ({
               <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexShrink: 0, flexWrap: 'wrap', width: isMobile ? '100%' : 'auto' }}>
                 <div style={{ display: 'flex', gap: 4, flexShrink: 0, flexWrap: 'wrap', width: isMobile ? '100%' : 'auto' }}>
                   {(product.categories || [product.category]).map((categoryId) => <Tag key={categoryId} label={categories.find((category) => category.id === categoryId)?.label || categoryId} color={B.goldLight} text="#7A5C1E" />)}
-                  {(product.uso || []).includes('homecare') && <Tag label="Home Care" color="#E8F5E9" text="#1E7E46" />}
-                  {(product.uso || []).includes('profissional') && <Tag label="Profissional" color="#EBF5FF" text="#1A56DB" />}
+                  {getProductTypes(product).map((typeId) => {
+                    const style = PRODUCT_TYPE_TAG_STYLES[typeId] || { color: B.purpleLight, text: B.purpleDark };
+                    return <Tag key={typeId} label={getProductTypeLabel(typeId)} color={style.color} text={style.text} />;
+                  })}
                   {!isActive(product) && <Tag label="Inativo" color={B.redLight} text={B.red} />}
                 </div>
                 {hasPerm(loggedUser, 'products', 'edit') && <Btn size="sm" variant="secondary" onClick={() => setEditProd(product)}>Editar</Btn>}

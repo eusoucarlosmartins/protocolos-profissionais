@@ -17,6 +17,7 @@ import {
   INDICATIONS_KEY,
   MARKETING_KEY,
   PHASES_KEY,
+  PRODUCT_TYPE_OPTIONS,
   PRODUCTS_KEY,
   PROTOCOLS_KEY,
   RESPONSIVE_CSS,
@@ -30,10 +31,14 @@ import {
   fmtCurrency,
   getAdminSession,
   getAffectedProtocols,
+  getProductTypeLabel,
+  getProductTypes,
   isActive,
   load,
   loadHtml2Pdf,
+  normalizeProductForStorage,
   logoutAdmin,
+  productHasType,
   primePurify,
   save,
   savePublic,
@@ -210,6 +215,22 @@ const AppFooter = ({ brand }) => (
 
 const Tag = ({ label, color = B.purpleLight, text = B.purple, size = 'sm' }) => (
   <span style={{ background:color, color:text, padding:size==='sm'?'2px 10px':'4px 14px', borderRadius:20, fontSize:size==='sm'?11:13, fontWeight:700, letterSpacing:'0.03em', whiteSpace:'nowrap' }}>{label}</span>
+);
+
+const PRODUCT_TYPE_TAG_STYLES = {
+  protocol: { color: B.blueLight, text: B.blue },
+  skincare: { color: B.greenLight, text: B.green },
+  kit_professional: { color: B.purpleLight, text: B.purpleDark },
+  kit_homecare: { color: B.goldLight, text: '#7A5C1E' },
+};
+
+const ProductTypeTags = ({ product, size = 'sm' }) => (
+  <>
+    {getProductTypes(product).map((typeId) => {
+      const style = PRODUCT_TYPE_TAG_STYLES[typeId] || { color: B.purpleLight, text: B.purpleDark };
+      return <Tag key={typeId} label={getProductTypeLabel(typeId)} color={style.color} text={style.text} size={size} />;
+    })}
+  </>
 );
 
 const Btn = ({ children, onClick, variant='primary', size='md', disabled=false, sx={} }) => {
@@ -973,7 +994,6 @@ const PublicProductPage = ({ product: p, protocols, categories, navigate, brand,
     )
   );
   const cats = (p.categories || [p.category]);
-  const uso = p.uso || [];
   const shareUrl = typeof window !== 'undefined'
     ? `${window.location.origin}/produto/${p.id}`
     : `/produto/${p.id}`;
@@ -1010,8 +1030,7 @@ const PublicProductPage = ({ product: p, protocols, categories, navigate, brand,
           <div style={{flex:1,minWidth:0}}>
             <div style={{display:'flex',gap:6,flexWrap:'wrap',marginBottom:10}}>
               {cats.map(c=><Tag key={c} label={categories.find(x=>x.id===c)?.label||c} color={B.goldLight} text={'#7A5C1E'} size="md" />)}
-              {uso.includes('profissional')&&<Tag label="Profissional" color={B.blueLight} text={B.blue} size="md" />}
-              {uso.includes('homecare')&&<Tag label="Home Care" color={B.greenLight} text={B.green} size="md" />}
+              <ProductTypeTags product={p} size="md" />
               {!isActive(p)&&<Tag label="Inativo" color={B.redLight} text={B.red} size="md" />}
             </div>
             <h1 style={{margin:'0 0 8px',color:B.purpleDark,fontSize:isMobile?19:26,fontWeight:700,fontFamily:'Georgia, serif',lineHeight:1.25}}>{p.name}</h1>
@@ -1174,7 +1193,10 @@ const ProductSearch = ({ products, protocols, indications, categories, navigate 
                   </div>
                 </div>
                 <div style={{display:'flex',flexDirection:'column',gap:10,alignItems:isMobile?'stretch':'flex-end',width:isMobile?'100%':'auto'}}>
-                  <div style={{display:'flex',gap:4,flexWrap:'wrap',justifyContent:isMobile?'flex-start':'flex-end'}}>{(prod.categories||[prod.category]).map(c=><Tag key={c} label={categories.find(cat=>cat.id===c)?.label||c} color={B.goldLight} text={'#7A5C1E'} />)}{(prod.uso||[]).includes('homecare')&&<Tag label='Home Care' color='#E8F5E9' text='#1E7E46' />}</div>
+                  <div style={{display:'flex',gap:4,flexWrap:'wrap',justifyContent:isMobile?'flex-start':'flex-end'}}>
+                    {(prod.categories||[prod.category]).map(c=><Tag key={c} label={categories.find(cat=>cat.id===c)?.label||c} color={B.goldLight} text={'#7A5C1E'} />)}
+                    <ProductTypeTags product={prod} />
+                  </div>
                   <div style={{display:'flex', gap:8, alignItems:'stretch', flexDirection:isMobile?'row':'row', width:isMobile?'100%':'auto'}}>
                     <button onClick={()=>navigate(`/produto/${prod.id}`)} style={{background:B.purpleLight,border:`1px solid ${B.border}`,color:B.purple,fontWeight:700,fontSize:12,cursor:'pointer',fontFamily:'inherit',padding:'10px 12px',borderRadius:10,minHeight:42,textAlign:'center',flex:isMobile?1:'0 0 auto'}}>Ver produto</button>
                     <BuyLink href={prod.siteUrl} isMobile={isMobile} sx={{padding: '10px 14px', fontSize: 12, minHeight:42}} />
@@ -1430,6 +1452,7 @@ const XMLImporter = ({ products, saveProducts }) => {
             siteUrl: link.trim(),
             description: description.trim(),
             uso: ['profissional', 'homecare'],
+            productTypes: ['protocol', 'skincare'],
             categories: ['facial']
           });
           addedCount++;
@@ -1624,7 +1647,7 @@ const AdminPanel = ({ products, protocols, indications, categories, phases, bran
   });
   const [editProd,setEditProd]=useState(null);
   const [editProt,setEditProt]=useState(null);
-  const EMPTY_PROD_FILTERS = { status: 'all', category: 'all', uso: 'all' };
+  const EMPTY_PROD_FILTERS = { status: 'all', category: 'all', type: 'all' };
   const EMPTY_PROT_FILTERS = { status: 'all', category: 'all', indication: 'all' };
   const [prodFilters, setProdFilters] = useState(EMPTY_PROD_FILTERS);
   const [prodSearch, setProdSearch] = useState('');
@@ -1755,7 +1778,7 @@ const AdminPanel = ({ products, protocols, indications, categories, phases, bran
 
 const AdminProductsLegacy = ({ products, categories, saveProducts, setEditProd, filters, setFilters, search, setSearch, onClearFilters, loggedUser }) => {
   const isMobile = useIsMobile();
-  const hasActiveFilters = search || filters.status !== 'all' || filters.category !== 'all' || filters.uso !== 'all';
+  const hasActiveFilters = search || filters.status !== 'all' || filters.category !== 'all' || filters.type !== 'all';
 
   const del = id => { if(window.confirm('Excluir produto?')) saveProducts(products.filter(p=>p.id!==id)); };
   const duplicate = (p) => {
@@ -1766,8 +1789,8 @@ const AdminProductsLegacy = ({ products, categories, saveProducts, setEditProd, 
     const matchSearch = !search || p.name.toLowerCase().includes(search.toLowerCase());
     const matchStatus = filters.status === 'all' || (filters.status === 'active' ? isActive(p) : !isActive(p));
     const matchCategory = filters.category === 'all' || (p.categories || [p.category]).includes(filters.category);
-    const matchUso = filters.uso === 'all' || (p.uso || []).includes(filters.uso);
-    return matchSearch && matchStatus && matchCategory && matchUso;
+    const matchType = filters.type === 'all' || productHasType(p, filters.type);
+    return matchSearch && matchStatus && matchCategory && matchType;
   });
 
   return (
@@ -1795,10 +1818,9 @@ const AdminProductsLegacy = ({ products, categories, saveProducts, setEditProd, 
               <option value="all">Area: Todas</option>
              {[...categories].sort((a,b)=>a.label.localeCompare(b.label)).map(c => <option key={c.id} value={c.id}>{c.label}</option>)}
            </select>
-           <select value={filters.uso} onChange={e=>setFilters({...filters, uso: e.target.value})} style={{padding:'9px 12px',border:`1.5px solid ${B.border}`,borderRadius:8,fontSize:14,outline:'none',fontFamily:'inherit', background: B.white, width:isMobile?'100%':'auto'}}>
-             <option value="all">Uso: Todos</option>
-              <option value="profissional">Profissional</option>
-              <option value="homecare">Home Care</option>
+           <select value={filters.type} onChange={e=>setFilters({...filters, type: e.target.value})} style={{padding:'9px 12px',border:`1.5px solid ${B.border}`,borderRadius:8,fontSize:14,outline:'none',fontFamily:'inherit', background: B.white, width:isMobile?'100%':'auto'}}>
+             <option value="all">Tipo: Todos</option>
+              {PRODUCT_TYPE_OPTIONS.map(option => <option key={option.id} value={option.id}>{option.label}</option>)}
            </select>
         </div>
         <div style={{marginTop: 12, fontSize: 12, color: B.muted, fontWeight: 600}}>
@@ -1819,7 +1841,11 @@ const AdminProductsLegacy = ({ products, categories, saveProducts, setEditProd, 
                 </div>
               </div>
               <div style={{display:'flex',gap:8,alignItems:'center',flexShrink:0,flexWrap:'wrap',width:isMobile?'100%':'auto'}}>
-                <div style={{display:'flex',gap:4,flexShrink:0,flexWrap:'wrap',width:isMobile?'100%':'auto'}}>{(p.categories||[p.category]).map(c=><Tag key={c} label={categories.find(cat=>cat.id===c)?.label||c} color={B.goldLight} text={'#7A5C1E'} />)}{(p.uso||[]).includes('homecare')&&<Tag label='Home Care' color='#E8F5E9' text='#1E7E46' />}{(p.uso||[]).includes('profissional')&&<Tag label='Profissional' color='#EBF5FF' text='#1A56DB' />}{!isActive(p)&&<Tag label='Inativo' color={B.redLight} text={B.red} />}</div>
+                <div style={{display:'flex',gap:4,flexShrink:0,flexWrap:'wrap',width:isMobile?'100%':'auto'}}>
+                  {(p.categories||[p.category]).map(c=><Tag key={c} label={categories.find(cat=>cat.id===c)?.label||c} color={B.goldLight} text={'#7A5C1E'} />)}
+                  <ProductTypeTags product={p} />
+                  {!isActive(p)&&<Tag label='Inativo' color={B.redLight} text={B.red} />}
+                </div>
                 {hasPerm(loggedUser,'products','edit')&&<Btn size="sm" variant="secondary" onClick={()=>setEditProd(p)}>Editar</Btn>}
                 {hasPerm(loggedUser,'products','edit')&&<Btn size="sm" variant="ghost" onClick={()=>duplicate(p)}>Duplicar</Btn>}
                 {hasPerm(loggedUser,'products','edit')&&<button onClick={()=>saveProducts(products.map(x=>x.id===p.id?{...x,active:!isActive(x)}:x))} style={{padding:'5px 10px',borderRadius:6,border:`1px solid ${isActive(p)?B.border:B.red}`,background:isActive(p)?B.white:B.redLight,color:isActive(p)?B.muted:B.red,fontSize:12,fontWeight:700,cursor:'pointer',fontFamily:'inherit'}}>{isActive(p)?'Inativar':'Reativar'}</button>}
@@ -1870,7 +1896,7 @@ const AdminProdForm = ({ prod, products, categories, saveProducts, setEditProd }
 
   const doSave = () => {
     if(!f.name.trim()) return alert('Nome obrigatorio');
-    const {_new,...clean}=f;
+    const {_new,...clean}=normalizeProductForStorage(f);
     if(prod._new) saveProducts([...products,clean]);
     else saveProducts(products.map(p=>p.id===clean.id?clean:p));
     setEditProd(null);
@@ -1944,14 +1970,29 @@ const AdminProdForm = ({ prod, products, categories, saveProducts, setEditProd }
             </div>
           </div>
           <div>
-            <label style={{display:'block',fontSize:12,fontWeight:700,color:'#6B7280',marginBottom:8,textTransform:'uppercase',letterSpacing:'0.06em'}}>Tipo de Uso</label>
+            <label style={{display:'block',fontSize:12,fontWeight:700,color:'#6B7280',marginBottom:8,textTransform:'uppercase',letterSpacing:'0.06em'}}>Tipos de Produto</label>
             <div style={{display:'flex',gap:10,flexWrap:'wrap'}}>
-              {[{v:'profissional',l:'Profissional'},{v:'homecare',l:'Home Care'}].map(u => (
-                <label key={u.v} style={{display:'flex',alignItems:'center',gap:6,cursor:'pointer',padding:'8px 14px',borderRadius:8,border:`1.5px solid ${(f.uso||[]).includes(u.v)?'#5E3D8F':'#E2D9F3'}`,background:(f.uso||[]).includes(u.v)?'#EDE5F5':'#fff',fontWeight:700,fontSize:13,userSelect:'none'}}>
-                  <input type="checkbox" checked={(f.uso||[]).includes(u.v)} onChange={()=>{const cur=f.uso||[];setF({...f,uso:cur.includes(u.v)?cur.filter(x=>x!==u.v):[...cur,u.v]});}} style={{display:'none'}} />
-                  {u.l}
-                </label>
-              ))}
+              {PRODUCT_TYPE_OPTIONS.map(option => {
+                const selected = getProductTypes(f).includes(option.id);
+                return (
+                  <label key={option.id} style={{display:'flex',alignItems:'center',gap:6,cursor:'pointer',padding:'8px 14px',borderRadius:8,border:`1.5px solid ${selected?'#5E3D8F':'#E2D9F3'}`,background:selected?'#EDE5F5':'#fff',fontWeight:700,fontSize:13,userSelect:'none'}}>
+                    <input
+                      type="checkbox"
+                      checked={selected}
+                      onChange={()=>{
+                        const cur = getProductTypes(f);
+                        const next = cur.includes(option.id) ? cur.filter(x=>x!==option.id) : [...cur, option.id];
+                        setF({...f,productTypes:next});
+                      }}
+                      style={{display:'none'}}
+                    />
+                    {option.label}
+                  </label>
+                );
+              })}
+            </div>
+            <div style={{marginTop:8,fontSize:11,color:B.muted,lineHeight:1.55}}>
+              Produtos marcados como kit aparecem apenas nos campos de kit do protocolo. Produtos marcados como protocolo ou skincare continuam disponiveis nas etapas correspondentes.
             </div>
           </div>
         </div>
@@ -2170,21 +2211,35 @@ const AdminProtForm = ({ prot, products, protocols, indications, categories, pha
 
   const [draggedIdx, setDraggedIdx] = useState(null);
 
-  // Dropdown de produtos deve conter apenas os ativos e os ja selecionados (mesmo que inativos)
-  const getProductOptions = (selectedId) => {
-      const activeProducts = [...products].filter(p => isActive(p)).sort((a,b)=>a.name.localeCompare(b.name));
-      const opts = [{v:'', l:'Sem produto (equipamento/tecnica)'}];
-      
-      activeProducts.forEach(p => opts.push({v: p.id, l: p.name}));
-      
+  // Dropdowns respeitam os tipos do produto, mas preservam o item ja selecionado mesmo se ficar inativo.
+  const buildProductOptions = ({ selectedId, type, includeEmpty = false, emptyLabel = 'Sem produto' }) => {
+      const activeProducts = [...products]
+        .filter(product => isActive(product) && productHasType(product, type))
+        .sort((a,b)=>a.name.localeCompare(b.name));
+      const opts = includeEmpty ? [{v:'', l:emptyLabel}] : [];
+
+      activeProducts.forEach(product => opts.push({v: product.id, l: product.name}));
+
       if (selectedId) {
-          const currentProd = products.find(p => p.id === selectedId);
-          if (currentProd && !isActive(currentProd)) {
-              opts.push({v: currentProd.id, l: `[INATIVO] ${currentProd.name}`});
+          const currentProd = products.find(product => product.id === selectedId);
+          if (currentProd && !opts.some(option => option.v === currentProd.id)) {
+              opts.push({v: currentProd.id, l: `${isActive(currentProd) ? '' : '[INATIVO] '}${currentProd.name}`});
           }
       }
       return opts;
   };
+
+  const getProtocolProductOptions = (selectedId) =>
+    buildProductOptions({ selectedId, type: 'protocol', includeEmpty: true, emptyLabel: 'Sem produto (equipamento/tecnica)' });
+
+  const getSkincareProductOptions = (selectedId) =>
+    buildProductOptions({ selectedId, type: 'skincare', includeEmpty: true, emptyLabel: 'Sem produto indicado' });
+
+  const getProfessionalKitOptions = (selectedId) =>
+    buildProductOptions({ selectedId, type: 'kit_professional' });
+
+  const getHomeKitOptions = (selectedId) =>
+    buildProductOptions({ selectedId, type: 'kit_homecare' });
   
   const addStep=()=>setF(x=>({...x,steps:[...x.steps,{id:uid(),phase:'',productId:null,instruction:''}]}));
   const rmStep=id=>setF(x=>({...x,steps:x.steps.filter(s=>s.id!==id)}));
@@ -2365,7 +2420,7 @@ const AdminProtForm = ({ prot, products, protocols, indications, categories, pha
               <div style={{fontSize:11,fontWeight:700,color:B.muted,marginBottom:4}}>KIT PROFISSIONAL</div>
               <select value={f.professionalKitId||''} onChange={e=>setF({...f,professionalKitId:e.target.value})} style={inpSt}>
                 <option value="">Nenhum kit profissional vinculado</option>
-                {getProductOptions(f.professionalKitId).filter(o=>o.v !== '').map(o=><option key={o.v} value={o.v}>{o.l}</option>)}
+                {getProfessionalKitOptions(f.professionalKitId).map(o=><option key={o.v} value={o.v}>{o.l}</option>)}
               </select>
               <div style={{fontSize:11,color:B.muted,marginTop:5}}>Esse kit aparece no resumo final do protocolo, sem entrar no passo a passo.</div>
             </div>
@@ -2373,7 +2428,7 @@ const AdminProtForm = ({ prot, products, protocols, indications, categories, pha
               <div style={{fontSize:11,fontWeight:700,color:B.muted,marginBottom:4}}>KIT USO EM CASA</div>
               <select value={f.homeKitId||''} onChange={e=>setF({...f,homeKitId:e.target.value})} style={inpSt}>
                 <option value="">Nenhum kit de uso em casa vinculado</option>
-                {getProductOptions(f.homeKitId).filter(o=>o.v !== '').map(o=><option key={o.v} value={o.v}>{o.l}</option>)}
+                {getHomeKitOptions(f.homeKitId).map(o=><option key={o.v} value={o.v}>{o.l}</option>)}
               </select>
               <div style={{fontSize:11,color:B.muted,marginTop:5}}>Esse kit aparece no bloco de uso em casa e no resumo de produtos do protocolo.</div>
             </div>
@@ -2467,7 +2522,7 @@ const AdminProtForm = ({ prot, products, protocols, indications, categories, pha
               <div style={{background:B.cream,border:`1px solid ${B.border}`,borderRadius:12,padding:'12px 12px 10px'}}>
                 <div style={{fontSize:11,fontWeight:700,color:B.muted,marginBottom:4}}>Produto usado nesta etapa</div>
                 <select value={step.productId||''} onChange={e=>updStep(step.id,'productId',e.target.value||null)} style={inpSt}>
-                  {getProductOptions(step.productId).map(o=><option key={o.v} value={o.v}>{o.l}</option>)}
+                  {getProtocolProductOptions(step.productId).map(o=><option key={o.v} value={o.v}>{o.l}</option>)}
                 </select>
                 {step.productId&&costPerApp(products.find(x=>x.id===step.productId))!=null&&(
                   <div style={{fontSize:11,color:B.green,fontWeight:700,marginTop:3}}>Custo: {fmtCurrency(costPerApp(products.find(x=>x.id===step.productId)))}/aplicacao</div>
@@ -2534,7 +2589,7 @@ const AdminProtForm = ({ prot, products, protocols, indications, categories, pha
                   <div style={{background:B.cream,border:`1px solid ${B.border}`,borderRadius:12,padding:'12px 12px 10px',marginBottom:10}}>
                     <div style={{fontSize:11,fontWeight:700,color:B.muted,marginBottom:4}}>Produto indicado</div>
                     <select value={item.productId||''} onChange={e=>updHome(sl,i,'productId',e.target.value||null)} style={{...inpSt,marginBottom:0}}>
-                      {getProductOptions(item.productId).map(o=><option key={o.v} value={o.v}>{o.l}</option>)}
+                      {getSkincareProductOptions(item.productId).map(o=><option key={o.v} value={o.v}>{o.l}</option>)}
                     </select>
                   </div>
                   <div style={{background:B.cream,border:`1px solid ${B.border}`,borderRadius:12,padding:'12px 12px 2px'}}>
@@ -2696,7 +2751,7 @@ export default function App() {
 
   useEffect(()=>{
     (async()=>{
-      setProducts(await load(PRODUCTS_KEY,INIT_PRODUCTS));
+      setProducts((await load(PRODUCTS_KEY,INIT_PRODUCTS)).map(normalizeProductForStorage));
       setProtocols(await load(PROTOCOLS_KEY,INIT_PROTOCOLS));
       setIndications(await load(INDICATIONS_KEY,INIT_INDICATIONS));
       setCategories(await load(CATEGORIES_KEY,INIT_CATEGORIES));
@@ -2718,7 +2773,7 @@ export default function App() {
     })();
   },[]);
 
-  const saveProd=async d=>{setProducts(d);await save(PRODUCTS_KEY,d);};
+  const saveProd=async d=>{const normalized = d.map(normalizeProductForStorage); setProducts(normalized); await save(PRODUCTS_KEY,normalized);};
   const saveProt=async d=>{setProtocols(d);await save(PROTOCOLS_KEY,d);};
   const saveInd=async d=>{setIndications(d);await save(INDICATIONS_KEY,d);};
   const saveCat=async d=>{setCategories(d);await save(CATEGORIES_KEY,d);};

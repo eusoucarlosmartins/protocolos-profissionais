@@ -5,6 +5,7 @@ import {
   ADMIN_LOGIN_MAX_ATTEMPTS,
   EMPTY_PERMS,
   FULL_PERMS,
+  PRODUCT_TYPE_OPTIONS,
   USERS_KEY,
 } from "./app-constants";
 
@@ -298,6 +299,38 @@ export const sortByName = (list) =>
   [...list].sort((a, b) => a.name.localeCompare(b.name, "pt-BR", { sensitivity: "base" }));
 
 export const isActive = (product) => product?.active !== false;
+
+export const getProductTypes = (product) => {
+  const explicitTypes = Array.isArray(product?.productTypes) ? product.productTypes.filter(Boolean) : [];
+  if (explicitTypes.length) return [...new Set(explicitTypes)];
+
+  const legacyUso = Array.isArray(product?.uso) ? product.uso : [];
+  const derivedTypes = [];
+  if (legacyUso.includes("profissional")) derivedTypes.push("protocol");
+  if (legacyUso.includes("homecare")) derivedTypes.push("skincare");
+  return [...new Set(derivedTypes.length ? derivedTypes : ["protocol"])];
+};
+
+export const productHasType = (product, type) => getProductTypes(product).includes(type);
+
+export const normalizeProductForStorage = (product) => {
+  const productTypes = getProductTypes(product);
+  const normalizedUso = [
+    productTypes.includes("protocol") ? "profissional" : null,
+    productTypes.includes("skincare") ? "homecare" : null,
+  ].filter(Boolean);
+
+  return {
+    ...product,
+    productTypes,
+    uso: [...new Set(normalizedUso)],
+  };
+};
+
+export const normalizeProductsForStorage = (products) => (products || []).map(normalizeProductForStorage);
+
+export const getProductTypeLabel = (typeId) =>
+  PRODUCT_TYPE_OPTIONS.find((option) => option.id === typeId)?.label || typeId;
 
 export const getAffectedProtocols = (product, protocols) =>
   protocols.filter(
