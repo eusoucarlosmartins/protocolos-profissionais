@@ -252,6 +252,18 @@ const BuyLink = ({ href, children, isMobile, sx = {} }) => {
   );
 };
 
+const buildCopyName = (baseName, existingNames = []) => {
+  const cleanBase = String(baseName || '')
+    .replace(/\s+\(Copia(?: \d+)?\)$/i, '')
+    .trim() || 'Item';
+  const usedNames = new Set(existingNames.map((name) => String(name || '').trim().toLowerCase()));
+  const firstCopy = `${cleanBase} (Copia)`;
+  if (!usedNames.has(firstCopy.toLowerCase())) return firstCopy;
+  let index = 2;
+  while (usedNames.has(`${cleanBase} (Copia ${index})`.toLowerCase())) index += 1;
+  return `${cleanBase} (Copia ${index})`;
+};
+
 // Componente RichText
 const RichTextField = ({ label, value, onChange, placeholder, rows=3, note }) => {
   const ref = useRef(null);
@@ -1643,6 +1655,7 @@ const AdminPanel = ({ products, protocols, indications, categories, phases, bran
   const isMobile = useIsMobile();
   const adminScrollRef = useRef(null);
   const productListScrollRef = useRef(0);
+  const protocolListScrollRef = useRef(0);
   const [aView,setAView]=useState(()=>{
     const first = ['dashboard','products','protocols','categories','indications','phases','alerts','settings','marketing','users'].find(s=>hasPerm(loggedUser,s,'view'));
     return first||'dashboard';
@@ -1687,6 +1700,20 @@ const AdminPanel = ({ products, protocols, indications, categories, phases, bran
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
         if (adminScrollRef.current) adminScrollRef.current.scrollTop = productListScrollRef.current || 0;
+      });
+    });
+  };
+
+  const openProtocolEditor = (protocol) => {
+    if (adminScrollRef.current) protocolListScrollRef.current = adminScrollRef.current.scrollTop;
+    setEditProt(protocol);
+  };
+
+  const closeProtocolEditor = () => {
+    setEditProt(null);
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        if (adminScrollRef.current) adminScrollRef.current.scrollTop = protocolListScrollRef.current || 0;
       });
     });
   };
@@ -1746,7 +1773,7 @@ const AdminPanel = ({ products, protocols, indications, categories, phases, bran
         )}
         {aView==='alerts'&&!editProd&&!editProt&&hasPerm(loggedUser,'alerts','view')&&(
           <Suspense fallback={<AdminModuleFallback />}>
-            <AdminAlertsModule products={products} protocols={protocols} saveProducts={saveProducts} setEditProt={setEditProt} setAView={setAView} Btn={Btn} B={B} isActive={isActive} getAffectedProtocols={getAffectedProtocols} />
+            <AdminAlertsModule products={products} protocols={protocols} saveProducts={saveProducts} setEditProt={openProtocolEditor} setAView={setAView} Btn={Btn} B={B} isActive={isActive} getAffectedProtocols={getAffectedProtocols} />
           </Suspense>
         )}
         {aView==='settings'&&!editProd&&!editProt&&hasPerm(loggedUser,'settings','view')&&(
@@ -1785,8 +1812,8 @@ const AdminPanel = ({ products, protocols, indications, categories, phases, bran
           </Suspense>
         )}
         {aView==='products'&&editProd&&hasPerm(loggedUser,'products','edit')&&<AdminProdForm prod={editProd} products={products} categories={categories} saveProducts={saveProducts} setEditProd={openProductEditor} onClose={closeProductEditor} />}
-        {aView==='protocols'&&!editProt&&hasPerm(loggedUser,'protocols','view')&&<AdminProtocols products={products} protocols={protocols} indications={indications} categories={categories} saveProtocols={saveProtocols} setEditProt={setEditProt} filters={protFilters} setFilters={setProtFilters} search={protSearch} setSearch={setProtSearch} onClearFilters={()=>{setProtFilters(EMPTY_PROT_FILTERS);setProtSearch('');}} loggedUser={loggedUser} />}
-        {aView==='protocols'&&editProt&&hasPerm(loggedUser,'protocols','edit')&&<AdminProtForm prot={editProt} products={products} protocols={protocols} indications={indications} categories={categories} phases={phases} saveProtocols={saveProtocols} saveIndications={saveIndications} savePhases={savePhases} setEditProt={setEditProt} loggedUser={loggedUser} />}
+        {aView==='protocols'&&!editProt&&hasPerm(loggedUser,'protocols','view')&&<AdminProtocols products={products} protocols={protocols} indications={indications} categories={categories} saveProtocols={saveProtocols} setEditProt={openProtocolEditor} filters={protFilters} setFilters={setProtFilters} search={protSearch} setSearch={setProtSearch} onClearFilters={()=>{setProtFilters(EMPTY_PROT_FILTERS);setProtSearch('');}} loggedUser={loggedUser} />}
+        {aView==='protocols'&&editProt&&hasPerm(loggedUser,'protocols','edit')&&<AdminProtForm prot={editProt} products={products} protocols={protocols} indications={indications} categories={categories} phases={phases} saveProtocols={saveProtocols} saveIndications={saveIndications} savePhases={savePhases} setEditProt={openProtocolEditor} onClose={closeProtocolEditor} loggedUser={loggedUser} />}
       </div>
     </div>
   );
@@ -1798,7 +1825,7 @@ const AdminProductsLegacy = ({ products, categories, saveProducts, setEditProd, 
 
   const del = id => { if(window.confirm('Excluir produto?')) saveProducts(products.filter(p=>p.id!==id)); };
   const duplicate = (p) => {
-        setEditProd({ ...p, id: uid(), name: `${p.name} (Copia)`, _new: true });
+        setEditProd({ ...p, id: uid(), name: buildCopyName(p.name, products.map(product => product.name)), _new: true });
   };
 
   const filtered = products.filter(p => {
@@ -2105,7 +2132,7 @@ const AdminProtocols = ({ products, protocols, indications, categories, saveProt
     saveProtocols(arr);
   };
   const duplicate = (p) => {
-    setEditProt({ ...p, id: uid(), name: `${p.name} (Copia)`, _new: true });
+    setEditProt({ ...p, id: uid(), name: buildCopyName(p.name, protocols.map(protocol => protocol.name)), _new: true });
   };
   const newP = () => setEditProt({id:uid(),name:'',description:'',concerns:[],category:'',frequency:'',associations:'',youtubeUrl:'',published:false,steps:[],homeUse:{morning:[],night:[]},professionalKitId:'',homeKitId:'',_new:true});
   
@@ -2119,6 +2146,7 @@ const AdminProtocols = ({ products, protocols, indications, categories, saveProt
   const publishedCount = protocols.filter(p=>p.published).length;
   const draftCount = protocols.length - publishedCount;
   const homeRoutineCount = protocols.filter(p=>(p.homeUse?.morning?.length||0) + (p.homeUse?.night?.length||0) > 0).length;
+  const kitLinkedCount = protocols.filter(p=>p.professionalKitId || p.homeKitId).length;
 
   return (
     <div>
@@ -2155,24 +2183,32 @@ const AdminProtocols = ({ products, protocols, indications, categories, saveProt
         </div>
       </div>
 
-      <div style={{display:'grid',gridTemplateColumns:isMobile?'1fr':'repeat(3, minmax(0, 1fr))',gap:12,marginBottom:20}}>
+      <div style={{display:'grid',gridTemplateColumns:isMobile?'1fr 1fr':'repeat(4, minmax(0, 1fr))',gap:12,marginBottom:20}}>
         <div style={{background:B.white,border:`1px solid ${B.border}`,borderRadius:14,padding:'14px 16px',boxShadow:'0 10px 24px rgba(44,31,64,0.04)'}}>
           <div style={{fontSize:11,fontWeight:700,color:B.muted,textTransform:'uppercase',letterSpacing:'0.08em',marginBottom:5}}>Publicados</div>
           <div style={{fontSize:26,fontWeight:800,color:B.green}}>{publishedCount}</div>
+          <div style={{fontSize:12,color:B.muted,marginTop:4}}>visiveis no site</div>
         </div>
         <div style={{background:B.white,border:`1px solid ${B.border}`,borderRadius:14,padding:'14px 16px',boxShadow:'0 10px 24px rgba(44,31,64,0.04)'}}>
           <div style={{fontSize:11,fontWeight:700,color:B.muted,textTransform:'uppercase',letterSpacing:'0.08em',marginBottom:5}}>Rascunhos</div>
-          <div style={{fontSize:26,fontWeight:800,color:B.purpleDark}}>{draftCount}</div>
+          <div style={{fontSize:26,fontWeight:800,color:'#7A5C1E'}}>{draftCount}</div>
+          <div style={{fontSize:12,color:B.muted,marginTop:4}}>em preparacao</div>
         </div>
         <div style={{background:B.white,border:`1px solid ${B.border}`,borderRadius:14,padding:'14px 16px',boxShadow:'0 10px 24px rgba(44,31,64,0.04)'}}>
           <div style={{fontSize:11,fontWeight:700,color:B.muted,textTransform:'uppercase',letterSpacing:'0.08em',marginBottom:5}}>Com rotina em casa</div>
           <div style={{fontSize:26,fontWeight:800,color:B.purple}}>{homeRoutineCount}</div>
+          <div style={{fontSize:12,color:B.muted,marginTop:4}}>cliente acompanhada</div>
+        </div>
+        <div style={{background:B.white,border:`1px solid ${B.border}`,borderRadius:14,padding:'14px 16px',boxShadow:'0 10px 24px rgba(44,31,64,0.04)'}}>
+          <div style={{fontSize:11,fontWeight:700,color:B.muted,textTransform:'uppercase',letterSpacing:'0.08em',marginBottom:5}}>Com kits</div>
+          <div style={{fontSize:26,fontWeight:800,color:B.purpleDark}}>{kitLinkedCount}</div>
+          <div style={{fontSize:12,color:B.muted,marginTop:4}}>fechamento estruturado</div>
         </div>
       </div>
 
       <div style={{display:'flex',flexDirection:'column',gap:12}}>
         {filtered.map(p=>(
-          <div key={p.id} style={{background:B.white,borderRadius:16,border:`1px solid ${B.border}`,padding:isMobile?'16px':'18px 20px',display:'flex',justifyContent:'space-between',alignItems:isMobile?'flex-start':'center',flexDirection:isMobile?'column':'row',gap:isMobile?14:18,boxShadow:'0 12px 28px rgba(44,31,64,0.05)'}}>
+          <div key={p.id} style={{background:B.white,borderRadius:16,border:`1px solid ${B.border}`,borderLeft:`4px solid ${p.published ? B.green : B.gold}`,padding:isMobile?'16px':'18px 20px',display:'flex',justifyContent:'space-between',alignItems:isMobile?'flex-start':'center',flexDirection:isMobile?'column':'row',gap:isMobile?14:18,boxShadow:'0 12px 28px rgba(44,31,64,0.05)'}}>
             <div style={{width:isMobile?'100%':'auto',flex:1}}>
               <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',gap:10,marginBottom:8,flexDirection:isMobile?'column':'row'}}>
                 <div style={{flex:1,minWidth:0}}>
@@ -2187,6 +2223,8 @@ const AdminProtocols = ({ products, protocols, indications, categories, saveProt
               <div style={{display:'flex',gap:6,flexWrap:'wrap',alignItems:'center',marginBottom:10}}>
                 {(p.concerns || []).map(c=><Tag key={c} label={indications.find(x=>x.id===c)?.label||c} />)}
                 <div style={{display:'flex',gap:4,flexShrink:0}}><Tag label={categories.find(c => c.id === p.category)?.label || p.category} color={B.goldLight} text={'#7A5C1E'} /></div>
+                {p.professionalKitId&&<Tag label="Kit Profissional" color={B.purpleLight} text={B.purpleDark} />}
+                {p.homeKitId&&<Tag label="Kit Home Care" color={B.greenLight} text={B.green} />}
                 {p.youtubeUrl&&<span style={{fontSize:12,background:'#FF0000',color:B.white,padding:'1px 7px',borderRadius:10,fontWeight:700}}>YT</span>}
                 {(()=>{const n=p.steps.filter(s=>s.productId&&!isActive(products.find(x=>x.id===s.productId))).length;return n>0&&<span style={{fontSize:12,background:B.redLight,color:B.red,padding:'2px 8px',borderRadius:10,fontWeight:700,border:`1px solid ${B.red}`}}>{n} inativo{n>1?'s':''}</span>;})()}
               </div>
@@ -2231,7 +2269,7 @@ const AdminProtocols = ({ products, protocols, indications, categories, saveProt
 };
 
 // ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ Admin Protocol Form ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬
-const AdminProtForm = ({ prot, products, protocols, indications, categories, phases, saveProtocols, saveIndications, savePhases, setEditProt, loggedUser }) => {
+const AdminProtForm = ({ prot, products, protocols, indications, categories, phases, saveProtocols, saveIndications, savePhases, setEditProt, loggedUser, onClose }) => {
   const isMobile = useIsMobile();
   const [f,setF]=useState({...prot,professionalKitId:prot.professionalKitId||'',homeKitId:prot.homeKitId||'',steps:[...(prot.steps||[])],homeUse:{morning:[...(prot.homeUse?.morning||[])],night:[...(prot.homeUse?.night||[])]}, concerns: [...(prot.concerns||[])]});
   
@@ -2338,7 +2376,7 @@ const AdminProtForm = ({ prot, products, protocols, indications, categories, pha
     if(pub!==null) clean.published=pub;
     if(prot._new) saveProtocols([...protocols,clean]);
     else saveProtocols(protocols.map(p=>p.id===clean.id?clean:p));
-    setEditProt(null);
+    onClose?.();
   };
   
   const inpSt={width:'100%',padding:'7px 10px',border:`1.5px solid ${B.border}`,borderRadius:7,fontSize:13,outline:'none',boxSizing:'border-box',fontFamily:'inherit',background:B.white};
@@ -2373,7 +2411,7 @@ const AdminProtForm = ({ prot, products, protocols, indications, categories, pha
   return (
     <div style={{maxWidth:700}}>
       <div style={{display:'flex',alignItems:'center',gap:12,marginBottom:24}}>
-        <button onClick={()=>setEditProt(null)} style={{background:'none',border:'none',color:B.purple,fontWeight:700,cursor:'pointer',fontSize:14,fontFamily:'inherit'}}>← Voltar</button>
+        <button onClick={()=>onClose?.()} style={{background:'none',border:'none',color:B.purple,fontWeight:700,cursor:'pointer',fontSize:14,fontFamily:'inherit'}}>← Voltar</button>
         <h2 style={{margin:0,color:B.purpleDark,fontSize:20,fontFamily:'Georgia, serif'}}>{prot._new?'Novo Protocolo':'Editar Protocolo'}</h2>
       </div>
 
@@ -2667,7 +2705,7 @@ const AdminProtForm = ({ prot, products, protocols, indications, categories, pha
         <div style={{display:'flex',gap:10,flexDirection:isMobile?'column':'row'}}>
           {hasPerm(loggedUser,'protocols','publish')&&<Btn onClick={(e)=>{e.preventDefault(); doSave(true);}} sx={{flex:1,padding:'12px 0'}}>Salvar e Publicar</Btn>}
           <Btn variant="secondary" onClick={(e)=>{e.preventDefault(); doSave(false);}} sx={isMobile?{width:'100%'}:undefined}>Salvar Rascunho</Btn>
-          <Btn variant="ghost" onClick={(e)=>{e.preventDefault(); setEditProt(null);}} sx={isMobile?{width:'100%'}:undefined}>Cancelar</Btn>
+          <Btn variant="ghost" onClick={(e)=>{e.preventDefault(); onClose?.();}} sx={isMobile?{width:'100%'}:undefined}>Cancelar</Btn>
         </div>
       </div>
       </div>

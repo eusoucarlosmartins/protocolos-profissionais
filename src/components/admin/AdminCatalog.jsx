@@ -16,6 +16,18 @@ const PRODUCT_TYPE_ACCENTS = {
   kit_homecare: '#C8A96E',
 };
 
+const buildCopyName = (baseName, existingNames = []) => {
+  const cleanBase = String(baseName || '')
+    .replace(/\s+\(Copia(?: \d+)?\)$/i, '')
+    .trim() || 'Item';
+  const usedNames = new Set(existingNames.map((name) => String(name || '').trim().toLowerCase()));
+  const firstCopy = `${cleanBase} (Copia)`;
+  if (!usedNames.has(firstCopy.toLowerCase())) return firstCopy;
+  let index = 2;
+  while (usedNames.has(`${cleanBase} (Copia ${index})`.toLowerCase())) index += 1;
+  return `${cleanBase} (Copia ${index})`;
+};
+
 export const AdminProducts = ({
   products,
   categories,
@@ -48,7 +60,7 @@ export const AdminProducts = ({
   };
 
   const duplicate = (product) => {
-    setEditProd({ ...product, id: uid(), name: `${product.name} (Copia)`, _new: true });
+    setEditProd({ ...product, id: uid(), name: buildCopyName(product.name, products.map((item) => item.name)), _new: true });
   };
 
   const filtered = products.filter((product) => {
