@@ -246,14 +246,19 @@ const ProductTooltip = ({ product: p, children, navigate }) => {
   const calcPos = () => {
     if (!triggerRef.current) return;
     const r = triggerRef.current.getBoundingClientRect();
-    const popW = 320;
-    const spaceRight = window.innerWidth - r.left;
-    const left = spaceRight < popW + 16 ? Math.max(8, r.right - popW) : r.left;
-    setPos({ top: r.bottom + 8, left });
+    const popW = popoverRef.current?.offsetWidth || 320;
+    const popH = popoverRef.current?.offsetHeight || 260;
+    const gutter = 12;
+    const desiredLeft = r.left + (r.width / 2) - (popW / 2);
+    const left = Math.min(window.innerWidth - popW - gutter, Math.max(gutter, desiredLeft));
+    const fitsBelow = r.bottom + 8 + popH <= window.innerHeight - gutter;
+    const top = fitsBelow
+      ? r.bottom + 8
+      : Math.max(gutter, r.top - popH - 8);
+    setPos({ top, left });
   };
 
   const handleOpen = () => {
-    if (!isMobile) calcPos();
     setOpen(true);
   };
 
@@ -271,6 +276,19 @@ const ProductTooltip = ({ product: p, children, navigate }) => {
     document.body.style.overflow = "hidden";
     return () => {
       document.body.style.overflow = previousOverflow;
+    };
+  }, [open, isMobile]);
+
+  useEffect(() => {
+    if (!open || isMobile) return;
+    const update = () => calcPos();
+    const raf = window.requestAnimationFrame(update);
+    window.addEventListener('resize', update);
+    window.addEventListener('scroll', update, true);
+    return () => {
+      window.cancelAnimationFrame(raf);
+      window.removeEventListener('resize', update);
+      window.removeEventListener('scroll', update, true);
     };
   }, [open, isMobile]);
 
@@ -386,6 +404,8 @@ const PublicHome = ({ protocols, products, indications, categories, favorites, s
   
   const isMobile = useIsMobile();
   const pub = protocols.filter(p=>p.published);
+  const activeQuickFilter = filterInd === 'favorites' ? 'favorites' : 'all';
+  const selectedIndication = filterInd !== 'all' && filterInd !== 'favorites' ? filterInd : 'all';
   
   const filtered = pub.filter(p => {
     if (filterInd === 'favorites' && !favorites.includes(p.id)) return false;
@@ -425,14 +445,25 @@ const PublicHome = ({ protocols, products, indications, categories, favorites, s
         <div style={{marginTop:16,color:'rgba(255,255,255,0.55)',fontSize:12}}>{filtered.length} protocolo{filtered.length!==1?'s':''} encontrado{filtered.length!==1?'s':''}</div>
       </div>
 
-      <div className="no-print" style={{background:B.white,borderBottom:`1px solid ${B.border}`,padding:`10px ${isMobile?12:24}px`,display:'flex',gap:8,overflowX:'auto',WebkitOverflowScrolling:'touch', alignItems:'center'}}>
-        <span style={{fontSize:11, fontWeight:700, color:B.muted, textTransform:'uppercase', letterSpacing:'0.05em', flexShrink:0, marginRight: 4}}>Filtros:</span>
-        <button onClick={()=>setFilterInd('all')} style={{padding:'6px 14px',borderRadius:20,border:`1.5px solid ${filterInd==='all'?B.purple:B.border}`,background:filterInd==='all'?B.purple:B.white,color:filterInd==='all'?B.white:B.text,fontSize:12,fontWeight:700,cursor:'pointer',whiteSpace:'nowrap',fontFamily:'inherit',flexShrink:0}}>Todos</button>
-        <button onClick={()=>setFilterInd('favorites')} style={{padding:'6px 14px',borderRadius:20,border:`1.5px solid ${filterInd==='favorites'?B.red:B.border}`,background:filterInd==='favorites'?B.redLight:B.white,color:filterInd==='favorites'?B.red:B.text,fontSize:12,fontWeight:700,cursor:'pointer',whiteSpace:'nowrap',fontFamily:'inherit',flexShrink:0}}>ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¤ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¯ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¸ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â Meus Favoritos</button>
-        <div style={{width: 1, background: B.border, alignSelf: 'stretch', margin: '0 4px'}} />
-        {[...indications].sort((a,b)=>a.label.localeCompare(b.label)).map(c=>(
-          <button key={c.id} onClick={()=>setFilterInd(c.id)} style={{padding:'6px 14px',borderRadius:20,border:`1.5px solid ${filterInd===c.id?B.purple:B.border}`,background:filterInd===c.id?B.purple:B.white,color:filterInd===c.id?B.white:B.text,fontSize:12,fontWeight:700,cursor:'pointer',whiteSpace:'nowrap',fontFamily:'inherit',flexShrink:0}}>{c.label}</button>
-        ))}
+      <div className="no-print" style={{background:B.white,borderBottom:`1px solid ${B.border}`,padding:isMobile?'12px':'14px 24px'}}>
+        <div style={{maxWidth:1100,margin:'0 auto',display:'flex',flexDirection:isMobile?'column':'row',alignItems:isMobile?'stretch':'center',gap:12}}>
+          <div style={{display:'flex',alignItems:'center',gap:8,flexWrap:'wrap'}}>
+            <span style={{fontSize:11,fontWeight:700,color:B.muted,textTransform:'uppercase',letterSpacing:'0.05em',marginRight:4}}>Filtros:</span>
+            <button onClick={()=>setFilterInd('all')} style={{padding:'7px 14px',borderRadius:999,border:`1.5px solid ${activeQuickFilter==='all' && selectedIndication==='all'?B.purple:B.border}`,background:activeQuickFilter==='all' && selectedIndication==='all'?B.purple:B.white,color:activeQuickFilter==='all' && selectedIndication==='all'?B.white:B.text,fontSize:12,fontWeight:700,cursor:'pointer',whiteSpace:'nowrap',fontFamily:'inherit'}}>Todos</button>
+            <button onClick={()=>setFilterInd('favorites')} style={{padding:'7px 14px',borderRadius:999,border:`1.5px solid ${activeQuickFilter==='favorites'?B.red:B.border}`,background:activeQuickFilter==='favorites'?B.redLight:B.white,color:activeQuickFilter==='favorites'?B.red:B.text,fontSize:12,fontWeight:700,cursor:'pointer',whiteSpace:'nowrap',fontFamily:'inherit'}}>Meus Favoritos</button>
+          </div>
+          <div style={{display:'flex',gap:10,flex:1,flexDirection:isMobile?'column':'row',alignItems:isMobile?'stretch':'center'}}>
+            <select value={selectedIndication} onChange={e=>setFilterInd(e.target.value)} style={{flex:isMobile?'unset':1,padding:'10px 12px',borderRadius:10,border:`1.5px solid ${selectedIndication!=='all'?B.purple:B.border}`,fontSize:13,outline:'none',background:B.white,color:B.text,fontFamily:'inherit'}}>
+              <option value="all">Todas as indicacoes</option>
+              {[...indications].sort((a,b)=>a.label.localeCompare(b.label)).map(c=><option key={c.id} value={c.id}>{c.label}</option>)}
+            </select>
+            {selectedIndication !== 'all' && (
+              <button onClick={()=>setFilterInd(activeQuickFilter === 'favorites' ? 'favorites' : 'all')} style={{padding:'10px 12px',borderRadius:10,border:`1.5px solid ${B.border}`,background:B.cream,color:B.muted,fontSize:12,fontWeight:700,cursor:'pointer',fontFamily:'inherit'}}>
+                Limpar indicacao
+              </button>
+            )}
+          </div>
+        </div>
       </div>
 
       <div style={{maxWidth:1100,margin:'0 auto',padding:`${isMobile?20:32}px ${isMobile?12:24}px`}}>
@@ -501,6 +532,9 @@ const ProtocolDetail = ({ protocol:p, products, indications, categories, navigat
   const pad = isMobile ? '16px 14px' : '28px 28px 24px';
   const secPad = isMobile ? '16px 14px' : '24px 28px';
   const categoryLabel = categories.find(c => c.id === p.category)?.label || p.category;
+  const shareUrl = typeof window !== 'undefined'
+    ? `${window.location.origin}/protocolo/${p.id}`
+    : `/protocolo/${p.id}`;
 
   const handlePrint = async () => {
     const html2pdf = await loadHtml2Pdf();
@@ -515,7 +549,7 @@ const ProtocolDetail = ({ protocol:p, products, indications, categories, navigat
     }).from(element).save();
   };
 
-  const shareText = encodeURIComponent(`Confira o protocolo: *${p.name}*\n\n${brand?.companyName || 'Extratos da Terra'}\nMais detalhes disponÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­veis no sistema!`);
+  const shareText = encodeURIComponent(`Confira este protocolo: ${shareUrl}`);
 
   return (
     <div style={{background:B.cream, flex: 1}}>
@@ -751,6 +785,9 @@ const PublicProductPage = ({ product: p, protocols, categories, navigate, brand,
   );
   const cats = (p.categories || [p.category]);
   const uso = p.uso || [];
+  const shareUrl = typeof window !== 'undefined'
+    ? `${window.location.origin}/produto/${p.id}`
+    : `/produto/${p.id}`;
 
   const Section = ({ title, children }) => (
     <div style={{marginBottom:20}}>
@@ -759,7 +796,7 @@ const PublicProductPage = ({ product: p, protocols, categories, navigate, brand,
     </div>
   );
 
-  const shareText = encodeURIComponent(`ConheÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§a o produto: *${p.name}*\n\nVeja mais detalhes no site!`);
+  const shareText = encodeURIComponent(`Confira este produto: ${shareUrl}`);
 
   return (
     <div style={{background:B.cream, flex: 1}}>
@@ -1491,7 +1528,7 @@ const AdminPanel = ({ products, protocols, indications, categories, phases, bran
       )}
       <div style={{flex:1,padding:isMobile?14:28,overflowY:'auto'}}>
         {isMobile && (
-          <div style={{background:B.white,border:`1px solid ${B.border}`,borderRadius:14,padding:'14px 14px 12px',marginBottom:14}}>
+          <div style={{position:'sticky',top:70,zIndex:40,background:'rgba(255,255,255,0.96)',backdropFilter:'blur(10px)',border:`1px solid ${B.border}`,borderRadius:18,padding:'14px 14px 12px',marginBottom:14,boxShadow:'0 14px 30px rgba(44,31,64,0.08)'}}>
             <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',gap:12,marginBottom:12}}>
               <div>
                 <div style={{fontSize:10,fontWeight:700,color:B.muted,letterSpacing:'0.1em',textTransform:'uppercase',marginBottom:4}}>Painel Admin</div>
@@ -1503,11 +1540,11 @@ const AdminPanel = ({ products, protocols, indications, categories, phases, bran
                 <button onClick={async ()=>{await logoutAdmin();setLoggedUser(null);navigate('/');}} style={{background:B.redLight,border:`1px solid ${B.red}`,borderRadius:8,padding:'8px 10px',fontSize:12,fontWeight:700,color:B.red,cursor:'pointer',fontFamily:'inherit'}}>Sair</button>
               </div>
             </div>
-            <div style={{display:'flex',gap:8,overflowX:'auto',paddingBottom:2,WebkitOverflowScrolling:'touch'}}>
+            <div style={{display:'flex',gap:8,overflowX:'auto',paddingBottom:2,WebkitOverflowScrolling:'touch',scrollbarWidth:'none'}}>
               {nav.map(n=>(
-                <button key={n.id} onClick={()=>openSection(n.id)} style={{display:'inline-flex',alignItems:'center',gap:6,whiteSpace:'nowrap',padding:'9px 12px',borderRadius:999,border:`1px solid ${aView===n.id?B.purple:B.border}`,background:aView===n.id?B.purpleLight:B.white,color:aView===n.id?B.purple:B.text,fontSize:12,fontWeight:700,cursor:'pointer',fontFamily:'inherit'}}>
-                  <span style={{fontSize:11}}>{n.icon}</span>
-                  {n.label}
+                <button key={n.id} onClick={()=>openSection(n.id)} style={{display:'inline-flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:4,minWidth:74,whiteSpace:'nowrap',padding:'10px 10px',borderRadius:16,border:`1px solid ${aView===n.id?B.purple:'rgba(94,61,143,0.12)'}`,background:aView===n.id?B.purple:'rgba(94,61,143,0.06)',color:aView===n.id?B.white:B.text,fontSize:11,fontWeight:700,cursor:'pointer',fontFamily:'inherit',boxShadow:aView===n.id?'0 10px 20px rgba(94,61,143,0.18)':'none'}}>
+                  <span style={{fontSize:11,fontWeight:800}}>{n.icon}</span>
+                  <span>{n.label}</span>
                 </button>
               ))}
             </div>
