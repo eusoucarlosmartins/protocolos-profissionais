@@ -1,32 +1,34 @@
 import { useState } from 'react';
 import { uid, isActive } from '../lib/app-services';
 
-// ─── Utilitários de normalização ────────────────────────────────────────────
+// ─── Normalização ────────────────────────────────────────────────────────────
 
 const normalizeStr = (s) =>
+  String(s || '').toLowerCase().normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9 ]/g, ' ').replace(/\s+/g, ' ').trim();
+
+// Limpa Markdown e links de um segmento → texto puro
+// [text](url) → text  |  [](url) → ''  |  **bold** → bold  |  ![img](url) → ''
+const cleanSeg = (s) =>
   String(s || '')
-    .toLowerCase()
-    .normalize('NFKD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^a-z0-9 ]/g, ' ')
+    .replace(/!\[[^\]]*\]\([^)]*\)/g, '')
+    .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1')
+    .replace(/\*\*([^*]*)\*\*/g, '$1')
+    .replace(/\*([^*]*)\*/g, '$1')
+    .replace(/`([^`]*)`/g, '$1')
     .replace(/\s+/g, ' ')
     .trim();
 
-// Remove formatação Markdown do Notion: **bold**, *italic*, `code`
-const stripMarkdown = (line) =>
-  String(line || '')
-    .replace(/\*\*(.+?)\*\*/g, '$1')
-    .replace(/\*(.+?)\*/g, '$1')
-    .replace(/`(.+?)`/g, '$1')
-    .replace(/__(.+?)__/g, '$1')
-    .trim();
-
-// Extrai nomes dentro de colchetes: [Nome do Produto] ou links [Nome](url)
-const extractBracketedNames = (line) => {
-  const re = /\[([^\]]+)\](?:\([^)]*\))?/g;
+// Extrai nomes de produtos de links Notion com texto: [Nome Produto](url) → 'Nome Produto'
+// Links sem texto [](url) são ignorados
+const extractProductNames = (rawSeg) => {
+  const re = /\[([^\]]+)\]\([^)]*\)/g;
   const names = [];
   let m;
-  while ((m = re.exec(line)) !== null) names.push(m[1].trim());
+  while ((m = re.exec(rawSeg)) !== null) {
+    const name = m[1].trim();
+    if (name) names.push(name);
+  }
   return names;
 };
 
@@ -37,30 +39,51 @@ const tryMatchProduct = (text, products) => {
   const tokens = new Set(normalizeStr(text).split(' ').filter(t => t.length > 2));
   if (!tokens.size) return '';
 
-  let best = null;
+  let bestId    = '';
   let bestScore = 0;
 
   for (const p of products) {
     if (!isActive(p)) continue;
-    // Usa só a parte antes do primeiro hífen para evitar ruído de variações
-    const pNorm = normalizeStr(p.name.split('-')[0]);
-    const pTokens = [...new Set(pNorm.split(' ').filter(t => t.length > 2))];
+    const pTokens = [...new Set(normalizeStr(p.name.split('-')[0]).split(' ').filter(t => t.length > 2))];
     if (!pTokens.length) continue;
-
-    const hits = pTokens.filter(t => tokens.has(t)).length;
-    const score = hits / pTokens.length;
-    if (score >= 0.4 && score > bestScore) {
-      bestScore = score;
-      best = p.id;
-    }
+    const score = pTokens.filter(t => tokens.has(t)).length / pTokens.length;
+    if (score >= 0.4 && score > bestScore) { bestScore = score; bestId = p.id; }
   }
-  return best || '';
+  return bestId;
+};
+
+// ─── Divisão inteligente do texto bruto em segmentos ─────────────────────────
+//
+// Notion copiado pode vir como:
+//   a) Múltiplas linhas (quebras \n)       → usar as linhas diretamente
+//   b) Uma linha única com espaços duplos  → dividir por "  " e depois por "N. " interno
+//
+const splitIntoSegments = (rawText) => {
+  // Remove imagens e normaliza quebras de linha
+  const pre = rawText.replace(/!\[[^\]]*\]\([^)]*\)/g, '').replace(/\r\n/g, '\n');
+
+  // Tenta dividir por \n
+  const byNewline = pre.split('\n').map(s => s.trim()).filter(Boolean);
+  if (byNewline.length >= 4) return byNewline;
+
+  // Formato linha única: divide por 2+ espaços
+  const bySpace = pre.split(/[ \t]{2,}/).map(s => s.trim()).filter(Boolean);
+
+  // Dentro de cada segmento, quebra se houver outra etapa embutida: "texto. 2. Próxima etapa"
+  const result = [];
+  for (const seg of bySpace) {
+    // Separa no padrão: não-espaço → espaços → dígito + ponto + espaço
+    const parts = seg.split(/(?<=\S)\s+(?=\d+\.\s)/);
+    result.push(...parts.map(s => s.trim()).filter(Boolean));
+  }
+
+  return result;
 };
 
 // ─── Parser principal ────────────────────────────────────────────────────────
 
 export const parseProtocolText = (rawText, products = []) => {
-  const lines = rawText.split('\n').map(l => l.trim()).filter(Boolean);
+  const segments = splitIntoSegments(rawText);
 
   let pageTitle    = '';
   let category     = '';
@@ -77,129 +100,136 @@ export const parseProtocolText = (rawText, products = []) => {
 
   const CATEGORIES = new Set(['facial', 'corporal', 'capilar']);
 
+  // Fecha a etapa em andamento, tentando vincular produto
   const flushStep = () => {
     if (!currentStep) return;
-    // 1ª tentativa: produtos em colchetes da etapa
-    if (!currentStep.productId && currentStep._bracketedNames?.length) {
-      for (const name of currentStep._bracketedNames) {
+    if (!currentStep.productId && currentStep._productNames?.length) {
+      for (const name of currentStep._productNames) {
         const id = tryMatchProduct(name, products);
         if (id) { currentStep.productId = id; break; }
       }
     }
-    // 2ª tentativa: busca fuzzy na instrução completa
     if (!currentStep.productId && currentStep.instruction) {
       currentStep.productId = tryMatchProduct(currentStep.instruction, products);
     }
-    delete currentStep._bracketedNames;
+    delete currentStep._productNames;
     steps.push(currentStep);
     currentStep = null;
   };
 
-  for (const raw of lines) {
-    const line  = stripMarkdown(raw);
-    const lower = normalizeStr(line);
+  for (const rawSeg of segments) {
+    const cleaned = cleanSeg(rawSeg);
+    const lower   = normalizeStr(cleaned);
 
-    // Ignora marcadores de página e cabeçalhos genéricos
-    if (
-      raw.includes('--- PAGE') ||
-      ['protocolo', 'extratos', 'da terra', 'cosmetologia', 'beleza'].includes(lower)
-    ) continue;
+    if (!cleaned) continue;
 
-    // ── Início da seção Home Care ──────────────────────────────────────────
+    // Ignora cabeçalhos genéricos da empresa
+    if (['protocolo', 'extratos', 'da terra', 'cosmetologia', 'beleza'].includes(lower)) continue;
+
+    // ── Início do Home Care ──────────────────────────────────────────────
     if (
       lower.includes('para continuar o tratamento') ||
       lower.includes('uso em casa') ||
-      lower === 'home care' ||
-      lower === 'homecare'
+      lower === 'home care' || lower === 'homecare'
     ) {
       flushStep();
       parsingHomeUse = true;
       continue;
     }
 
-    // ── Dentro do Home Care ────────────────────────────────────────────────
+    // ── Dentro do Home Care ──────────────────────────────────────────────
     if (parsingHomeUse) {
-      if (/\bmanha\b/.test(lower))  { homeSlot = 'morning'; continue; }
-      if (/\bnoite\b/.test(lower))  { homeSlot = 'night';   continue; }
+      if (/\bmanha\b/.test(lower) && !cleaned.match(/^\d+[\.\)]/)) { homeSlot = 'morning'; continue; }
+      if (/\bnoite\b/.test(lower) && !cleaned.match(/^\d+[\.\)]/)) { homeSlot = 'night';   continue; }
 
-      const stepM = raw.match(/^\d+[\.\)]\s*(.+)$/);
+      const stepM = cleaned.match(/^\d+[\.\)]\s*(.+)$/);
       if (stepM && homeSlot) {
-        const itemText     = stripMarkdown(stepM[1]);
-        const bracketNames = extractBracketedNames(raw);
-        const searchText   = bracketNames.length ? bracketNames[0] : itemText;
-        homeUse[homeSlot].push({
-          id: uid(),
-          productId:   tryMatchProduct(searchText, products),
-          instruction: itemText,
-        });
+        const instruction = stepM[1].trim();
+        const names       = extractProductNames(rawSeg);
+        const productId   = tryMatchProduct(names[0] || instruction, products);
+        homeUse[homeSlot].push({ id: uid(), productId, instruction });
         continue;
       }
-      // Continuação de item anterior
-      if (homeSlot && line.length > 3) {
+
+      // Segmento de continuação: pode ser o nome do produto em link separado, ou texto
+      if (homeSlot && cleaned.length > 2) {
         const arr = homeUse[homeSlot];
-        if (arr.length) arr[arr.length - 1].instruction += ' ' + line;
-        else homeUse[homeSlot].push({ id: uid(), productId: '', instruction: line });
+        if (arr.length) {
+          const last = arr[arr.length - 1];
+          // Tenta vincular produto ainda não vinculado
+          if (!last.productId) {
+            const names = extractProductNames(rawSeg);
+            if (names.length) last.productId = tryMatchProduct(names[0], products) || '';
+            else last.productId = tryMatchProduct(cleaned, products) || '';
+          }
+          // Só adiciona ao texto se for instrução real (não só nome de produto)
+          if (!extractProductNames(rawSeg).length || cleaned.split(' ').length > 3) {
+            last.instruction += ' ' + cleaned;
+          }
+        } else {
+          const names = extractProductNames(rawSeg);
+          homeUse[homeSlot].push({ id: uid(), productId: tryMatchProduct(names[0] || cleaned, products), instruction: cleaned });
+        }
       }
       continue;
     }
 
-    // ── Frequência ─────────────────────────────────────────────────────────
-    if (lower.includes('frequen') && lower.includes(':')) {
-      const m = line.match(/frequen[cç][ei]a\s*[:\-]\s*(.+?)(?:\s*(?:associa[cç][oõ]es|$))/i);
-      if (m) frequency = m[1].trim();
-      const a = line.match(/associa[cç][oõ]es\s*[:\-]\s*(.+)/i);
-      if (a) associations = a[1].trim();
+    // ── Frequência ───────────────────────────────────────────────────────
+    // Usa cleaned (mantém acentos e dois-pontos) para a regex
+    if (cleaned.toLowerCase().includes('frequen') && cleaned.includes(':')) {
+      const m = cleaned.match(/frequen[cç][ei]a\s*[:]\s*(.+?)(?:\s*💡|\s*Associa|$)/i);
+      if (m) frequency = m[1].replace(/\.\s*$/, '').trim();
+      const a = cleaned.match(/Associa[cç][oõ]es\s*[:]\s*(.+)/i);
+      if (a) associations = a[1].replace(/\.\s*$/, '').trim();
       continue;
     }
 
-    // ── Associações ─────────────────────────────────────────────────────────
-    if (lower.includes('associa') && lower.includes(':')) {
-      const m = line.match(/associa[cç][oõ]es\s*[:\-]\s*(.+)/i);
-      if (m) associations = m[1].trim();
+    // ── Associações ──────────────────────────────────────────────────────
+    if (cleaned.toLowerCase().includes('associa') && cleaned.includes(':')) {
+      const m = cleaned.match(/Associa[cç][oõ]es\s*[:]\s*(.+)/i);
+      if (m) associations = m[1].replace(/\.\s*$/, '').trim();
       continue;
     }
 
-    // ── Categoria ──────────────────────────────────────────────────────────
+    // ── Categoria ────────────────────────────────────────────────────────
     if (!category && CATEGORIES.has(lower)) {
       category = lower;
       continue;
     }
 
-    // ── Etapa numerada: "1. Higienização" ─────────────────────────────────
-    const stepM = raw.match(/^(\d+)[\.\)]\s*(.+)$/);
+    // ── Etapa numerada: "1. Higienização" ou "1. **Higienização**" ───────
+    const stepM = cleaned.match(/^(\d+)[\.\)]\s*(.+)$/);
     if (stepM) {
       flushStep();
-      const stepName     = stripMarkdown(stepM[2]);
-      const bracketNames = extractBracketedNames(raw);
+      const stepName = stepM[2].trim();
       currentStep = {
-        id:             uid(),
-        name:           stepName,
-        phase:          stepName,
-        instruction:    '',
-        productId:      '',
-        duration:       '',
-        _bracketedNames: bracketNames,
+        id:            uid(),
+        name:          stepName,
+        phase:         stepName,
+        instruction:   '',
+        productId:     '',
+        duration:      '',
+        _productNames: extractProductNames(rawSeg),
       };
       continue;
     }
 
-    // ── Título (primeira linha significativa, antes das etapas) ────────────
-    if (!pageTitle && !currentStep && line.length > 3) {
-      pageTitle = line;
+    // ── Título ───────────────────────────────────────────────────────────
+    if (!pageTitle && !currentStep && cleaned.length > 3) {
+      pageTitle = cleaned;
       continue;
     }
 
-    // ── Descrição (linhas soltas entre título e etapas) ─────────────────────
-    if (!currentStep && pageTitle && line.length > 10) {
-      description += (description ? ' ' : '') + line;
+    // ── Descrição (antes das etapas) ─────────────────────────────────────
+    if (!currentStep && pageTitle && cleaned.length > 10) {
+      description += (description ? ' ' : '') + cleaned;
       continue;
     }
 
-    // ── Instrução de uma etapa em andamento ─────────────────────────────────
+    // ── Instrução / continuação da etapa atual ────────────────────────────
     if (currentStep) {
-      const bracketNames = extractBracketedNames(raw);
-      currentStep._bracketedNames.push(...bracketNames);
-      currentStep.instruction += (currentStep.instruction ? '\n' : '') + line;
+      currentStep._productNames.push(...extractProductNames(rawSeg));
+      currentStep.instruction += (currentStep.instruction ? '\n' : '') + cleaned;
     }
   }
 
@@ -228,7 +258,7 @@ export const useNotionImporter = (products = []) => {
 
       if (!result.pageTitle && result.steps.length === 0) {
         setNotionError(
-          'Não foi possível extrair dados. Verifique se o texto contém etapas numeradas (1. Higienização, 2. Esfoliação…).'
+          'Não foi possível extrair dados. Verifique se o texto contém título e etapas numeradas (1. Higienização, 2. Esfoliação…).'
         );
         return;
       }

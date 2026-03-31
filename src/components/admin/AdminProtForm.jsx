@@ -60,13 +60,14 @@ const fuzzyScore = (name, query) => {
 
 // Combobox de produto com busca fuzzy — digita qualquer trecho do nome
 const ProductCombobox = ({ value, onChange, options, placeholder = 'Digite para buscar...' }) => {
-  const selectedLabel = options.find(o => o.v === value)?.l || '';
+  const selectedLabel = value ? (options.find(o => o.v === value)?.l || '') : '';
   const [inputVal, setInputVal] = useState(selectedLabel);
   const [open, setOpen] = useState(false);
   const wrapRef = useRef(null);
 
   useEffect(() => {
-    setInputVal(options.find(o => o.v === value)?.l || '');
+    // Só exibe o label quando há um produto realmente selecionado
+    setInputVal(value ? (options.find(o => o.v === value)?.l || '') : '');
   }, [value, options]);
 
   useEffect(() => {
