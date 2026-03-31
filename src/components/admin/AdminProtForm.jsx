@@ -69,7 +69,15 @@ const AdminProtForm = ({ prot, products, protocols, indications, categories, pha
   const togConcern = id => setF(x => ({ ...x, concerns: x.concerns.includes(id) ? x.concerns.filter(c => c !== id) : [...x.concerns, id] }));
 
   const handleNotionImportSuccess = (data) => {
-    setF(x => ({ ...x, externalSourceId: data.pageId, name: data.pageTitle || x.name, description: x.description, steps: data.steps.length > 0 ? data.steps : x.steps }));
+    setF(x => ({
+      ...x,
+      externalSourceId: data.pageId,
+      name: data.pageTitle || x.name,
+      description: data.description || x.description || '',
+      steps: Array.isArray(data.steps) && data.steps.length > 0 ? data.steps : x.steps,
+      homeUse: data.homeUse || x.homeUse,
+      concerns: data.concerns || x.concerns
+    }));
   };
 
   const handleFetchNotion = async () => {
@@ -259,14 +267,14 @@ const AdminProtForm = ({ prot, products, protocols, indications, categories, pha
             </h3>
             <button onClick={() => setShowNotionImport(false)} style={{ background: 'none', border: 'none', color: B.muted, cursor: 'pointer', fontSize: 18, fontFamily: 'inherit' }}>×</button>
           </div>
-          <div style={{ fontSize: 12, color: B.muted, marginBottom: 12, lineHeight: 1.5 }}>Cole a URL de uma página do Notion pública. Vamos tentar extrair as informações principais.</div>
+          <div style={{ fontSize: 12, color: B.muted, marginBottom: 12, lineHeight: 1.5 }}>Cole a URL ou o texto do Notion com etapas numeradas. O parser suporta protocolos do Notion e texto colado simples.</div>
           <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
             <input
               type="text"
               value={notionUrl}
               onChange={e => setNotionUrl(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="https://notion.so/seu-protocolo-09bfa8de63a64b27bd379d6b2a8b813f"
+              placeholder="URL do Notion ou texto com ‘1.…’, ‘2.…’"
               disabled={notionLoading}
               style={{ ...inpSt, flex: 1 }}
             />

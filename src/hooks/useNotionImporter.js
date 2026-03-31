@@ -78,6 +78,59 @@ export const useNotionImporter = () => {
     }
   };
 
+  const isNotionLink = (text) => {
+    const maybeId = text.match(/([a-f0-9]{32})/i);
+    return /notion\.so/i.test(text) || !!maybeId;
+  };
+
+  const parseNotionText = (text) => {
+    const linesRaw = text
+      .split(/\r?\n/)
+      .map((line) => line.trim())
+      .filter(Boolean);
+
+    let lines = [...linesRaw];
+    let title = '';
+    let description = '';
+
+    if (lines.length > 0 && /^#\s+/.test(lines[0])) {
+      title = lines[0].replace(/^#\s+/, '').trim();
+      lines = lines.slice(1);
+    }
+
+    if (lines.length > 0 && !/^(\d{1,2})(?:\.|\)|\-|\s)/.test(lines[0])) {
+      description = lines[0];
+      lines = lines.slice(1);
+    }
+
+    const steps = [];
+
+    lines.forEach((line) => {
+      const stepMatch = line.match(/^(\d{1,2})(?:\.|\)|\-|\s)*\s*(.+)$/);
+      if (stepMatch) {
+        const stepNum = String(parseInt(stepMatch[1], 10));
+        const content = stepMatch[2].replace(/^[:\s]+/, '').trim();
+        const [stepName, ...rest] = content.split(/\s+-\s+|:\s+/);
+
+        if (stepName && !steps.some((s) => s.step === stepNum)) {
+          steps.push({
+            id: uid(),
+            step: stepNum,
+            name: stepName.trim(),
+            instruction: rest.join(' ').trim() || '',
+            productId: null,
+            time: '',
+            repetition: '',
+            phase: '',
+            observation: ''
+          });
+        }
+      }
+    });
+
+    return { title, description, steps };
+  };
+
   // Tenta via API Splitbee (fallback)
   const fetchFromApi = async (pageId) => {
     try {
@@ -141,15 +194,40 @@ export const useNotionImporter = () => {
   // Função principal que orquestra o fetch
   const fetchNotionProtocol = async (onSuccess) => {
     if (!notionUrl.trim()) {
-      setNotionError('Cole uma URL do Notion válida');
+      setNotionError('Cole uma URL ou texto do Notion válido');
       return;
     }
     
     setNotionLoading(true);
     setNotionError('');
-    
+
+    const memo = notionUrl.trim();
+
     try {
-      const cleanUrl = notionUrl.trim().split('?')[0];
+      if (!isNotionLink(memo)) {
+        const parsed = parseNotionText(memo);
+        if (!parsed.steps.length) {
+          setNotionError('Texto não contém etapas numeradas válidas (ex: 1. Passo, 2. Passo).');
+          setNotionLoading(false);
+          return;
+        }
+
+        const pageTitle = parsed.title || 'Protocolo (texto)';
+
+        onSuccess({
+          pageId: null,
+          pageTitle,
+          description: parsed.description || '',
+          steps: parsed.steps
+        });
+
+        setNotionUrl('');
+        setShowNotionImport(false);
+        setNotionLoading(false);
+        return;
+      }
+
+      const cleanUrl = memo.split('?')[0];
       const pageId = extractPageIdFromNotionUrl(cleanUrl);
       
       if (!pageId) {
@@ -169,7 +247,6 @@ export const useNotionImporter = () => {
         extractedSteps = await fetchFromApi(pageId);
       }
 
-      // Callback com dados extraídos
       onSuccess({
         pageId,
         pageTitle,
