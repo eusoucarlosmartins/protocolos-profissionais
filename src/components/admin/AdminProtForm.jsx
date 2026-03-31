@@ -50,7 +50,6 @@ const AdminProtForm = ({ prot, products, protocols, indications, categories, pha
     concerns: [...(prot.concerns || [])],
     youtubeUrl: prot.youtubeUrl || '',
     featuredImage: prot.featuredImage || '',
-    price: prot.price || '',
   });
 
   const [modal, setModal] = useState(null);
@@ -225,6 +224,17 @@ const AdminProtForm = ({ prot, products, protocols, indications, categories, pha
     onClose?.();
   };
 
+  // ── Custo por sessão (calculado dos produtos das etapas) ──────────────────
+  const stepProducts = f.steps
+    .filter(s => s.productId)
+    .map(s => products.find(p => p.id === s.productId))
+    .filter(Boolean);
+  const uniqueStepProducts = [...new Map(stepProducts.map(p => [p.id, p])).values()];
+  const totalCostPerSession = uniqueStepProducts.reduce((acc, p) => acc + (costPerApp(p) || 0), 0);
+  const bottleneck = uniqueStepProducts
+    .filter(p => costPerApp(p) != null)
+    .sort((a, b) => (costPerApp(b) || 0) - (costPerApp(a) || 0))[0];
+
   // ── Fases: lista única para datalist ──────────────────────────────────────
   const allPhases = [...phases];
   f.steps.forEach(s => {
@@ -245,7 +255,7 @@ const AdminProtForm = ({ prot, products, protocols, indications, categories, pha
   ];
 
   return (
-    <div style={{ maxWidth: 700 }}>
+    <div style={{ maxWidth: 960 }}>
       <Modal modal={modal} />
 
       {/* Datalist de fases — usado nos campos de fase das etapas */}
@@ -349,10 +359,7 @@ const AdminProtForm = ({ prot, products, protocols, indications, categories, pha
             />
             <Field label="Frequência" value={f.frequency || ''} onChange={v => setF(x => ({ ...x, frequency: v }))} placeholder="Ex: 1x por semana" />
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 12 }}>
-            <Field label="Valor do protocolo (R$)" type="number" value={f.price || ''} onChange={v => setF(x => ({ ...x, price: v }))} placeholder="Ex: 250.00" />
-            <Field label="Associações / Equipamentos" value={f.associations || ''} onChange={v => setF(x => ({ ...x, associations: v }))} placeholder="Ex: Peeling de diamante" />
-          </div>
+          <Field label="Associações / Equipamentos" value={f.associations || ''} onChange={v => setF(x => ({ ...x, associations: v }))} placeholder="Ex: Peeling de diamante" />
           <Field label="Descrição" value={f.description || ''} onChange={v => setF(x => ({ ...x, description: v }))} placeholder="Resumo do protocolo" multi rows={3} />
 
           {/* Indicações */}
@@ -436,7 +443,7 @@ const AdminProtForm = ({ prot, products, protocols, indications, categories, pha
               </div>
 
               {/* Produto + Fase */}
-              <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 8 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '2fr 1fr', gap: 8 }}>
                 <Sel
                   label="Produto (opcional)"
                   value={step.productId || ''}
@@ -459,7 +466,7 @@ const AdminProtForm = ({ prot, products, protocols, indications, categories, pha
 
               {/* Instrução + Duração */}
               <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '2fr 1fr', gap: 8 }}>
-                <Field label="Instrução" value={step.instruction || ''} onChange={v => updStep(step.id, 'instruction', v)} placeholder="Detalhar a execução" multi rows={2} />
+                <Field label="Instrução" value={step.instruction || ''} onChange={v => updStep(step.id, 'instruction', v)} placeholder="Detalhar a execução" multi rows={3} />
                 <Field label="Duração" value={step.duration || ''} onChange={v => updStep(step.id, 'duration', v)} placeholder="Ex: 10 min" />
               </div>
 
@@ -474,6 +481,33 @@ const AdminProtForm = ({ prot, products, protocols, indications, categories, pha
           <button type="button" onClick={addStep} style={{ background: B.purple, color: '#fff', border: 'none', borderRadius: 8, padding: '9px 16px', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', fontSize: 14 }}>
             + Adicionar etapa
           </button>
+
+          {/* Card de custo por sessão — calculado automaticamente */}
+          {uniqueStepProducts.length > 0 && (
+            <div style={{ marginTop: 16, background: B.purpleLight, border: `1.5px solid ${B.border}`, borderRadius: 12, padding: '14px 18px' }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: B.purple, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 10 }}>Custo estimado por sessão</div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginBottom: 10 }}>
+                {uniqueStepProducts.map(p => {
+                  const cpa = costPerApp(p);
+                  return (
+                    <div key={p.id} style={{ background: B.white, borderRadius: 8, padding: '8px 12px', fontSize: 12, border: `1px solid ${B.border}`, display: 'flex', flexDirection: 'column', gap: 2, minWidth: 140 }}>
+                      <span style={{ fontWeight: 700, color: B.text, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 180 }}>{p.name}</span>
+                      <span style={{ color: B.muted }}>Custo/aplic.: <strong style={{ color: B.purpleDark }}>{cpa != null ? fmtCurrency(cpa) : '—'}</strong></span>
+                    </div>
+                  );
+                })}
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
+                <div style={{ fontSize: 13, color: B.muted }}>
+                  {bottleneck && <span>Maior custo: <strong style={{ color: B.purpleDark }}>{bottleneck.name}</strong></span>}
+                </div>
+                <div style={{ fontSize: 18, fontWeight: 800, color: B.purpleDark }}>
+                  Total: {fmtCurrency(totalCostPerSession)}
+                  <span style={{ fontSize: 12, fontWeight: 400, color: B.muted, marginLeft: 6 }}>/ sessão</span>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* ── Seção 3: Uso em casa ──────────────────────────────────────── */}
