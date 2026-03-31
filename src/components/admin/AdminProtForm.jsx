@@ -295,8 +295,131 @@ const AdminProtForm = ({ prot, products, protocols, indications, categories, pha
         </div>
       )}
 
-      <div style={{ display: 'flex', flexDirection: 'column' }}>
-        {/* ...continuation of the form... same content as in App.jsx (omitted here for brevity) */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <div style={sectionBoxStyle}>
+          <SectionTitle>Base do protocolo</SectionTitle>
+          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 12 }}>
+            <Field label="Codigo" value={f.code || ''} onChange={(v) => setF((x) => ({ ...x, code: v }))} placeholder="Ex: PROT-001" />
+            <Field label="Nome" value={f.name || ''} onChange={(v) => setF((x) => ({ ...x, name: v }))} placeholder="Ex: Limpeza de Pele Negra" />
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 12 }}>
+            <Sel
+              label="Categoria"
+              value={f.category || ''}
+              onChange={(v) => setF((x) => ({ ...x, category: v }))}
+              options={[{ v: '', l: 'Sem categoria' }, ...[...categories].sort((a, b) => a.label.localeCompare(b.label)).map((c) => ({ v: c.id, l: c.label }))]}
+            />
+            <Field label="Frequencia" value={f.frequency || ''} onChange={(v) => setF((x) => ({ ...x, frequency: v }))} placeholder="Ex: 1x por semana" />
+          </div>
+          <Field label="Descricao" value={f.description || ''} onChange={(v) => setF((x) => ({ ...x, description: v }))} placeholder="Resumo do protocolo" multi rows={3} />
+          <div style={{ marginTop: 8 }}>
+            <div style={{ fontSize: 12, color: B.muted, marginBottom: 8, fontWeight: 700 }}>Indicacoes</div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+              {indications.map((ind) => {
+                const selected = (f.concerns || []).includes(ind.id);
+                return (
+                  <button
+                    key={ind.id}
+                    type="button"
+                    onClick={() => {
+                      setF((x) => ({
+                        ...x,
+                        concerns: selected ? (x.concerns || []).filter((c) => c !== ind.id) : [...(x.concerns || []), ind.id]
+                      }));
+                    }}
+                    style={{
+                      border: `1px solid ${selected ? B.purple : B.border}`,
+                      background: selected ? B.purple : '#fff',
+                      color: selected ? '#fff' : B.text,
+                      borderRadius: 8,
+                      padding: '6px 10px',
+                      cursor: 'pointer',
+                      fontSize: 12,
+                      fontWeight: 700,
+                    }}
+                  >
+                    {ind.label}
+                  </button>
+                );
+              })}
+            </div>
+            <div style={{ marginTop: 8, display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+              {showNewIndication ? (
+                <>
+                  <input value={newIndication} onChange={(e) => setNewIndication(e.target.value)} placeholder="Nova indicacao" style={inpSt} />
+                  <button onClick={handleAddIndication} type="button" style={{ background: B.purple, color: '#fff', border: 'none', borderRadius: 6, padding: '6px 12px', cursor: 'pointer' }}>Adicionar</button>
+                </>
+              ) : (
+                <button onClick={() => setShowNewIndication(true)} type="button" style={{ background: 'none', border: `1px dashed ${B.border}`, borderRadius: 6, padding: '6px 12px', cursor: 'pointer', fontSize: 12 }}>+ Nova indicacao</button>
+              )}
+            </div>
+          </div>
+        </div>
+
+        <div style={sectionBoxStyle}>
+          <SectionTitle>Cabine (Etapas)</SectionTitle>
+          {f.steps.map((step, idx) => (
+            <div key={step.id || idx} style={{ marginBottom: 10, border: `1px solid ${B.border}`, borderRadius: 10, padding: 10, background: '#FAFAFC' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                <span style={{ width: 24, height: 24, borderRadius: '50%', background: B.purple, color: '#fff', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: 12 }}>{step.step || idx + 1}</span>
+                <Field label="Nome da etapa" value={step.name || ''} onChange={(v) => updStep(step.id, 'name', v)} placeholder="Ex: Higienizacao" />
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 8 }}>
+                <Sel
+                  label="Produto (opcional)"
+                  value={step.productId || ''}
+                  onChange={(v) => updStep(step.id, 'productId', v)}
+                  options={[{ v: '', l: 'Sem produto' }, ...getProtocolProductOptions(step.productId)]}
+                />
+                <Sel
+                  label="Fase"
+                  value={step.phase || ''}
+                  onChange={(v) => updStep(step.id, 'phase', v)}
+                  options={[{ v: '', l: 'Sem fase' }, ...phaseOptions.map((p) => ({ v: p.label, l: p.label }))]}
+                />
+              </div>
+              <Field label="Instrucao" value={step.instruction || ''} onChange={(v) => updStep(step.id, 'instruction', v)} placeholder="Detalhar a execucao" multi rows={2} />
+              <button type="button" onClick={() => rmStep(step.id)} style={{ background: B.redLight, color: B.red, border: 'none', borderRadius: 6, padding: '6px 10px', cursor: 'pointer' }}>Remover etapa</button>
+            </div>
+          ))}
+          <button type="button" onClick={addStep} style={{ background: B.purple, color: '#fff', border: 'none', borderRadius: 8, padding: '8px 12px', fontWeight: 700, cursor: 'pointer' }}>+ Adicionar etapa</button>
+        </div>
+
+        <div style={sectionBoxStyle}>
+          <SectionTitle>Uso em casa</SectionTitle>
+          {['morning', 'night'].map((period) => (
+            <div key={period} style={{ marginBottom: 12 }}>
+              <div style={{ fontWeight: 700, marginBottom: 6, textTransform: 'capitalize' }}>{period === 'morning' ? 'Manhã' : 'Noite'}</div>
+              {(f.homeUse?.[period] || []).map((item, i) => (
+                <div key={`${period}-${i}`} style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 8, marginBottom: 8, border: `1px solid ${B.border}`, borderRadius: 8, padding: 8, background: '#FBFBFF' }}>
+                  <Sel
+                    label="Produto"
+                    value={item.productId || ''}
+                    onChange={(v) => updHome(period, i, 'productId', v)}
+                    options={[{ v: '', l: 'Sem produto' }, ...getSkincareProductOptions(item.productId)]}
+                  />
+                  <Field label="Instrucao" value={item.instruction || ''} onChange={(v) => updHome(period, i, 'instruction', v)} placeholder="Ex: Aplicar 2x dia" />
+                  <button type="button" onClick={() => rmHome(period, i)} style={{ gridColumn: '1 / -1', background: B.redLight, color: B.red, border: 'none', borderRadius: 6, padding: '6px 10px', cursor: 'pointer' }}>Remover</button>
+                </div>
+              ))}
+              <button type="button" onClick={() => addHome(period)} style={{ background: '#EEEFFB', color: B.purpleDark, border: `1px solid ${B.purple}`, borderRadius: 8, padding: '7px 12px', fontSize: 12, cursor: 'pointer' }}>+ Adicionar item ({period === 'morning' ? 'Manhã' : 'Noite'})</button>
+            </div>
+          ))}
+        </div>
+
+        <div style={sectionBoxStyle}>
+          <SectionTitle>Kits e revisao</SectionTitle>
+          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 12 }}>
+            <Sel label="Kit Profissional" value={f.professionalKitId || ''} onChange={(v) => setF((x) => ({ ...x, professionalKitId: v }))} options={[{ v: '', l: 'Sem kit' }, ...getProfessionalKitOptions(f.professionalKitId)]} />
+            <Sel label="Kit Home Care" value={f.homeKitId || ''} onChange={(v) => setF((x) => ({ ...x, homeKitId: v }))} options={[{ v: '', l: 'Sem kit' }, ...getHomeKitOptions(f.homeKitId)]} />
+          </div>
+          <Sel label="Revisao" value={f.reviewStatus || 'needs_review'} onChange={(v) => setF((x) => ({ ...x, reviewStatus: v }))} options={[{ v: 'needs_review', l: 'A Revisar' }, { v: 'reviewed', l: 'Revisado' }, { v: 'approved', l: 'Aprovado' }]} />
+          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 12 }}>
+            <Btn onClick={() => doSave(false)} variant="secondary">Salvar rascunho</Btn>
+            <Btn onClick={() => doSave(true)}>Publicar</Btn>
+            <Btn variant="ghost" onClick={() => onClose?.()}>Cancelar</Btn>
+          </div>
+        </div>
       </div>
     </div>
   );
