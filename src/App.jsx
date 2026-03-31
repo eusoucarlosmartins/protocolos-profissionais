@@ -1382,6 +1382,7 @@ const TextProtocolImporter = ({ onImport, products }) => {
         category,
         frequency,
         associations,
+        reviewStatus: 'needs_review',
         concerns: [],
         youtubeUrl: '',
         published: false,
@@ -1439,10 +1440,45 @@ const TextProtocolImporter = ({ onImport, products }) => {
 const XMLImporter = ({ products, saveProducts }) => {
   const [xmlInput, setXmlInput] = useState('');
   const [showImport, setShowImport] = useState(false);
+  const [parsedItems, setParsedItems] = useState([]);
+
+  const normalizeName = (value) =>
+    String(value || '')
+      .toLowerCase()
+      .replace(/[\u00C0-\u017F]/g, '')
+      .replace(/[^a-z0-9 ]/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+
+  const findProductMatch = (productName) => {
+    const normalized = normalizeName(productName);
+    if (!normalized) return null;
+
+    const exactMatch = products.find((p) => normalizeName(p.name) === normalized);
+    if (exactMatch) return exactMatch;
+
+    const tokenSet = new Set(normalized.split(' '));
+    let best = null;
+    let bestScore = 0;
+
+    products.forEach((p) => {
+      const pName = normalizeName(p.name);
+      const tokens = [...new Set(pName.split(' ').filter(Boolean))];
+      if (!tokens.length) return;
+      const hits = tokens.filter((t) => tokenSet.has(t)).length;
+      const score = hits / tokens.length;
+      if (score > bestScore) {
+        bestScore = score;
+        best = p;
+      }
+    });
+
+    return bestScore >= 0.4 ? best : null;
+  };
 
   const handleXMLImport = () => {
     if (!xmlInput.trim()) {
-      alert("Cole o codigo XML antes de processar.");
+      alert('Cole o codigo XML antes de processar.');
       return;
     }
 
@@ -1458,74 +1494,109 @@ const XMLImporter = ({ products, saveProducts }) => {
     }
 
     const parser = new DOMParser();
-    const xmlDoc = parser.parseFromString(cleanXmlInput, "text/xml");
-    const items = xmlDoc.getElementsByTagName("item");
+    const xmlDoc = parser.parseFromString(cleanXmlInput, 'text/xml');
+    const items = xmlDoc.getElementsByTagName('item');
 
     if (!items || items.length === 0) {
-      alert("Nenhum <item> encontrado no XML. Verifique se copiou o codigo correto.");
+      alert('Nenhum <item> encontrado no XML. Verifique se copiou o codigo correto.');
       return;
     }
 
-    let updatedCount = 0;
-    let addedCount = 0;
-    const newProducts = [...products];
+    const provisional = [];
 
     for (let i = 0; i < items.length; i++) {
       const item = items[i];
-      const name = item.getElementsByTagName("title")[0]?.textContent || item.getElementsByTagName("g:title")[0]?.textContent;
-      const priceStr = item.getElementsByTagName("g:price")[0]?.textContent || item.getElementsByTagName("price")[0]?.textContent;
-      const image = item.getElementsByTagName("g:image_link")[0]?.textContent || item.getElementsByTagName("image_link")[0]?.textContent || '';
-      const link = item.getElementsByTagName("link")[0]?.textContent || item.getElementsByTagName("g:link")[0]?.textContent || '';
-      const description = item.getElementsByTagName("description")[0]?.textContent || item.getElementsByTagName("g:description")[0]?.textContent || '';
+      const name = item.getElementsByTagName('title')[0]?.textContent || item.getElementsByTagName('g:title')[0]?.textContent || '';
+      const priceStr = item.getElementsByTagName('g:price')[0]?.textContent || item.getElementsByTagName('price')[0]?.textContent || '';
+      const image = item.getElementsByTagName('g:image_link')[0]?.textContent || item.getElementsByTagName('image_link')[0]?.textContent || '';
+      const link = item.getElementsByTagName('link')[0]?.textContent || item.getElementsByTagName('g:link')[0]?.textContent || '';
+      const description = item.getElementsByTagName('description')[0]?.textContent || item.getElementsByTagName('g:description')[0]?.textContent || '';
 
-      if (name && priceStr) {
-        let cleanStr = priceStr.replace(/[^\d.,]/g, '');
-        let numericPrice = 0;
-        if (cleanStr.includes(',') && cleanStr.includes('.')) {
-          numericPrice = parseFloat(cleanStr.replace(/\./g, '').replace(',', '.'));
-        } else if (cleanStr.includes(',')) {
-          numericPrice = parseFloat(cleanStr.replace(',', '.'));
-        } else {
-          numericPrice = parseFloat(cleanStr);
-        }
+      if (!name.trim()) continue;
 
-        const index = newProducts.findIndex(p => p.name.toLowerCase().trim() === name.toLowerCase().trim());
-
-        if (index !== -1) {
-          if (newProducts[index].cost !== numericPrice.toString()) {
-            newProducts[index] = { 
-              ...newProducts[index], 
-              cost: numericPrice.toString() 
-            };
-            updatedCount++;
-          }
-        } else {
-          newProducts.push({
-            ...EMPTY_PRODUCT,
-            id: uid(),
-            name: name.trim(),
-            cost: numericPrice.toString(),
-            image: image.trim(),
-            siteUrl: link.trim(),
-            description: description.trim(),
-            uso: ['profissional', 'homecare'],
-            productTypes: ['protocol', 'skincare'],
-            categories: ['facial']
-          });
-          addedCount++;
-        }
+      let cleanStr = priceStr.replace(/[^[0-9.,]/g, '');
+      let numericPrice = 0;
+      if (cleanStr.includes(',') && cleanStr.includes('.')) {
+        numericPrice = parseFloat(cleanStr.replace(/\./g, '').replace(',', '.'));
+      } else if (cleanStr.includes(',')) {
+        numericPrice = parseFloat(cleanStr.replace(',', '.'));
+      } else {
+        numericPrice = parseFloat(cleanStr);
       }
+
+      const matched = findProductMatch(name);
+
+      provisional.push({
+        id: i,
+        name: name.trim(),
+        price: Number.isNaN(numericPrice) ? 0 : numericPrice,
+        image: image.trim(),
+        link: link.trim(),
+        description: description.trim(),
+        matchedProductId: matched?.id || null,
+        matchedProductName: matched?.name || null,
+        includeNew: true,
+      });
     }
 
-    if (updatedCount > 0 || addedCount > 0) {
-      saveProducts(newProducts);
-      alert(`${updatedCount} produtos atualizados e ${addedCount} novos produtos cadastrados com sucesso!`);
-    } else {
-      alert("Processamento concluido. Nenhum produto novo encontrado e os precos ja estavam atualizados.");
-    }
-    setXmlInput('');
-    setShowImport(false);
+    setParsedItems(provisional);
+    setShowImport(true);
   };
+
+  const updateIncludeNew = (id, value) => {
+    setParsedItems((prev) => prev.map((item) => (item.id === id ? { ...item, includeNew: value } : item)));
+  };
+
+  const applyXMLChanges = () => {
+    if (!parsedItems.length) {
+      alert('Nada para sincronizar. Importe o XML primeiro.');
+      return;
+    }
+
+    const newProducts = [...products];
+    let updatedCount = 0;
+    let createdCount = 0;
+
+    parsedItems.forEach((item) => {
+      if (item.matchedProductId) {
+        const idx = newProducts.findIndex((p) => p.id === item.matchedProductId);
+        if (idx !== -1) {
+          const current = newProducts[idx];
+          const updated = {
+            ...current,
+            cost: item.price ? String(item.price) : current.cost,
+            image: item.image || current.image,
+            siteUrl: item.link || current.siteUrl,
+            description: item.description || current.description,
+          };
+          if (JSON.stringify(updated) !== JSON.stringify(current)) {
+            newProducts[idx] = updated;
+            updatedCount += 1;
+          }
+        }
+      } else if (item.includeNew) {
+        newProducts.push({
+          ...EMPTY_PRODUCT,
+          id: uid(),
+          name: item.name,
+          cost: item.price ? String(item.price) : '',
+          image: item.image,
+          siteUrl: item.link,
+          description: item.description,
+          category: '',
+          published: false,
+        });
+        createdCount += 1;
+      }
+    });
+
+    saveProducts(newProducts);
+    setParsedItems([]);
+    setXmlInput('');
+
+    alert(`${updatedCount} produtos existentes atualizados e ${createdCount} novos produtos cadastrados.`);
+  };
+
 
   return (
     <div style={{ marginBottom: 20, padding: 18, background: B.goldLight, borderRadius: 12, border: `1px solid ${B.gold}` }}>
@@ -1559,6 +1630,40 @@ const XMLImporter = ({ products, saveProducts }) => {
           >
             Processar XML
           </button>
+
+          {parsedItems.length > 0 && (
+            <div style={{ marginTop: 16, borderTop: `1px solid rgba(150, 150, 150, 0.2)`, paddingTop: 14 }}>
+              <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', flexWrap:'wrap', gap:8}}>
+                <strong style={{color:B.purpleDark}}>{parsedItems.length} itens extraidos</strong>
+                <button onClick={applyXMLChanges} style={{background:B.green,color:B.white,border:'none',padding:'8px 16px',borderRadius:8,cursor:'pointer',fontWeight:700}}>Aplicar sincronizacao</button>
+              </div>
+              <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8,marginTop:12,fontSize:12}}>
+                <span>Encontrados: {parsedItems.filter((i) => i.matchedProductId).length}</span>
+                <span>Nao encontrados: {parsedItems.filter((i) => !i.matchedProductId).length}</span>
+              </div>
+
+              <div style={{marginTop:12,maxHeight:320,overflowY:'auto',border:'1px solid #ddd',borderRadius:8,padding:10,background:'#fff'}}>
+                {parsedItems.map((item) => (
+                  <div key={item.id} style={{display:'grid',gridTemplateColumns:'1fr auto',gap:12,alignItems:'center',borderBottom:'1px solid #eee',padding:'8px 0'}}>
+                    <div>
+                      <div><strong>{item.name}</strong> <span style={{color:B.muted,fontSize:11}}>{item.price?`R$ ${item.price}`:''}</span></div>
+                      {item.matchedProductId ? (
+                        <div style={{color:B.green,fontSize:12}}>Casou com: {item.matchedProductName}</div>
+                      ) : (
+                        <div style={{color:B.orange,fontSize:12}}>Nao encontrado</div>
+                      )}
+                    </div>
+                    {!item.matchedProductId && (
+                      <label style={{display:'flex',alignItems:'center',gap:6,fontSize:12}}>
+                        <input type="checkbox" checked={item.includeNew} onChange={(e) => updateIncludeNew(item.id, e.target.checked)} />
+                        Importar
+                      </label>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>
@@ -1703,7 +1808,7 @@ const AdminPanel = ({ products, protocols, indications, categories, phases, bran
   const [editProd,setEditProd]=useState(null);
   const [editProt,setEditProt]=useState(null);
   const EMPTY_PROD_FILTERS = { status: 'all', category: 'all', type: 'all' };
-  const EMPTY_PROT_FILTERS = { status: 'all', category: 'all', indication: 'all' };
+  const EMPTY_PROT_FILTERS = { status: 'all', category: 'all', indication: 'all', reviewStatus: 'all' };
   const [prodFilters, setProdFilters] = useState(EMPTY_PROD_FILTERS);
   const [prodSearch, setProdSearch] = useState('');
   const [protFilters, setProtFilters] = useState(EMPTY_PROT_FILTERS);
@@ -2350,7 +2455,10 @@ const AdminProtForm = ({ prot, products, protocols, indications, categories, pha
           <Field label="Codigo do protocolo *" value={f.code||''} onChange={v=>setF({...f,code:v})} placeholder="Ex: PROTO-023" note="Use um codigo curto e unico para localizar rapido no admin." />
           <Field label="Nome do protocolo *" value={f.name} onChange={v=>setF({...f,name:v})} placeholder="Ex: Peeling de Diamante para Clareamento e Uniformizacao" note="Use um nome que a equipe reconheca rapido e que tambem fique claro para consulta futura." />
         </div>
-        <Field label="Etiqueta de destaque" value={f.badge||''} onChange={v=>setF({...f,badge:v})} placeholder="Ex: Lancamento, Novo, Exclusivo" note="Aparece como selo no card da home. Use so quando realmente quiser destacar." />
+        <div style={{display:'grid',gridTemplateColumns:isMobile?'1fr':'1fr 1fr',gap:14}}>
+          <Sel label="Status de Revisao" value={f.reviewStatus || 'needs_review'} onChange={v=>setF({...f,reviewStatus:v})} options={[{v:'needs_review', l:'A Revisar'}, {v:'reviewed', l:'Revisado'}, {v:'approved', l:'Aprovado'}]} />
+          <Field label="Etiqueta de destaque" value={f.badge||''} onChange={v=>setF({...f,badge:v})} placeholder="Ex: Lancamento, Novo, Exclusivo" note="Aparece como selo no card da home. Use so quando realmente quiser destacar." />
+        </div>
         <Field label="Resumo do protocolo" value={f.description} onChange={v=>setF({...f,description:v})} placeholder="Explique o objetivo principal, para quem ele foi pensado e o resultado esperado." multi rows={3} />
         <div style={{display:'grid',gridTemplateColumns:isMobile?'1fr':'1fr 1fr',gap:14}}>
           <Sel label="Categoria visual" value={f.category} onChange={v=>setF({...f,category:v})} options={[{v:'',l:'Selecione'}, ...categories.map(c => ({v: c.id, l: c.label}))]} />

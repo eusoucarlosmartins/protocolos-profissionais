@@ -39,7 +39,8 @@ export const AdminProtocols = ({
     search ||
     filters.status !== "all" ||
     filters.category !== "all" ||
-    filters.indication !== "all";
+    filters.indication !== "all" ||
+    filters.reviewStatus !== "all";
 
   const toggle = (id) =>
     saveProtocols(protocols.map((protocol) => (protocol.id === id ? { ...protocol, published: !protocol.published } : protocol)));
@@ -48,6 +49,10 @@ export const AdminProtocols = ({
     if (window.confirm("Excluir protocolo?")) {
       saveProtocols(protocols.filter((protocol) => protocol.id !== id));
     }
+  };
+
+  const setReviewStatus = (id, status) => {
+    saveProtocols(protocols.map((protocol) => (protocol.id === id ? { ...protocol, reviewStatus: status } : protocol)));
   };
 
   const moveProtocol = (id, dir) => {
@@ -78,6 +83,7 @@ export const AdminProtocols = ({
       category: "",
       frequency: "",
       associations: "",
+      reviewStatus: "needs_review",
       youtubeUrl: "",
       published: false,
       steps: [],
@@ -100,7 +106,10 @@ export const AdminProtocols = ({
     const matchIndication =
       filters.indication === "all" ||
       (protocol.concerns && protocol.concerns.includes(filters.indication));
-    return matchSearch && matchStatus && matchCategory && matchIndication;
+    const matchReviewStatus =
+      filters.reviewStatus === "all" ||
+      (protocol.reviewStatus || 'needs_review') === filters.reviewStatus;
+    return matchSearch && matchStatus && matchCategory && matchIndication && matchReviewStatus;
   });
 
   const publishedCount = protocols.filter((protocol) => protocol.published).length;
@@ -112,6 +121,9 @@ export const AdminProtocols = ({
   const kitLinkedCount = protocols.filter(
     (protocol) => protocol.professionalKitId || protocol.homeKitId,
   ).length;
+  const needsReviewCount = protocols.filter((protocol) => protocol.reviewStatus === 'needs_review').length;
+  const reviewedCount = protocols.filter((protocol) => protocol.reviewStatus === 'reviewed').length;
+  const approvedCount = protocols.filter((protocol) => protocol.reviewStatus === 'approved').length;
 
   return (
     <div>
@@ -184,10 +196,14 @@ export const AdminProtocols = ({
           <select value={filters.indication} onChange={(event) => setFilters({ ...filters, indication: event.target.value })} style={{ padding: "9px 12px", border: `1.5px solid ${B.border}`, borderRadius: 8, fontSize: 14, outline: "none", fontFamily: "inherit", background: B.white, width: isMobile ? "100%" : "auto" }}>
             <option value="all">Indicacao: Todas</option>
             {[...indications].sort((a, b) => a.label.localeCompare(b.label)).map((indication) => (
-              <option key={indication.id} value={indication.id}>
-                {indication.label}
-              </option>
+              <option key={indication.id} value={indication.id}>{indication.label}</option>
             ))}
+          </select>
+          <select value={filters.reviewStatus} onChange={(event) => setFilters({ ...filters, reviewStatus: event.target.value })} style={{ padding: "9px 12px", border: `1.5px solid ${B.border}`, borderRadius: 8, fontSize: 14, outline: "none", fontFamily: "inherit", background: B.white, width: isMobile ? "100%" : "auto" }}>
+            <option value="all">Revisao: Todos</option>
+            <option value="needs_review">A Revisar</option>
+            <option value="reviewed">Revisado</option>
+            <option value="approved">Aprovado</option>
           </select>
         </div>
         <div style={{ marginTop: 12, fontSize: 12, color: B.muted, fontWeight: 600 }}>
@@ -201,6 +217,9 @@ export const AdminProtocols = ({
           { label: "Rascunhos", value: draftCount, tone: "#7A5C1E", helper: "em preparacao" },
           { label: "Com rotina em casa", value: homeRoutineCount, tone: B.purple, helper: "cliente acompanhada" },
           { label: "Com kits", value: kitLinkedCount, tone: B.purpleDark, helper: "fechamento estruturado" },
+          { label: "A Revisar", value: needsReviewCount, tone: B.gold, helper: "aguardando aprovacao" },
+          { label: "Revisados", value: reviewedCount, tone: B.blue, helper: "aguardando aprovação final" },
+          { label: "Aprovados", value: approvedCount, tone: B.green, helper: "pronto para publicacao" },
         ].map((card) => (
           <div key={card.label} style={{ background: B.white, border: `1px solid ${B.border}`, borderRadius: 14, padding: "14px 16px", boxShadow: "0 10px 24px rgba(44,31,64,0.04)" }}>
             <div style={{ fontSize: 11, fontWeight: 700, color: B.muted, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 5 }}>{card.label}</div>
@@ -229,6 +248,11 @@ export const AdminProtocols = ({
                     {protocol.published ? "Publicado" : "Rascunho"}
                   </span>
                 )}
+                <select value={protocol.reviewStatus || 'needs_review'} onChange={(event) => setReviewStatus(protocol.id, event.target.value)} style={{ padding: "6px 10px", borderRadius: 999, border: `1px solid ${B.border}`, background: B.white, color: B.purpleDark, fontSize: 12, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", whiteSpace: "nowrap", marginLeft: 8, height: 30 }}>
+                  <option value="needs_review">A Revisar</option>
+                  <option value="reviewed">Revisado</option>
+                  <option value="approved">Aprovado</option>
+                </select>
               </div>
               <div style={{ display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center", marginBottom: 10 }}>
                 {(protocol.concerns || []).map((concern) => <Tag key={concern} label={indications.find((item) => item.id === concern)?.label || concern} />)}
