@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useIsMobile, useRoute } from "./hooks/useAppShell";
 import { lazy, Suspense } from "react";
 import AdminProtForm from "./components/admin/AdminProtForm";
@@ -297,7 +297,7 @@ const RichTextField = ({ label, value, onChange, placeholder, rows=3, note }) =>
           <button type="button" onClick={()=>applyTag('<i>','</i>')} style={{fontStyle:'italic', padding:'2px 8px', border:'none', background:'transparent', cursor:'pointer', color:B.purpleDark}}>I</button>
           <button type="button" onClick={()=>applyTag('<u>','</u>')} style={{textDecoration:'underline', padding:'2px 8px', border:'none', background:'transparent', cursor:'pointer', color:B.purpleDark}}>S</button>
           <div style={{width:1, background:B.border, margin:'0 4px'}} />
-          <button type="button" onClick={()=>applyTag('<ul>\n<li>','</li>\n</ul>')} style={{padding:'2px 8px', border:'none', background:'transparent', cursor:'pointer', color:B.purpleDark}}>• Lista</button>
+          <button type="button" onClick={()=>applyTag('<ul>\n<li>','</li>\n</ul>')} style={{padding:'2px 8px', border:'none', background:'transparent', cursor:'pointer', color:B.purpleDark}}>� Lista</button>
         </div>
         <textarea 
           ref={ref}
@@ -626,7 +626,7 @@ const ProtocolCard = ({ protocol:p, products, indications, categories, onClick, 
       style={{position:'relative', background:B.white,borderRadius:16,border:`1px solid ${hov?B.purpleMid:B.border}`,padding:22,cursor:'pointer',transition:'all 0.18s',transform:hov?'translateY(-3px)':'none',boxShadow:hov?'0 14px 36px rgba(94,61,143,0.14)':'0 8px 22px rgba(44,31,64,0.05)'}}>
       {p.badge&&<span style={{position:'absolute',top:-8,left:14,background:B.gold,color:'#fff',fontSize:10,fontWeight:700,padding:'3px 10px',borderRadius:20,textTransform:'uppercase',letterSpacing:'0.07em',zIndex:3}}>{p.badge}</span>}
       <button onClick={toggleFav} style={{position:'absolute', top: 18, right: 18, background:'none', border:'none', fontSize: 22, cursor:'pointer', color: isFav ? B.red : B.border, zIndex: 2}}>
-        {isFav ? '♥' : '♡'}
+        {isFav ? '?' : '?'}
       </button>
       <div style={{display:'flex',gap:6,marginBottom:12,flexWrap:'wrap', paddingRight: 30}}>
         {(p.concerns || []).map(c=><Tag key={c} label={indications.find(x=>x.id===c)?.label||c} />)}
@@ -707,7 +707,7 @@ const ProtocolDetail = ({ protocol:p, products, indications, categories, navigat
     .filter(Boolean);
   const homeRoutineText = encodeURIComponent(
     [
-      `Olá! Segue a rotina de uso em casa do protocolo ${p.name}.`,
+      `Ol�! Segue a rotina de uso em casa do protocolo ${p.name}.`,
       homeKit ? `Kit de uso em casa recomendado: ${homeKit.name}` : '',
       '',
       ...homeRoutineSections,
@@ -1068,7 +1068,7 @@ const PublicProductPage = ({ product: p, protocols, categories, navigate, brand,
                 <Section title="Beneficios">
                   {p.benefits.split(';').map((b,i)=>b.trim()&&(
                     <div key={i} style={{display:'flex',gap:8,marginBottom:7,alignItems:'flex-start'}}>
-                      <span style={{color:B.purple,fontWeight:700,flexShrink:0,marginTop:3}}>•</span>
+                      <span style={{color:B.purple,fontWeight:700,flexShrink:0,marginTop:3}}>�</span>
                       <span style={{fontSize:isMobile?13:15,color:B.text,lineHeight:1.6}} dangerouslySetInnerHTML={{__html: clean(b.trim())}} />
                     </div>
                   ))}
@@ -1214,14 +1214,14 @@ const ProductSearch = ({ products, protocols, indications, categories, navigate 
               {protos.length>0
                 ? <><div style={{fontSize:13,fontWeight:700,color:B.text,marginBottom:10}}>Utilizado em {protos.length} protocolo(s):</div>
                     <div style={{display:'flex',flexDirection:'column',gap:8}}>
-                      {protos.map(pr=><button key={pr.id} onClick={()=>navigate(`/protocolo/${pr.id}`)} style={{background:B.purpleLight,border:`1px solid ${B.border}`,borderRadius:10,padding:'11px 14px',textAlign:'left',cursor:'pointer',fontSize:14,color:B.purple,fontWeight:700,fontFamily:'inherit'}}>{pr.name} →</button>)}
+                      {protos.map(pr=><button key={pr.id} onClick={()=>navigate(`/protocolo/${pr.id}`)} style={{background:B.purpleLight,border:`1px solid ${B.border}`,borderRadius:10,padding:'11px 14px',textAlign:'left',cursor:'pointer',fontSize:14,color:B.purple,fontWeight:700,fontFamily:'inherit'}}>{pr.name} ?</button>)}
                     </div></>
                 : <div style={{fontSize:13,color:B.muted,fontStyle:'italic'}}>Nao vinculado a nenhum protocolo publicado</div>
               }
             </div>
           );
         })}
-        {q.length<=1&&<div style={{textAlign:'center',padding:'70px 0'}}><div style={{fontSize:52,marginBottom:16}}>🔎</div><p style={{color:B.muted,fontSize:15,maxWidth:340,margin:'0 auto'}}>Digite o nome de um produto para descobrir em quais protocolos ele e utilizado</p></div>}
+        {q.length<=1&&<div style={{textAlign:'center',padding:'70px 0'}}><div style={{fontSize:52,marginBottom:16}}>??</div><p style={{color:B.muted,fontSize:15,maxWidth:340,margin:'0 auto'}}>Digite o nome de um produto para descobrir em quais protocolos ele e utilizado</p></div>}
       </div>
     </div>
   );
@@ -1239,9 +1239,9 @@ const TextProtocolImporter = ({ onImport, products }) => {
 
     const normalizeText = (input) => {
       let s = String(input || '').toLowerCase();
-      s = s.replace(/[•–—‑_–]/g, ' '); // remove bullets/hyphens/dashes
+      s = s.replace(/[���-_�]/g, ' '); // remove bullets/hyphens/dashes
       s = s.replace(/\s+([gml]b?|kg|mg|ml|cm|mm)\b/g, '$1'); // normaliza unidades como 700 g -> 700g
-      s = s.replace(/[^a-z0-9\s]/g, ' '); // tira pontuação
+      s = s.replace(/[^a-z0-9\s]/g, ' '); // tira pontua��o
       s = s.replace(/\s+/g, ' ').trim();
       return s;
     };
@@ -1324,7 +1324,7 @@ const TextProtocolImporter = ({ onImport, products }) => {
                 const itemText = line.replace(/^\d+\.\s*/, '').trim();
                 const matchedProductId = tryMatchProduct(itemText);
                 if (matchedProductId) {
-                    homeUse[homeUseTime].push({ instruction: 'Aplicar na região conforme recomendação.', productId: matchedProductId });
+                    homeUse[homeUseTime].push({ instruction: 'Aplicar na regi�o conforme recomenda��o.', productId: matchedProductId });
                 } else {
                     homeUse[homeUseTime].push({ instruction: itemText, productId: null });
                 }
@@ -1340,21 +1340,21 @@ const TextProtocolImporter = ({ onImport, products }) => {
             if (lower.includes('frequencia:') && lower.includes('associacoes:')) {
                 const m = line.match(/frequencia:\s*(.*?)\s*associacoes:\s*(.*)$/i);
                 if (m) {
-                    frequency = m[1].replace(/[•]/g, '').trim();
-                    associations = m[2].replace(/[•]/g, '').trim();
+                    frequency = m[1].replace(/[�]/g, '').trim();
+                    associations = m[2].replace(/[�]/g, '').trim();
                     continue;
                 }
             }
 
             if (lower.includes('frequencia:')) {
-                frequency = line.replace(/.*frequencia:\s*/i, '').replace(/[•]/g, '').trim();
-                // se a linha continuar com associacoes, extrai também
+                frequency = line.replace(/.*frequencia:\s*/i, '').replace(/[�]/g, '').trim();
+                // se a linha continuar com associacoes, extrai tamb�m
                 const assocPart = line.match(/associacoes:\s*(.*)$/i);
-                if (assocPart) associations = assocPart[1].replace(/[•]/g, '').trim();
+                if (assocPart) associations = assocPart[1].replace(/[�]/g, '').trim();
                 continue;
             }
             if (lower.includes('associacoes:')) {
-                associations = line.replace(/.*associacoes:\s*/i, '').replace(/[•]/g, '').trim();
+                associations = line.replace(/.*associacoes:\s*/i, '').replace(/[�]/g, '').trim();
                 continue;
             }
         }
@@ -1366,7 +1366,7 @@ const TextProtocolImporter = ({ onImport, products }) => {
             continue;
         }
 
-        if (currentStep && !lower.includes('•')) {
+        if (currentStep && !lower.includes('�')) {
             currentStep.instruction += (currentStep.instruction ? '\n' : '') + line;
         }
     }
@@ -1765,8 +1765,8 @@ const AdminMarketingLegacy = ({ marketing, saveMarketing, protocols }) => {
             <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:12}}>
               <span style={{fontWeight:700,fontSize:13,color:B.purpleDark}}>Banner {i+1}</span>
               <div style={{display:'flex',gap:6}}>
-                  <button onClick={()=>moveBanner(b.id,-1)} disabled={i===0} style={{background:'none',border:`1px solid ${B.border}`,borderRadius:6,padding:'3px 8px',cursor:'pointer',opacity:i===0?0.3:1}}>↑</button>
-                  <button onClick={()=>moveBanner(b.id,1)} disabled={i===m.banners.length-1} style={{background:'none',border:`1px solid ${B.border}`,borderRadius:6,padding:'3px 8px',cursor:'pointer',opacity:i===m.banners.length-1?0.3:1}}>↓</button>
+                  <button onClick={()=>moveBanner(b.id,-1)} disabled={i===0} style={{background:'none',border:`1px solid ${B.border}`,borderRadius:6,padding:'3px 8px',cursor:'pointer',opacity:i===0?0.3:1}}>?</button>
+                  <button onClick={()=>moveBanner(b.id,1)} disabled={i===m.banners.length-1} style={{background:'none',border:`1px solid ${B.border}`,borderRadius:6,padding:'3px 8px',cursor:'pointer',opacity:i===m.banners.length-1?0.3:1}}>?</button>
                 <label style={{display:'flex',alignItems:'center',gap:5,cursor:'pointer',padding:'3px 8px',borderRadius:6,border:`1px solid ${b.active?B.purple:B.border}`,background:b.active?B.purpleLight:'none',fontSize:12,fontWeight:700,color:b.active?B.purple:B.muted}}>
                   <input type="checkbox" checked={b.active} onChange={e=>updateBanner(b.id,'active',e.target.checked)} style={{display:'none'}} />
                   {b.active?'Ativo':'Inativo'}
@@ -1817,6 +1817,14 @@ const AdminPanel = ({ products, protocols, indications, categories, phases, bran
   const [protFilters, setProtFilters] = useState(EMPTY_PROT_FILTERS);
   const [protSearch, setProtSearch] = useState('');
 
+  if (!loggedUser) {
+    return (
+      <div style={{padding:24}}>
+        <div style={{fontSize:16,fontWeight:700,color:B.purpleDark,marginBottom:12}}>Carregando painel...</div>
+      </div>
+    );
+  }
+
   const nav=[
     {id:'dashboard',  label:'Dashboard', icon:'DB'},
     {id:'products',   label:'Produtos', icon:'PR'},
@@ -1830,13 +1838,13 @@ const AdminPanel = ({ products, protocols, indications, categories, phases, bran
     {id:'users',      label:'Usuarios', icon:'US'},
   ].filter(n=>hasPerm(loggedUser, n.id, 'view'));
 
-  const accessibleAreas = Object.entries(loggedUser.perms||{}).filter(([,v])=>Object.values(v).some(Boolean)).length;
+  const accessibleAreas = Object.entries(loggedUser?.perms||{}).filter(([,v])=>Object.values(v).some(Boolean)).length;
 
   if (accessibleAreas === 0) {
     return (
       <div style={{padding:24}}>
         <div style={{fontSize:16,fontWeight:700,color:B.purpleDark,marginBottom:12}}>Acesso nenhuma area</div>
-        <div style={{color:B.muted}}>Usuário sem permissões definidas para este painel. Verifique as configurações ou entre em contato com o administrador.</div>
+        <div style={{color:B.muted}}>Usu�rio sem permiss�es definidas para este painel. Verifique as configura��es ou entre em contato com o administrador.</div>
       </div>
     );
   }
@@ -1882,7 +1890,7 @@ const AdminPanel = ({ products, protocols, indications, categories, phases, bran
           <div style={{padding:'0 18px 18px',borderBottom:`1px solid ${B.border}`,marginBottom:8}}>
             <div style={{fontSize:10,fontWeight:700,color:B.muted,letterSpacing:'0.1em',textTransform:'uppercase',marginBottom:6}}>Painel Admin</div>
             <div style={{background:B.purpleLight,borderRadius:8,padding:'8px 10px'}}>
-              <div style={{fontSize:12,fontWeight:700,color:B.purpleDark}}>{loggedUser.name}</div>
+              <div style={{fontSize:12,fontWeight:700,color:B.purpleDark}}>{loggedUser?.name || 'Administrador'}</div>
               <div style={{fontSize:11,color:B.muted,marginTop:1}}>{accessibleAreas} areas com acesso</div>
             </div>
           </div>
@@ -2158,7 +2166,7 @@ const AdminProdForm = ({ prod, products, categories, saveProducts, setEditProd, 
   return (
     <div style={{maxWidth:680}}>
       <div style={{display:'flex',alignItems:'center',gap:12,marginBottom:24,flexWrap:'wrap'}}>
-        <button onClick={()=>onClose?.()} style={{background:'none',border:'none',color:B.purple,fontWeight:700,cursor:'pointer',fontSize:14,fontFamily:'inherit'}}>← Voltar</button>
+        <button onClick={()=>onClose?.()} style={{background:'none',border:'none',color:B.purple,fontWeight:700,cursor:'pointer',fontSize:14,fontFamily:'inherit'}}>? Voltar</button>
         <h2 style={{margin:0,color:B.purpleDark,fontSize:20,fontFamily:'Georgia, serif',flex:1}}>{prod._new?'Novo Produto':'Editar Produto'}</h2>
         <button onClick={()=>{setJsonModal(true);setJsonErr('');}} style={{background:B.gold,color:B.white,border:'none',padding:'8px 14px',borderRadius:8,fontWeight:700,fontSize:13,cursor:'pointer',fontFamily:'inherit',whiteSpace:'nowrap'}}>Preencher com IA (Colar JSON)</button>
       </div>
@@ -2301,7 +2309,7 @@ const AdminProdForm = ({ prod, products, categories, saveProducts, setEditProd, 
           <div style={{background:B.greenLight,border:`1px solid ${B.green}`,borderRadius:10,padding:'14px 18px',display:'flex',justifyContent:'space-between',alignItems:'center'}}>
             <div>
               <div style={{fontWeight:700,fontSize:14,color:B.green}}>Custo por Aplicacao Calculado</div>
-              <div style={{fontSize:12,color:B.muted,marginTop:2}}>R$ {f.cost} · {f.yieldApplications} aplicacoes</div>
+              <div style={{fontSize:12,color:B.muted,marginTop:2}}>R$ {f.cost} � {f.yieldApplications} aplicacoes</div>
             </div>
             <div style={{fontSize:24,fontWeight:700,color:B.green}}>{fmtCurrency(cpa)}</div>
           </div>
@@ -2327,581 +2335,6 @@ const AdminProdForm = ({ prod, products, categories, saveProducts, setEditProd, 
   );
 };
 
-const AdminProtForm = ({ prot, products, protocols, indications, categories, phases, saveProtocols, saveIndications, savePhases, setEditProt, loggedUser, onClose }) => {
-  const isMobile = useIsMobile();
-  const [f,setF]=useState({...prot,professionalKitId:prot.professionalKitId||'',homeKitId:prot.homeKitId||'',steps:[...(prot.steps||[])],homeUse:{morning:[...(prot.homeUse?.morning||[])],night:[...(prot.homeUse?.night||[])]}, concerns: [...(prot.concerns||[])]});
-  
-  // Hook para importar do Notion
-  const {
-    notionUrl, setNotionUrl,
-    notionLoading, notionError,
-    showNotionImport, setShowNotionImport,
-    fetchNotionProtocol
-  } = useNotionImporter();
-  
-  const [newIndication, setNewIndication] = useState('');
-  const [showNewIndication, setShowNewIndication] = useState(false);
-  
-  const [addingPhaseFor, setAddingPhaseFor] = useState(null);
-  const [newPhaseLabel, setNewPhaseLabel] = useState('');
-
-  const [draggedIdx, setDraggedIdx] = useState(null);
-
-  // Dropdowns respeitam os tipos do produto, mas preservam o item ja selecionado mesmo se ficar inativo.
-  const buildProductOptions = ({ selectedId, type, includeEmpty = false, emptyLabel = 'Sem produto' }) => {
-      const activeProducts = [...products]
-        .filter(product => isActive(product) && productHasType(product, type))
-        .sort((a,b)=>a.name.localeCompare(b.name));
-      const opts = includeEmpty ? [{v:'', l:emptyLabel}] : [];
-
-      activeProducts.forEach(product => opts.push({v: product.id, l: product.name}));
-
-      if (selectedId) {
-          const currentProd = products.find(product => product.id === selectedId);
-          if (currentProd && !opts.some(option => option.v === currentProd.id)) {
-              opts.push({v: currentProd.id, l: `${isActive(currentProd) ? '' : '[INATIVO] '}${currentProd.name}`});
-          }
-      }
-      return opts;
-  };
-
-  const getProtocolProductOptions = (selectedId) =>
-    buildProductOptions({ selectedId, type: 'protocol', includeEmpty: true, emptyLabel: 'Sem produto (equipamento/tecnica)' });
-
-  const getSkincareProductOptions = (selectedId) =>
-    buildProductOptions({ selectedId, type: 'skincare', includeEmpty: true, emptyLabel: 'Sem produto indicado' });
-
-  const getProfessionalKitOptions = (selectedId) =>
-    buildProductOptions({ selectedId, type: 'kit_professional' });
-
-  const getHomeKitOptions = (selectedId) =>
-    buildProductOptions({ selectedId, type: 'kit_homecare' });
-  
-  const addStep=()=>setF(x=>({...x,steps:[...x.steps,{id:uid(),phase:'',productId:null,instruction:''}]}));
-  const rmStep=id=>setF(x=>({...x,steps:x.steps.filter(s=>s.id!==id)}));
-  const updStep=(id,k,v)=>setF(x=>({...x,steps:x.steps.map(s=>s.id===id?{...s,[k]:v}:s)}));
-  
-  const addHome=sl=>setF(x=>({...x,homeUse:{...x.homeUse,[sl]:[...x.homeUse[sl],{productId:null,instruction:''}]}}));
-  const rmHome=(sl,i)=>setF(x=>({...x,homeUse:{...x.homeUse,[sl]:x.homeUse[sl].filter((_,idx)=>idx!==i)}}));
-  const updHome=(sl,i,k,v)=>setF(x=>({...x,homeUse:{...x.homeUse,[sl]:x.homeUse[sl].map((h,idx)=>idx===i?{...h,[k]:v}:h)}}));
-  
-  const togConcern=id=>setF(x=>({...x,concerns:x.concerns.includes(id)?x.concerns.filter(c=>c!==id):[...x.concerns,id]}));
-  
-  // Callback quando Notion import é bem-sucedido
-  const handleNotionImportSuccess = (data) => {
-    setF(x => ({
-      ...x,
-      externalSourceId: data.pageId,
-      name: data.pageTitle || x.name,
-      description: x.description,
-      steps: data.steps.length > 0 ? data.steps : x.steps
-    }));
-  };
-  
-  // Wrapper para chamar o hook com callback
-  const handleFetchNotion = async () => {
-    await fetchNotionProtocol(handleNotionImportSuccess);
-  };
-  
-  const handleKeyDown = (e) => {
-    if (e.key === 'Enter' && notionUrl.trim()) {
-      handleFetchNotion();
-    }
-  };
-  
-  const handleAddIndication = () => {
-    if (!newIndication.trim()) return;
-    const lbl = newIndication.trim();
-    let id;
-    const existing = indications.find(i => i.label.toLowerCase() === lbl.toLowerCase());
-    if (!existing) {
-       id = uid();
-       saveIndications([...indications, { id, label: lbl }]);
-    } else {
-       id = existing.id;
-    }
-    setF(x => ({...x, concerns: x.concerns.includes(id) ? x.concerns : [...x.concerns, id]}));
-    setNewIndication('');
-    setShowNewIndication(false);
-  };
-
-  const handleAddPhase = (stepId) => {
-    if (!newPhaseLabel.trim()) return;
-    const lbl = newPhaseLabel.trim();
-    const existing = phases.find(p => p.label.toLowerCase() === lbl.toLowerCase());
-    if (!existing) {
-       const id = uid();
-       savePhases([...phases, {id, label: lbl}]);
-       updStep(stepId, 'phase', lbl);
-    } else {
-       updStep(stepId, 'phase', existing.label);
-    }
-    setAddingPhaseFor(null);
-    setNewPhaseLabel('');
-  };
-
-  const handleDragStart = (e, index) => {
-    setDraggedIdx(index);
-    e.dataTransfer.effectAllowed = "move";
-  };
-
-  const handleDragOver = (e, index) => {
-    e.preventDefault();
-    if (draggedIdx === null || draggedIdx === index) return;
-    const newSteps = [...f.steps];
-    const draggedItem = newSteps[draggedIdx];
-    newSteps.splice(draggedIdx, 1);
-    newSteps.splice(index, 0, draggedItem);
-    setDraggedIdx(index);
-    setF({ ...f, steps: newSteps });
-  };
-
-  const handleDragEnd = () => setDraggedIdx(null);
-
-  const normalizePlainName = (value) =>
-    String(value || '')
-      .toLowerCase()
-      .normalize('NFKD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .replace(/[^a-z0-9 ]/g, ' ')
-      .replace(/\s+/g, ' ')
-      .trim();
-
-  const getFuzzyScore = (a, b) => {
-    const tokensA = a.split(' ').filter(Boolean);
-    const tokensB = b.split(' ').filter(Boolean);
-    if (!tokensA.length || !tokensB.length) return 0;
-    const setB = new Set(tokensB);
-    const matched = tokensA.filter((t) => setB.has(t)).length;
-    return matched / tokensA.length;
-  };
-
-  const doSave=(pub=null)=>{
-    if(!f.name.trim()) return alert('Nome obrigatorio');
-    if(!String(f.code||'').trim()) return alert('Codigo obrigatorio');
-    const normalizedCode = String(f.code || '').trim().toLowerCase();
-    const codeInUse = protocols.some(p => p.id !== f.id && String(p.code || '').trim().toLowerCase() === normalizedCode);
-    if(codeInUse) return alert('Ja existe um protocolo com este codigo.');
-
-    const normalizedName = normalizePlainName(f.name);
-    const exactMatch = protocols.find(p => p.id !== f.id && normalizePlainName(p.name) === normalizedName);
-    if (exactMatch) {
-      if (!window.confirm(`Ja existe protocolo similar: "${exactMatch.name}". Deseja continuar?`)) return;
-    } else {
-      const possible = protocols
-        .map((p) => ({ protocol: p, score: getFuzzyScore(normalizedName, normalizePlainName(p.name)) }))
-        .filter(item => item.score >= 0.6)
-        .sort((a, b) => b.score - a.score);
-      if (possible.length > 0 && !window.confirm(`Protocolo similar encontrado: "${possible[0].protocol.name}" (${Math.round(possible[0].score * 100)}% similar). Deseja continuar?`)) return;
-    }
-
-    const {_new,...clean}=f;
-    clean.code = String(clean.code || '').trim();
-    clean.reviewStatus = clean.reviewStatus || 'needs_review';
-    if(pub!==null) clean.published=pub;
-    if(prot._new) saveProtocols([...protocols,clean]);
-    else saveProtocols(protocols.map(p=>p.id===clean.id?clean:p));
-    onClose?.();
-  };
-  
-  const inpSt={width:'100%',padding:'7px 10px',border:`1.5px solid ${B.border}`,borderRadius:7,fontSize:13,outline:'none',boxSizing:'border-box',fontFamily:'inherit',background:B.white};
-  const flowCards = [
-    { n:'1', title:'Base do protocolo', desc:'Nome, descricao, categoria e indicacoes.' },
-    { n:'2', title:'Cabine', desc:'Monte as etapas e a ordem do atendimento.' },
-    { n:'3', title:'Uso em casa', desc:'Defina a rotina que o cliente vai seguir.' },
-    { n:'4', title:'Kits e destaque', desc:'Kits vinculados, imagem final e CTA.' },
-    { n:'5', title:'Revisao', desc:'Confira e publique quando estiver pronto.' }
-  ];
-  const sectionBoxStyle = {background:B.white,borderRadius:16,border:`1px solid ${B.border}`,padding:isMobile?18:24,marginBottom:16,boxShadow:'0 10px 26px rgba(44,31,64,0.04)'};
-  const sectionHeadingStyle = {display:'flex',alignItems:'flex-start',gap:12,marginBottom:16,flexDirection:isMobile?'column':'row'};
-  const sectionStepStyle = {width:34,height:34,borderRadius:'50%',background:B.purple,color:B.white,display:'flex',alignItems:'center',justifyContent:'center',fontSize:14,fontWeight:800,flexShrink:0};
-  
-  const protocolProducts = f.steps.filter(s=>s.productId).map(s=>products.find(x=>x.id===s.productId)).filter(Boolean);
-  const uniqueProducts = [...new Map(protocolProducts.map(pr=>[pr.id,pr])).values()];
-  const totalInvestment = uniqueProducts.reduce((acc, pr) => acc + (parseFloat(pr.cost) || 0), 0);
-  const yields = uniqueProducts.map(pr => parseFloat(pr.yieldApplications)).filter(y => y > 0 && !isNaN(y));
-  const protocolYield = yields.length > 0 ? Math.min(...yields) : 0;
-  const bottleneckProduct = uniqueProducts.find(pr => parseFloat(pr.yieldApplications) === protocolYield);
-  const avgCostPerSession = protocolYield > 0 ? totalInvestment / protocolYield : 0;
-  
-  const phaseOptions = [...phases];
-  f.steps.forEach(s => {
-      if (s.phase && !phaseOptions.find(p => p.label === s.phase)) {
-          phaseOptions.push({ id: uid(), label: s.phase });
-      }
-  });
-  phaseOptions.sort((a,b)=>a.label.localeCompare(b.label));
-
-  return (
-    <div style={{maxWidth:700}}>
-      <div style={{display:'flex',alignItems:'center',gap:12,marginBottom:24}}>
-        <button onClick={()=>onClose?.()} style={{background:'none',border:'none',color:B.purple,fontWeight:700,cursor:'pointer',fontSize:14,fontFamily:'inherit'}}>← Voltar</button>
-        <h2 style={{margin:0,color:B.purpleDark,fontSize:20,fontFamily:'Georgia, serif'}}>{prot._new?'Novo Protocolo':'Editar Protocolo'}</h2>
-      </div>
-
-      <div style={{background:`linear-gradient(135deg, ${B.purpleDark}, ${B.purple})`,borderRadius:18,padding:isMobile?'18px 16px':'22px 22px 20px',marginBottom:18,color:B.white,boxShadow:'0 18px 38px rgba(44,31,64,0.18)'}}>
-        <div style={{fontSize:11,fontWeight:700,letterSpacing:'0.14em',textTransform:'uppercase',color:'rgba(255,255,255,0.7)',marginBottom:8}}>Fluxo de montagem</div>
-        <div style={{fontSize:isMobile?20:22,fontWeight:700,fontFamily:'Georgia, serif',marginBottom:8}}>Preencha o protocolo em sequencia</div>
-        <div style={{fontSize:13,lineHeight:1.6,color:'rgba(255,255,255,0.78)',marginBottom:16}}>Organizei o cadastro para voce montar o protocolo de forma mais natural: contexto, kits, cabine, rotina de casa e publicacao.</div>
-        <div style={{display:'grid',gridTemplateColumns:isMobile?'1fr':'repeat(5, minmax(0, 1fr))',gap:10}}>
-          {flowCards.map(card=>(
-            <div key={card.n} style={{background:'rgba(255,255,255,0.08)',border:'1px solid rgba(255,255,255,0.12)',borderRadius:14,padding:'12px 12px 10px'}}>
-              <div style={{width:26,height:26,borderRadius:'50%',background:B.gold,color:B.white,display:'flex',alignItems:'center',justifyContent:'center',fontSize:12,fontWeight:800,marginBottom:8}}>{card.n}</div>
-              <div style={{fontSize:13,fontWeight:700,marginBottom:4}}>{card.title}</div>
-              <div style={{fontSize:11,lineHeight:1.45,color:'rgba(255,255,255,0.72)'}}>{card.desc}</div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {!showNotionImport && (
-        <>
-          {f.externalSourceId && (
-            <div style={{background:'#E8F5E9',border:`1.5px solid ${B.green}`,borderRadius:14,padding:'12px 14px',marginBottom:18,display:'flex',alignItems:'center',justifyContent:'space-between', gap: 12}}>
-              <div style={{display:'flex',alignItems:'center',gap:10}}>
-                <span style={{fontSize:18}}>✓</span>
-                <div style={{fontSize:13,color:'#2E7D32',fontWeight:600}}>Protocolo carregado do Notion</div>
-              </div>
-              <button onClick={()=>setShowNotionImport(true)} style={{background:'none',border:'none',color:B.purple,cursor:'pointer',fontSize:12,fontWeight:700,textDecoration:'underline'}}>Carregar outro Notion</button>
-            </div>
-          )}
-          {!f.externalSourceId && (
-            <div style={{background:`linear-gradient(135deg, rgba(113, 93, 168, 0.05), rgba(113, 93, 168, 0.08))`,border:`1.5px dashed ${B.purple}`,borderRadius:14,padding:'14px 16px',marginBottom:18,display:'flex',alignItems:'center',justifyContent:'space-between', gap: 12}}>
-              <div style={{display:'flex',alignItems:'center',gap:10}}>
-                <span style={{fontSize:16}}>🔗</span>
-                <div style={{fontSize:13,color:B.purple,fontWeight:600}}>Importar protocolo do Notion</div>
-              </div>
-              <button onClick={()=>setShowNotionImport(true)} style={{background:B.purple,border:'none',color:B.white,cursor:'pointer',fontSize:12,fontWeight:700,borderRadius:6,padding:'6px 12px',fontFamily:'inherit'}}>Abrir</button>
-            </div>
-          )}
-        </>
-      )}
-
-      {showNotionImport && (
-        <div style={{background:B.white,border:`1.5px solid ${B.purple}`,borderRadius:14,padding:'16px 18px',marginBottom:18,boxShadow:`0 6px 20px rgba(113, 93, 168, 0.12)`}}>
-          <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:12}}>
-            <h3 style={{margin:0,fontSize:14,fontWeight:700,color:B.purpleDark,display:'flex',alignItems:'center',gap:8}}>
-              <span style={{fontSize:14}}>🔗</span> Importar do Notion
-            </h3>
-            <button onClick={()=>setShowNotionImport(false)} style={{background:'none',border:'none',color:B.muted,cursor:'pointer',fontSize:18,fontFamily:'inherit'}}>×</button>
-          </div>
-          <div style={{fontSize:12,color:B.muted,marginBottom:12,lineHeight:1.5}}>Cole a URL de uma página do Notion pública. Vamos tentar extrair as informações principais.</div>
-          <div style={{display:'flex',gap:8,marginBottom:8}}>
-            <input 
-              type="text"
-              value={notionUrl}
-              onChange={e=>setNotionUrl(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder="https://notion.so/seu-protocolo-09bfa8de63a64b27bd379d6b2a8b813f"
-              disabled={notionLoading}
-              style={{...inpSt,flex:1}}
-            />
-            <button
-              onClick={handleFetchNotion}
-              disabled={notionLoading || !notionUrl.trim()}
-              style={{padding:'7px 16px',background:notionLoading?B.border:B.purple,color:B.white,border:'none',borderRadius:7,fontSize:13,fontWeight:700,cursor:notionLoading?'default':'pointer',fontFamily:'inherit',opacity:notionLoading || !notionUrl.trim()?0.6:1}}
-            >
-              {notionLoading ? 'Carregando...' : 'Carregar'}
-            </button>
-          </div>
-          {notionError && (
-            <div style={{background:'#FFEBEE',border:`1px solid #EF5350`,borderRadius:8,padding:'8px 10px',fontSize:12,color:'#C62828',display:'flex',alignItems:'center',gap:8}}>
-              <span>⚠️</span>
-              {notionError}
-            </div>
-          )}
-        </div>
-      )}
-
-      <div style={{display:'flex',flexDirection:'column'}}>
-      <div style={{...sectionBoxStyle,order:1}}>
-        <div style={sectionHeadingStyle}>
-          <div style={sectionStepStyle}>1</div>
-          <div>
-            <SectionTitle>Informacoes Principais</SectionTitle>
-            <div style={{fontSize:13,color:B.muted,marginTop:4}}>Comece definindo o posicionamento do protocolo, para que ele ja nasca bem organizado na area publica.</div>
-          </div>
-        </div>
-        <div style={{background:B.cream,border:`1px solid ${B.border}`,borderRadius:12,padding:'12px 14px',marginBottom:16,fontSize:12,color:B.muted,lineHeight:1.6}}>
-          Dica: pense nessa etapa como a vitrine do protocolo. Se alguem olhar so o card da home, essas informacoes ja precisam explicar o valor dele.
-        </div>
-        <div style={{display:'grid',gridTemplateColumns:isMobile?'1fr':'220px 1fr',gap:14}}>
-          <Field label="Codigo do protocolo *" value={f.code||''} onChange={v=>setF({...f,code:v})} placeholder="Ex: PROTO-023" note="Use um codigo curto e unico para localizar rapido no admin." />
-          <Field label="Nome do protocolo *" value={f.name} onChange={v=>setF({...f,name:v})} placeholder="Ex: Peeling de Diamante para Clareamento e Uniformizacao" note="Use um nome que a equipe reconheca rapido e que tambem fique claro para consulta futura." />
-        </div>
-        <div style={{display:'grid',gridTemplateColumns:isMobile?'1fr':'1fr 1fr',gap:14}}>
-          <Sel label="Status de Revisao" value={f.reviewStatus || 'needs_review'} onChange={v=>setF({...f,reviewStatus:v})} options={[{v:'needs_review', l:'A Revisar'}, {v:'reviewed', l:'Revisado'}, {v:'approved', l:'Aprovado'}]} />
-          <Field label="Etiqueta de destaque" value={f.badge||''} onChange={v=>setF({...f,badge:v})} placeholder="Ex: Lancamento, Novo, Exclusivo" note="Aparece como selo no card da home. Use so quando realmente quiser destacar." />
-        </div>
-        <Field label="Resumo do protocolo" value={f.description} onChange={v=>setF({...f,description:v})} placeholder="Explique o objetivo principal, para quem ele foi pensado e o resultado esperado." multi rows={3} />
-        <div style={{display:'grid',gridTemplateColumns:isMobile?'1fr':'1fr 1fr',gap:14}}>
-          <Sel label="Categoria visual" value={f.category} onChange={v=>setF({...f,category:v})} options={[{v:'',l:'Selecione'}, ...categories.map(c => ({v: c.id, l: c.label}))]} />
-          <Field label="Frequencia recomendada" value={f.frequency} onChange={v=>setF({...f,frequency:v})} placeholder="Ex: 1 sessao a cada 15 dias" />
-        </div>
-        <Field label="Associacoes e recursos complementares" value={f.associations} onChange={v=>setF({...f,associations:v})} placeholder="Ex: Peeling de diamante, LED, vapor de ozonio" note="Use para citar equipamentos ou tecnicas que combinam com esse protocolo." />
-        <Field label="Video demonstrativo no YouTube" value={f.youtubeUrl} onChange={v=>setF({...f,youtubeUrl:v})} placeholder="https://youtube.com/watch?v=..." note="Se preencher, aparecera um botao extra no protocolo publico." />
-        
-        <div style={{marginTop: 16, paddingTop: 16, borderTop: `1px dashed ${B.border}`}}>
-          <div style={{fontSize:12,fontWeight:700,color:B.muted,marginBottom:8,textTransform:'uppercase',letterSpacing:'0.06em'}}>Preocupacoes / Indicacoes</div>
-          <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
-            {[...indications].sort((a,b)=>a.label.localeCompare(b.label)).map(c=>(
-              <button key={c.id} onClick={(e)=>{e.preventDefault(); togConcern(c.id);}} style={{padding:'6px 14px',borderRadius:20,border:`1.5px solid ${f.concerns.includes(c.id)?B.purple:B.border}`,background:f.concerns.includes(c.id)?B.purple:B.white,color:f.concerns.includes(c.id)?B.white:B.text,fontSize:13,cursor:'pointer',fontWeight:700,fontFamily:'inherit'}}>{c.label}</button>
-            ))}
-            {!showNewIndication ? (
-              <button onClick={(e) => {e.preventDefault(); setShowNewIndication(true);}} style={{padding:'6px 14px',borderRadius:20,border:`1.5px dashed ${B.purple}`,background:'transparent',color:B.purple,fontSize:13,cursor:'pointer',fontWeight:700}}>+ Nova Indicacao</button>
-            ) : (
-              <div style={{display:'flex', gap: 5}}>
-                 <input value={newIndication} onChange={e=>setNewIndication(e.target.value)} onKeyDown={(e) => { if(e.key === 'Enter') { e.preventDefault(); handleAddIndication(); } }} placeholder="Nome..." style={{padding:'6px 10px', borderRadius:20, border:`1px solid ${B.border}`, fontSize:13, outline:'none'}} autoFocus />
-                 <button onClick={(e)=>{e.preventDefault(); handleAddIndication();}} style={{padding:'6px 10px', borderRadius:20, border:'none', background:B.green, color:B.white, cursor:'pointer', fontWeight:700}}>OK</button>
-                 <button onClick={(e)=>{e.preventDefault(); setShowNewIndication(false);}} style={{padding:'6px 10px', borderRadius:20, border:'none', background:B.redLight, color:B.red, cursor:'pointer', fontWeight:700}}>×</button>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-
-      <div style={{...sectionBoxStyle,order:4}}>
-        <div style={sectionHeadingStyle}>
-          <div style={sectionStepStyle}>4</div>
-          <div>
-            <SectionTitle>Kits e Destaques</SectionTitle>
-            <div style={{fontSize:13,color:B.muted,marginTop:4}}>Aqui voce vincula os kits finais e prepara o material visual que aparece no fechamento do protocolo.</div>
-          </div>
-        </div>
-        <div style={{background:B.cream,border:`1px solid ${B.border}`,borderRadius:12,padding:'12px 14px',marginBottom:16,fontSize:12,color:B.muted,lineHeight:1.6}}>
-          Dica: os kits entram como recomendacao final. Eles nao entram nas etapas, mas ajudam a vender melhor o fechamento do protocolo.
-        </div>
-
-        <div style={{marginBottom: 16, paddingBottom: 16, borderBottom: `1px dashed ${B.border}`}}>
-          <div style={{fontSize:12,fontWeight:700,color:B.muted,marginBottom:10,textTransform:'uppercase',letterSpacing:'0.06em'}}>Kits Vinculados ao Protocolo</div>
-          <div style={{background:B.cream,border:`1px solid ${B.border}`,borderRadius:12,padding:'12px 14px',marginBottom:14,fontSize:12,color:B.muted,lineHeight:1.6}}>
-            Use os kits para fechar a oferta do protocolo. Eles aparecem no resumo final e no bloco certo da pagina publica, mas nao entram automaticamente nas etapas do atendimento.
-          </div>
-          <div style={{display:'grid',gridTemplateColumns:isMobile?'1fr':'1fr 1fr',gap:14}}>
-            <div style={{background:'#F8F6FC',border:`1px solid ${B.border}`,borderRadius:12,padding:'12px 12px 10px'}}>
-              <div style={{fontSize:11,fontWeight:700,color:B.muted,marginBottom:4}}>KIT PROFISSIONAL</div>
-              <select value={f.professionalKitId||''} onChange={e=>setF({...f,professionalKitId:e.target.value})} style={inpSt}>
-                <option value="">Nenhum kit profissional vinculado</option>
-                {getProfessionalKitOptions(f.professionalKitId).map(o=><option key={o.v} value={o.v}>{o.l}</option>)}
-              </select>
-              <div style={{fontSize:11,color:B.muted,marginTop:6,lineHeight:1.5}}>Esse kit aparece como oferta profissional no fechamento do protocolo, sem entrar no passo a passo da cabine.</div>
-            </div>
-            <div style={{background:'#F8FCF8',border:'1px solid #D8EEDB',borderRadius:12,padding:'12px 12px 10px'}}>
-              <div style={{fontSize:11,fontWeight:700,color:B.muted,marginBottom:4}}>KIT USO EM CASA</div>
-              <select value={f.homeKitId||''} onChange={e=>setF({...f,homeKitId:e.target.value})} style={inpSt}>
-                <option value="">Nenhum kit de uso em casa vinculado</option>
-                {getHomeKitOptions(f.homeKitId).map(o=><option key={o.v} value={o.v}>{o.l}</option>)}
-              </select>
-              <div style={{fontSize:11,color:B.muted,marginTop:6,lineHeight:1.5}}>Esse kit aparece no bloco de uso em casa e tambem no resumo de produtos do protocolo.</div>
-            </div>
-          </div>
-        </div>
-
-        <div>
-          <div style={{fontSize:12,fontWeight:700,color:B.muted,marginBottom:8,textTransform:'uppercase',letterSpacing:'0.06em'}}>Oferta final do protocolo</div>
-          <div style={{display:'flex',gap:14,alignItems:'flex-start', marginBottom: 14}}>
-            {f.featuredImage && <img src={f.featuredImage} alt="destaque" style={{width: 120, height: 'auto', objectFit:'contain',borderRadius:10,border:`1px solid ${B.border}`,background:B.cream,flexShrink:0}} />}
-            <div style={{flex:1}}>
-              <label style={{display:'inline-block',padding:'9px 18px',background:B.purpleLight,color:B.purple,borderRadius:8,fontWeight:700,fontSize:13,cursor:'pointer',border:`1.5px dashed ${B.purple}`}}>
-                {f.featuredImage?'Trocar Imagem':'Enviar Imagem Destaque'}
-                <input type="file" accept="image/*" style={{display:'none'}} onChange={async (e)=>{
-                  const file = e.target.files[0];
-                  if (!file) return;
-                  const url = await uploadImageSafe(file);
-                  setF(x => ({...x, featuredImage: url}));
-                }} />
-              </label>
-              {f.featuredImage&&<button onClick={(e)=>{e.preventDefault(); setF(x=>({...x,featuredImage:''}));}} style={{marginLeft:10,background:'none',border:'none',color:B.red,fontSize:12,cursor:'pointer',fontFamily:'inherit',fontWeight:700}}>Remover</button>}
-              <div style={{fontSize:11,color:B.muted,marginTop:6}}>Imagem retangular ou quadrada para o final do protocolo.</div>
-            </div>
-          </div>
-        <Field label="Link do botao da oferta final" value={f.featuredLink} onChange={v=>setF({...f,featuredLink:v})} placeholder="https://..." note="Esse link sera usado no CTA que aparece junto da imagem de destaque no final da pagina." />
-        </div>
-      </div>
-
-      <div style={{...sectionBoxStyle,order:2}}>
-        <div style={{...sectionHeadingStyle,justifyContent:'space-between',alignItems:isMobile?'stretch':'center'}}>
-          <div style={{display:'flex',alignItems:'flex-start',gap:12,flex:1,flexDirection:isMobile?'column':'row'}}>
-            <div style={sectionStepStyle}>2</div>
-            <div>
-              <SectionTitle>Passos em Cabine</SectionTitle>
-              <div style={{fontSize:13,color:B.muted,marginTop:4}}>Monte a sequencia do atendimento profissional. Cada etapa pode ter fase, produto e instrucao.</div>
-            </div>
-          </div>
-          <Btn size="sm" onClick={(e)=>{e.preventDefault(); addStep();}}>+ Adicionar Etapa</Btn>
-        </div>
-        <div style={{background:B.cream,border:`1px solid ${B.border}`,borderRadius:12,padding:'12px 14px',marginBottom:16,fontSize:12,color:B.muted,lineHeight:1.6}}>
-          Preencha aqui apenas o que acontece na cabine. Se um produto for vendido no fechamento ou usado em casa, vincule como kit ou rotina, nao como etapa.
-        </div>
-        {f.steps.map((step,i)=>(
-          <div 
-            key={step.id} 
-            draggable 
-            onDragStart={(e) => handleDragStart(e, i)}
-            onDragOver={(e) => handleDragOver(e, i)}
-            onDragEnd={handleDragEnd}
-            style={{background: draggedIdx === i ? B.purpleLight : B.white, borderRadius:14, padding:16, marginBottom:12, border:`1px solid ${draggedIdx === i ? B.purple : B.border}`, cursor: 'grab', opacity: draggedIdx === i ? 0.5 : 1, boxShadow:'0 8px 20px rgba(44,31,64,0.04)'}}
-          >
-            <div style={{display:'flex',justifyContent:'space-between',marginBottom:14, alignItems: 'center'}}>
-              <div style={{display: 'flex', alignItems: 'center', gap: 10}}>
-                <div style={{width:30,height:30,borderRadius:'50%',background:B.purple,color:B.white,display:'flex',alignItems:'center',justifyContent:'center',fontSize:12,fontWeight:800,flexShrink:0}}>{i+1}</div>
-                <div>
-                  <div style={{fontSize:11,fontWeight:700,color:B.purple,textTransform:'uppercase',letterSpacing:'0.08em'}}>Etapa {i+1} do atendimento</div>
-                  <div style={{fontSize:12,color:B.muted,marginTop:2}}>Arraste para reorganizar a sequencia</div>
-                </div>
-              </div>
-              <div style={{display:'flex',alignItems:'center',gap:10}}>
-                <span style={{cursor: 'grab', fontSize: 18, color: B.muted}}>≡</span>
-                <button onClick={(e)=>{e.preventDefault(); rmStep(step.id);}} style={{background:'none',border:'none',color:B.red,cursor:'pointer',fontSize:16,lineHeight:1}}>×</button>
-              </div>
-            </div>
-            <div style={{display:'grid',gridTemplateColumns:isMobile?'1fr':'1fr 2fr',gap:12,marginBottom:12}}>
-              <div style={{background:B.cream,border:`1px solid ${B.border}`,borderRadius:12,padding:'12px 12px 10px'}}>
-                <div style={{fontSize:11,fontWeight:700,color:B.muted,marginBottom:4}}>Nome da fase</div>
-                {addingPhaseFor === step.id ? (
-                    <div style={{display:'flex', gap: 4}}>
-                        <input 
-                            autoFocus 
-                            value={newPhaseLabel} 
-                            onChange={e=>setNewPhaseLabel(e.target.value)} 
-                            onKeyDown={(e) => { if(e.key === 'Enter') { e.preventDefault(); handleAddPhase(step.id); } }}
-                            placeholder="Nova fase..." 
-                            style={{...inpSt, flex:1}} 
-                        />
-                        <button onClick={(e) => { e.preventDefault(); handleAddPhase(step.id); }} style={{background:B.green, color:B.white, border:'none', borderRadius:7, padding:'0 10px', cursor:'pointer', fontWeight:'bold'}}>OK</button>
-                        <button onClick={(e) => { e.preventDefault(); setAddingPhaseFor(null); setNewPhaseLabel(''); }} style={{background:B.redLight, color:B.red, border:'none', borderRadius:7, padding:'0 10px', cursor:'pointer', fontWeight:'bold'}}>×</button>
-                    </div>
-                ) : (
-                    <div style={{display:'flex', gap: 4}}>
-                        <select value={step.phase} onChange={e=>updStep(step.id,'phase',e.target.value)} style={{...inpSt, flex:1}}>
-                            <option value="">Selecione uma fase</option>
-                            {phaseOptions.map(p=><option key={p.id} value={p.label}>{p.label}</option>)}
-                        </select>
-                        <button onClick={(e) => { e.preventDefault(); setAddingPhaseFor(step.id); setNewPhaseLabel(''); }} style={{background:B.purpleLight, color:B.purple, border:'none', borderRadius:7, padding:'0 10px', cursor:'pointer', fontWeight:'bold', fontSize:16}}>+</button>
-                    </div>
-                )}
-              </div>
-              <div style={{background:B.cream,border:`1px solid ${B.border}`,borderRadius:12,padding:'12px 12px 10px'}}>
-                <div style={{fontSize:11,fontWeight:700,color:B.muted,marginBottom:4}}>Produto usado nesta etapa</div>
-                <select value={step.productId||''} onChange={e=>updStep(step.id,'productId',e.target.value||null)} style={inpSt}>
-                  {getProtocolProductOptions(step.productId).map(o=><option key={o.v} value={o.v}>{o.l}</option>)}
-                </select>
-                {step.productId&&costPerApp(products.find(x=>x.id===step.productId))!=null&&(
-                  <div style={{fontSize:11,color:B.green,fontWeight:700,marginTop:3}}>Custo: {fmtCurrency(costPerApp(products.find(x=>x.id===step.productId)))}/aplicacao</div>
-                )}
-              </div>
-            </div>
-            <div style={{background:B.cream,border:`1px solid ${B.border}`,borderRadius:12,padding:'12px 12px 2px'}}>
-              <Field multi label="O que fazer nesta etapa" value={step.instruction} onChange={v=>updStep(step.id,'instruction',v)} rows={2} placeholder="Descreva a execucao: como aplicar, tempo, cuidados e observacoes." />
-            </div>
-          </div>
-        ))}
-
-        {uniqueProducts.length > 0 && totalInvestment > 0 && (
-          <div style={{background:B.purpleLight,borderRadius:8,padding:'16px', marginTop:14, border:`1px solid ${B.purple}`}}>
-            <div style={{fontSize:14,fontWeight:700,color:B.purpleDark,marginBottom:10}}>Resumo de Rentabilidade do Kit</div>
-            <div style={{display:'grid', gridTemplateColumns:isMobile?'1fr':'1fr 1fr 1fr', gap:10}}>
-               <div style={{background:B.white, padding:10, borderRadius:8, border:`1px solid ${B.border}`}}>
-                 <div style={{fontSize:11, color:B.muted, fontWeight:600, textTransform:'uppercase'}}>Investimento Total</div>
-                 <div style={{fontSize:15, fontWeight:'bold', color:B.text, marginTop:4}}>{fmtCurrency(totalInvestment)}</div>
-               </div>
-               <div style={{background:B.white, padding:10, borderRadius:8, border:`1px solid ${B.border}`}}>
-                 <div style={{fontSize:11, color:B.muted, fontWeight:600, textTransform:'uppercase'}}>Rendimento Medio</div>
-                 <div style={{fontSize:15, fontWeight:'bold', color:B.purple, marginTop:4}}>{protocolYield} apl.</div>
-                 {bottleneckProduct && <div style={{fontSize:10, color:B.muted, marginTop:2, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis'}}>Gargalo: {bottleneckProduct.name}</div>}
-               </div>
-               <div style={{background:B.white, padding:10, borderRadius:8, border:`1px solid ${B.border}`}}>
-                 <div style={{fontSize:11, color:B.muted, fontWeight:600, textTransform:'uppercase'}}>Custo por Sessao</div>
-                 <div style={{fontSize:15, fontWeight:'bold', color:B.green, marginTop:4}}>{fmtCurrency(avgCostPerSession)}</div>
-               </div>
-            </div>
-          </div>
-        )}
-        
-        {f.steps.length===0&&<div style={{textAlign:'center',padding:'16px 0',color:B.muted,fontSize:13}}>Nenhuma etapa adicionada</div>}
-      </div>
-
-      <div style={{...sectionBoxStyle,order:3}}>
-        <div style={sectionHeadingStyle}>
-          <div style={sectionStepStyle}>3</div>
-          <div>
-            <SectionTitle>Uso em Casa</SectionTitle>
-            <div style={{fontSize:13,color:B.muted,marginTop:4}}>Defina a rotina que o cliente vai continuar em casa, separando o que acontece de manha e a noite.</div>
-          </div>
-        </div>
-        <div style={{background:B.cream,border:`1px solid ${B.border}`,borderRadius:12,padding:'12px 14px',marginBottom:16,fontSize:12,color:B.muted,lineHeight:1.6}}>
-          Pense nessa parte como a mensagem pronta para a cliente. Quanto mais claro estiver aqui, mais valor a plataforma entrega para a esteticista.
-        </div>
-        <div style={{display:'grid',gridTemplateColumns:isMobile?'1fr':'1fr 1fr',gap:20}}>
-          {[{sl:'morning',lbl:'Manha'},{sl:'night',lbl:'Noite'}].map(({sl,lbl})=>(
-            <div key={sl}>
-              <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:10}}>
-                <div style={{fontSize:13,fontWeight:700,color:B.text}}>{lbl}</div>
-                <Btn size="sm" variant="secondary" onClick={(e)=>{e.preventDefault(); addHome(sl);}}>+ Adicionar</Btn>
-              </div>
-              {f.homeUse[sl].map((item,i)=>(
-                <div key={i} style={{background:B.white,borderRadius:14,padding:'14px 14px 10px',marginBottom:10,position:'relative',border:`1px solid ${B.border}`,boxShadow:'0 8px 18px rgba(44,31,64,0.04)'}}>
-                  <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:10,gap:10}}>
-                    <div style={{display:'flex',alignItems:'center',gap:8}}>
-                      <div style={{width:26,height:26,borderRadius:'50%',background:B.purple,color:B.white,display:'flex',alignItems:'center',justifyContent:'center',fontSize:11,fontWeight:800}}>{i+1}</div>
-                      <div style={{fontSize:12,fontWeight:700,color:B.purpleDark}}>Passo da rotina</div>
-                    </div>
-                    <button onClick={(e)=>{e.preventDefault(); rmHome(sl,i);}} style={{background:'none',border:'none',color:B.red,cursor:'pointer',fontSize:16,lineHeight:1}}>×</button>
-                  </div>
-                  <div style={{background:B.cream,border:`1px solid ${B.border}`,borderRadius:12,padding:'12px 12px 10px',marginBottom:10}}>
-                    <div style={{fontSize:11,fontWeight:700,color:B.muted,marginBottom:4}}>Produto indicado</div>
-                    <select value={item.productId||''} onChange={e=>updHome(sl,i,'productId',e.target.value||null)} style={{...inpSt,marginBottom:0}}>
-                      {getSkincareProductOptions(item.productId).map(o=><option key={o.v} value={o.v}>{o.l}</option>)}
-                    </select>
-                  </div>
-                  <div style={{background:B.cream,border:`1px solid ${B.border}`,borderRadius:12,padding:'12px 12px 2px'}}>
-                    <div style={{fontSize:11,fontWeight:700,color:B.muted,marginBottom:6}}>Como orientar a cliente</div>
-                    <Field multi value={item.instruction} onChange={v=>updHome(sl,i,'instruction',v)} placeholder="Ex: aplicar sobre a pele limpa, massagear e nao remover." />
-                  </div>
-                </div>
-              ))}
-              {f.homeUse[sl].length===0&&<div style={{fontSize:12,color:B.muted,fontStyle:'italic'}}>Nenhum produto adicionado</div>}
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div style={{...sectionBoxStyle,padding:isMobile?18:20,marginBottom:0,order:5}}>
-        <div style={sectionHeadingStyle}>
-          <div style={sectionStepStyle}>5</div>
-          <div>
-            <SectionTitle>Revisar e Publicar</SectionTitle>
-            <div style={{fontSize:13,color:B.muted,marginTop:4}}>Feche o cadastro escolhendo se o protocolo sai como rascunho ou ja vai para a area publica.</div>
-          </div>
-        </div>
-        <div style={{background:B.cream,border:`1px solid ${B.border}`,borderRadius:12,padding:'12px 14px',marginBottom:16,fontSize:12,color:B.muted,lineHeight:1.6}}>
-          Se ainda estiver montando ou revisando com a equipe, salve como rascunho. Quando estiver pronto para uso comercial, publique.
-        </div>
-        <div style={{display:'grid',gridTemplateColumns:isMobile?'1fr':'repeat(3, minmax(0, 1fr))',gap:10,marginBottom:16}}>
-          <div style={{background:B.cream,border:`1px solid ${B.border}`,borderRadius:12,padding:'12px 14px'}}>
-            <div style={{fontSize:10,fontWeight:700,color:B.muted,textTransform:'uppercase',letterSpacing:'0.08em',marginBottom:4}}>Etapas em cabine</div>
-            <div style={{fontSize:18,fontWeight:700,color:B.purpleDark}}>{f.steps.length}</div>
-          </div>
-          <div style={{background:B.cream,border:`1px solid ${B.border}`,borderRadius:12,padding:'12px 14px'}}>
-            <div style={{fontSize:10,fontWeight:700,color:B.muted,textTransform:'uppercase',letterSpacing:'0.08em',marginBottom:4}}>Rotina em casa</div>
-            <div style={{fontSize:18,fontWeight:700,color:B.purpleDark}}>{(f.homeUse?.morning?.length||0) + (f.homeUse?.night?.length||0)}</div>
-          </div>
-          <div style={{background:B.cream,border:`1px solid ${B.border}`,borderRadius:12,padding:'12px 14px'}}>
-            <div style={{fontSize:10,fontWeight:700,color:B.muted,textTransform:'uppercase',letterSpacing:'0.08em',marginBottom:4}}>Status atual</div>
-            <div style={{fontSize:18,fontWeight:700,color:f.published?B.green:B.purpleDark}}>{f.published?'Publicado':'Rascunho'}</div>
-          </div>
-        </div>
-        <div style={{display:'flex',gap:10,flexDirection:isMobile?'column':'row'}}>
-          {hasPerm(loggedUser,'protocols','publish')&&<Btn onClick={(e)=>{e.preventDefault(); doSave(true);}} sx={{flex:1,padding:'12px 0'}}>Salvar e Publicar</Btn>}
-          <Btn variant="secondary" onClick={(e)=>{e.preventDefault(); doSave(false);}} sx={isMobile?{width:'100%'}:undefined}>Salvar Rascunho</Btn>
-          <Btn variant="ghost" onClick={(e)=>{e.preventDefault(); onClose?.();}} sx={isMobile?{width:'100%'}:undefined}>Cancelar</Btn>
-        </div>
-      </div>
-      </div>
-    </div>
-  );
-};
-
 // AdminProtForm moved to src/components/admin/AdminProtForm.jsx
 
 const AdminAlertsLegacy = ({ products, protocols, saveProducts, setEditProt, setAView }) => {
@@ -2922,7 +2355,7 @@ const AdminAlertsLegacy = ({ products, protocols, saveProducts, setEditProt, set
 
       {allIssues.length === 0 && (
         <div style={{background:B.greenLight,borderRadius:14,padding:'36px 28px',textAlign:'center',border:`1px solid ${B.green}`}}>
-          <div style={{fontSize:40,marginBottom:12}}>✓</div>
+          <div style={{fontSize:40,marginBottom:12}}>?</div>
           <div style={{fontSize:16,fontWeight:700,color:B.green}}>Tudo certo!</div>
           <div style={{fontSize:14,color:B.muted,marginTop:4}}>Nenhum protocolo publicado possui produtos inativos vinculados.</div>
         </div>
@@ -2988,7 +2421,7 @@ const AdminAlertsLegacy = ({ products, protocols, saveProducts, setEditProt, set
 };
 
 export default function App() {
-  const [loading,setLoading]=useState(false); // Começa false porque carregamos dados locais rapidinho
+  const [loading,setLoading]=useState(false); // Come�a false porque carregamos dados locais rapidinho
   const [products,setProducts]=useState(()=>(load(PRODUCTS_KEY,INIT_PRODUCTS).then(p => p.map(normalizeProductForStorage)), INIT_PRODUCTS)); // valores iniciais
   const [protocols,setProtocols]=useState(INIT_PROTOCOLS);
   const [indications,setIndications]=useState(INIT_INDICATIONS);
@@ -3014,7 +2447,7 @@ export default function App() {
 
   useEffect(()=>{
     (async()=>{
-      // Carrega dados do localStorage em paralelo (operações rápidas)
+      // Carrega dados do localStorage em paralelo (opera��es r�pidas)
       const [
         loadedProducts,
         loadedProtocols,
@@ -3048,7 +2481,7 @@ export default function App() {
       if (loadedBrand.colorMain) B.purple = loadedBrand.colorMain;
       if (loadedBrand.colorAccent) B.gold = loadedBrand.colorAccent;
 
-      // Só agora verifica sessão (isso sim pode demorar um pouco)
+      // S� agora verifica sess�o (isso sim pode demorar um pouco)
       const sessionUser = await getAdminSession().catch(() => null);
       if (sessionUser) {
         const loadedUsers = await load(USERS_KEY, INIT_USERS);
@@ -3165,6 +2598,7 @@ export default function App() {
     </div>
   );
 }
+
 
 
 
