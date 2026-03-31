@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useIsMobile } from '../../hooks/useAppShell';
 import { useNotionImporter } from '../../hooks/useNotionImporter';
 import { B, hasPerm } from '../../lib/app-constants';
@@ -38,6 +38,116 @@ const Modal = ({ modal }) => {
 };
 
 const PHASE_DATALIST_ID = 'prot-phase-options';
+
+// Busca fuzzy normalizada para o combobox de produtos
+const normalizeStr = (s) =>
+  String(s || '').toLowerCase().normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9 ]/g, ' ').replace(/\s+/g, ' ').trim();
+
+const fuzzyMatch = (name, query) => {
+  const tokens = normalizeStr(query).split(' ').filter(Boolean);
+  const norm = normalizeStr(name);
+  if (!tokens.length) return true;
+  return tokens.every(t => norm.includes(t));
+};
+
+const fuzzyScore = (name, query) => {
+  const tokens = normalizeStr(query).split(' ').filter(Boolean);
+  const norm = normalizeStr(name);
+  if (!tokens.length) return 1;
+  return tokens.filter(t => norm.includes(t)).length / tokens.length;
+};
+
+// Combobox de produto com busca fuzzy — digita qualquer trecho do nome
+const ProductCombobox = ({ value, onChange, options, placeholder = 'Digite para buscar...' }) => {
+  const selectedLabel = options.find(o => o.v === value)?.l || '';
+  const [inputVal, setInputVal] = useState(selectedLabel);
+  const [open, setOpen] = useState(false);
+  const wrapRef = useRef(null);
+
+  useEffect(() => {
+    setInputVal(options.find(o => o.v === value)?.l || '');
+  }, [value, options]);
+
+  useEffect(() => {
+    const handleClick = (e) => { if (wrapRef.current && !wrapRef.current.contains(e.target)) setOpen(false); };
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, []);
+
+  const query = value ? '' : inputVal; // só filtra quando nenhum item está selecionado
+  const filtered = (() => {
+    const base = options.filter(o => o.v !== '');
+    if (!inputVal.trim() || value) return base.slice(0, 10);
+    return base
+      .filter(o => fuzzyMatch(o.l, inputVal))
+      .sort((a, b) => fuzzyScore(b.l, inputVal) - fuzzyScore(a.l, inputVal))
+      .slice(0, 10);
+  })();
+
+  const handleSelect = (opt) => {
+    onChange(opt.v);
+    setInputVal(opt.l);
+    setOpen(false);
+  };
+
+  const handleChange = (e) => {
+    setInputVal(e.target.value);
+    onChange(''); // limpa seleção ao digitar
+    setOpen(true);
+  };
+
+  const handleClear = () => { onChange(''); setInputVal(''); setOpen(false); };
+
+  const inpStyle = { width: '100%', padding: '9px 36px 9px 12px', border: `1.5px solid ${B.border}`, borderRadius: 8, fontSize: 14, outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit', background: B.white, color: B.text };
+
+  return (
+    <div style={{ marginBottom: 14 }}>
+      <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: B.muted, marginBottom: 5, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Produto (opcional)</label>
+      <div ref={wrapRef} style={{ position: 'relative' }}>
+        <input
+          type="text"
+          value={inputVal}
+          onChange={handleChange}
+          onFocus={() => setOpen(true)}
+          placeholder={placeholder}
+          style={{ ...inpStyle, borderColor: open ? B.purple : B.border }}
+          autoComplete="off"
+        />
+        {/* Ícone de lupa ou X para limpar */}
+        {value ? (
+          <button type="button" onClick={handleClear} style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: B.muted, cursor: 'pointer', fontSize: 16, lineHeight: 1, padding: 0 }}>×</button>
+        ) : (
+          <span style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', color: B.muted, fontSize: 14, pointerEvents: 'none' }}>🔍</span>
+        )}
+        {/* Dropdown de sugestões */}
+        {open && (
+          <div style={{ position: 'absolute', top: 'calc(100% + 4px)', left: 0, right: 0, background: B.white, border: `1.5px solid ${B.purple}`, borderRadius: 10, zIndex: 200, boxShadow: '0 8px 28px rgba(44,31,64,0.14)', maxHeight: 240, overflowY: 'auto' }}>
+            {/* Opção "Sem produto" */}
+            <div
+              onMouseDown={e => { e.preventDefault(); handleSelect({ v: '', l: '' }); }}
+              style={{ padding: '8px 12px', fontSize: 12, color: B.muted, cursor: 'pointer', borderBottom: `1px solid ${B.border}`, background: !value ? B.purpleLight : 'transparent' }}
+            >
+              Sem produto (equipamento / técnica)
+            </div>
+            {filtered.length === 0 && (
+              <div style={{ padding: '12px', fontSize: 13, color: B.muted, textAlign: 'center' }}>Nenhum produto encontrado</div>
+            )}
+            {filtered.map(opt => (
+              <div
+                key={opt.v}
+                onMouseDown={e => { e.preventDefault(); handleSelect(opt); }}
+                style={{ padding: '9px 12px', fontSize: 13, cursor: 'pointer', background: opt.v === value ? B.purpleLight : 'transparent', fontWeight: opt.v === value ? 700 : 400, borderBottom: `1px solid ${B.border}` }}
+              >
+                {opt.l}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
 
 const AdminProtForm = ({ prot, products, protocols, indications, categories, phases, saveProtocols, saveIndications, savePhases, setEditProt, loggedUser, onClose }) => {
   const isMobile = useIsMobile();
@@ -101,6 +211,8 @@ const AdminProtForm = ({ prot, products, protocols, indications, categories, pha
   const addStep  = () => setF(x => ({ ...x, steps: [...x.steps, { id: uid(), phase: '', productId: '', instruction: '', name: '', duration: '' }] }));
   const rmStep   = id => setF(x => ({ ...x, steps: x.steps.filter(s => s.id !== id) }));
   const updStep  = (id, k, v) => setF(x => ({ ...x, steps: x.steps.map(s => s.id === id ? { ...s, [k]: v } : s) }));
+  // Nome e fase são a mesma coisa — atualiza os dois de uma vez
+  const updStepNamePhase = (id, v) => setF(x => ({ ...x, steps: x.steps.map(s => s.id === id ? { ...s, name: v, phase: v } : s) }));
 
   // ── Home Use ──────────────────────────────────────────────────────────────
   const addHome  = sl => setF(x => ({ ...x, homeUse: { ...x.homeUse, [sl]: [...x.homeUse[sl], { productId: '', instruction: '' }] } }));
@@ -431,38 +543,34 @@ const AdminProtForm = ({ prot, products, protocols, indications, categories, pha
                 transform: draggedIdx === idx ? 'scale(1.02)' : 'scale(1)',
               }}
             >
-              {/* Linha do número + nome */}
+              {/* Linha do número + fase/nome (campo unificado) */}
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
                   <span style={{ fontSize: 14, color: B.muted, userSelect: 'none' }}>⋮⋮</span>
                   <span style={{ width: 26, height: 26, borderRadius: '50%', background: B.purple, color: '#fff', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 800, flexShrink: 0 }}>{idx + 1}</span>
                 </div>
                 <div style={{ flex: 1 }}>
-                  <Field label="Nome da etapa" value={step.name || ''} onChange={v => updStep(step.id, 'name', v)} placeholder="Ex: Higienização" />
+                  <div style={{ marginBottom: 14 }}>
+                    <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: B.muted, marginBottom: 5, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Fase / Nome da Etapa</label>
+                    <input
+                      type="text"
+                      list={PHASE_DATALIST_ID}
+                      value={step.name || ''}
+                      onChange={e => updStepNamePhase(step.id, e.target.value)}
+                      placeholder="Ex: Higienização, Esfoliação..."
+                      style={inpSt}
+                    />
+                  </div>
                 </div>
               </div>
 
-              {/* Produto + Fase */}
-              <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '2fr 1fr', gap: 8 }}>
-                <Sel
-                  label="Produto (opcional)"
-                  value={step.productId || ''}
-                  onChange={v => updStep(step.id, 'productId', v)}
-                  options={getProtocolProductOptions(step.productId)}
-                />
-                {/* Fase com datalist — digita livremente ou escolhe da lista */}
-                <div style={{ marginBottom: 14 }}>
-                  <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: B.muted, marginBottom: 5, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Fase</label>
-                  <input
-                    type="text"
-                    list={PHASE_DATALIST_ID}
-                    value={step.phase || ''}
-                    onChange={e => updStep(step.id, 'phase', e.target.value)}
-                    placeholder="Selecione ou digite uma fase"
-                    style={inpSt}
-                  />
-                </div>
-              </div>
+              {/* Produto com busca fuzzy */}
+              <ProductCombobox
+                value={step.productId || ''}
+                onChange={v => updStep(step.id, 'productId', v)}
+                options={getProtocolProductOptions(step.productId)}
+                placeholder="Digite qualquer trecho do nome do produto..."
+              />
 
               {/* Instrução + Duração */}
               <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '2fr 1fr', gap: 8 }}>
