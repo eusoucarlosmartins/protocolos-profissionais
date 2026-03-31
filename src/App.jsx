@@ -2575,14 +2575,27 @@ const AdminProtForm = ({ prot, products, protocols, indications, categories, pha
         </div>
       </div>
 
-      {!showNotionImport && f.externalSourceId && (
-        <div style={{background:'#E8F5E9',border:`1.5px solid ${B.green}`,borderRadius:14,padding:'12px 14px',marginBottom:18,display:'flex',alignItems:'center',justifyContent:'space-between', gap: 12}}>
-          <div style={{display:'flex',alignItems:'center',gap:10}}>
-            <span style={{fontSize:18}}>✓</span>
-            <div style={{fontSize:13,color:'#2E7D32',fontWeight:600}}>Protocolo carregado do Notion</div>
-          </div>
-          <button onClick={()=>setShowNotionImport(true)} style={{background:'none',border:'none',color:B.purple,cursor:'pointer',fontSize:12,fontWeight:700,textDecoration:'underline'}}>Carregar outro Notion</button>
-        </div>
+      {!showNotionImport && (
+        <>
+          {f.externalSourceId && (
+            <div style={{background:'#E8F5E9',border:`1.5px solid ${B.green}`,borderRadius:14,padding:'12px 14px',marginBottom:18,display:'flex',alignItems:'center',justifyContent:'space-between', gap: 12}}>
+              <div style={{display:'flex',alignItems:'center',gap:10}}>
+                <span style={{fontSize:18}}>✓</span>
+                <div style={{fontSize:13,color:'#2E7D32',fontWeight:600}}>Protocolo carregado do Notion</div>
+              </div>
+              <button onClick={()=>setShowNotionImport(true)} style={{background:'none',border:'none',color:B.purple,cursor:'pointer',fontSize:12,fontWeight:700,textDecoration:'underline'}}>Carregar outro Notion</button>
+            </div>
+          )}
+          {!f.externalSourceId && (
+            <div style={{background:`linear-gradient(135deg, rgba(113, 93, 168, 0.05), rgba(113, 93, 168, 0.08))`,border:`1.5px dashed ${B.purple}`,borderRadius:14,padding:'14px 16px',marginBottom:18,display:'flex',alignItems:'center',justifyContent:'space-between', gap: 12}}>
+              <div style={{display:'flex',alignItems:'center',gap:10}}>
+                <span style={{fontSize:16}}>🔗</span>
+                <div style={{fontSize:13,color:B.purple,fontWeight:600}}>Importar protocolo do Notion</div>
+              </div>
+              <button onClick={()=>setShowNotionImport(true)} style={{background:B.purple,border:'none',color:B.white,cursor:'pointer',fontSize:12,fontWeight:700,borderRadius:6,padding:'6px 12px',fontFamily:'inherit'}}>Abrir</button>
+            </div>
+          )}
+        </>
       )}
 
       {showNotionImport && (
