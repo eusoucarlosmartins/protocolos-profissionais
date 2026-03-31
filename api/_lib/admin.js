@@ -93,6 +93,7 @@ export const hashSecret = async (value) =>
 
 export const normalizeStoredUser = async (user) => {
   const safeUser = { ...user };
+  safeUser.email = String(safeUser.email || (safeUser.id === "u_admin" ? "admin@protocolo.local" : "")).trim().toLowerCase();
   if (!safeUser.passwordHash && safeUser.password) {
     safeUser.passwordHash = await hashSecret(safeUser.password);
   }
@@ -184,9 +185,20 @@ export const verifyPassword = async (user, password) => {
   return false;
 };
 
+export const matchUserIdentifier = (user, identifier) => {
+  const needle = String(identifier || "").trim().toLowerCase();
+  if (!needle) return false;
+  return (
+    String(user?.email || "").trim().toLowerCase() === needle ||
+    String(user?.name || "").trim().toLowerCase() === needle ||
+    String(user?.id || "").trim().toLowerCase() === needle
+  );
+};
+
 const createDefaultAdminUser = () => ({
   id: "u_admin",
   name: "Admin",
+  email: "admin@protocolo.local",
   perms: FULL_PERMS,
 });
 

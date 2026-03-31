@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { B, EMPTY_PERMS, PERM_KEYS } from "../../lib/app-constants";
-import { hashSecret, isStrongPassword } from "../../lib/app-services";
+import { hashSecret, isStrongPassword, isValidEmail } from "../../lib/app-services";
 
 const PERM_LABELS = {
   dashboard: { label: "Dashboard", icon: "DB" },
@@ -18,7 +18,7 @@ const PERM_LABELS = {
 const ACTION_LABELS = { view: "Ver", edit: "Editar", delete: "Excluir", publish: "Publicar" };
 
 export const AdminUsers = ({ users, saveUsers, loggedUser, Btn, Field, SectionTitle, uid }) => {
-  const EMPTY_USER = { id: "", name: "", password: "", passwordHash: "", perms: EMPTY_PERMS };
+  const EMPTY_USER = { id: "", name: "", email: "", password: "", passwordHash: "", perms: EMPTY_PERMS };
   const [editing, setEditing] = useState(null);
   const [formState, setFormState] = useState(null);
 
@@ -39,10 +39,17 @@ export const AdminUsers = ({ users, saveUsers, loggedUser, Btn, Field, SectionTi
 
   const doSave = async () => {
     if (!formState.name.trim()) return alert("Nome obrigatorio");
+    if (!formState.email.trim()) return alert("E-mail obrigatorio");
+    if (!isValidEmail(formState.email)) return alert("Informe um e-mail valido");
 
     const isNew = !users.find((user) => user.id === formState.id);
     const nextPassword = formState.password.trim();
     const hasExistingPassword = !!formState.passwordHash;
+    const normalizedEmail = formState.email.trim().toLowerCase();
+
+    if (users.find((user) => user.id !== formState.id && String(user.email || "").trim().toLowerCase() === normalizedEmail)) {
+      return alert("Este e-mail ja esta em uso por outro usuario.");
+    }
 
     if (!nextPassword && !hasExistingPassword) return alert("Senha obrigatoria");
     if (nextPassword && !isStrongPassword(nextPassword)) {
@@ -57,7 +64,7 @@ export const AdminUsers = ({ users, saveUsers, loggedUser, Btn, Field, SectionTi
       }
     }
 
-    const payload = { ...formState, passwordHash };
+    const payload = { ...formState, email: normalizedEmail, passwordHash };
     delete payload.password;
     saveUsers(isNew ? [...users, payload] : users.map((user) => (user.id === formState.id ? payload : user)));
     cancel();
@@ -118,6 +125,7 @@ export const AdminUsers = ({ users, saveUsers, loggedUser, Btn, Field, SectionTi
         <div style={{ background: B.white, borderRadius: 12, border: `1px solid ${B.border}`, padding: 24, marginBottom: 16 }}>
           <SectionTitle>Identificacao</SectionTitle>
           <Field label="Nome *" value={formState.name} onChange={(value) => setFormState({ ...formState, name: value })} placeholder="Ex: Ana Lima" />
+          <Field label="E-mail *" value={formState.email || ""} onChange={(value) => setFormState({ ...formState, email: value })} type="email" placeholder="Ex: ana@empresa.com.br" note="Esse e-mail sera usado no login do admin." />
           <Field
             label={`Senha de acesso ${formState.passwordHash ? "(opcional)" : "*"}`}
             value={formState.password}
@@ -247,6 +255,7 @@ export const AdminUsers = ({ users, saveUsers, loggedUser, Btn, Field, SectionTi
                   </span>
                 )}
               </div>
+              <div style={{ fontSize: 12, color: B.muted, marginBottom: 8 }}>{user.email || "Sem e-mail cadastrado"}</div>
               <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
                 {Object.entries(user.perms || {})
                   .filter(([, values]) => Object.values(values).some(Boolean))

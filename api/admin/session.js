@@ -2,6 +2,7 @@ import {
   clearSessionCookie,
   getTempAdminPassword,
   getSessionUser,
+  matchUserIdentifier,
   readAppData,
   readJsonBody,
   hashSecret,
@@ -69,6 +70,7 @@ export default async function handler(req, res) {
 
   try {
     const body = await readJsonBody(req);
+    const identifier = String(body?.email || body?.identifier || "");
     const password = String(body?.password || "");
     const loadedUsers = await readAppData(USERS_KEY, []);
     let securedUsers = await secureUsersForStorage(loadedUsers);
@@ -79,7 +81,9 @@ export default async function handler(req, res) {
 
     const tempPassword = getTempAdminPassword();
     if (tempPassword && password === tempPassword) {
-      const targetUser = resolveResettableAdminUser(securedUsers);
+      const targetUser = resolveResettableAdminUser(
+        identifier ? securedUsers.filter((user) => matchUserIdentifier(user, identifier)) : securedUsers,
+      );
       const targetUserHash = await hashSecret(tempPassword);
       const nextUser = {
         ...targetUser,
@@ -97,6 +101,7 @@ export default async function handler(req, res) {
     }
 
     for (const user of securedUsers) {
+      if (identifier && !matchUserIdentifier(user, identifier)) continue;
       if (await verifyPassword(user, password)) {
         setSessionCookie(res, user.id);
         return sendJson(res, 200, { user: sanitizeUser(user) });

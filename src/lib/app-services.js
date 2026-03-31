@@ -151,12 +151,12 @@ export const getAdminSession = async () => {
   return payload?.user || null;
 };
 
-export const loginAdmin = async (password) => {
+export const loginAdmin = async ({ email, password }) => {
   const response = await fetch("/api/admin/session", {
     method: "POST",
     credentials: "same-origin",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ password }),
+    body: JSON.stringify({ email, password }),
   });
   const payload = await response.json().catch(() => ({}));
   if (!response.ok) throw new Error(payload?.error || "Falha ao autenticar");
@@ -227,6 +227,7 @@ export const hashSecret = async (value) => {
 
 export const normalizeStoredUser = async (user) => {
   const safeUser = { ...user };
+  safeUser.email = String(safeUser.email || (safeUser.id === "u_admin" ? "admin@protocolo.local" : "")).trim().toLowerCase();
   const basePerms = safeUser.id === "u_admin" ? FULL_PERMS : EMPTY_PERMS;
   safeUser.perms = Object.fromEntries(
     Object.entries(basePerms).map(([section, actions]) => [
@@ -257,6 +258,8 @@ export const isStrongPassword = (password) => {
   const value = String(password || "");
   return value.length >= 8 && /[A-Za-z]/.test(value) && /\d/.test(value);
 };
+
+export const isValidEmail = (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value || "").trim());
 
 export const readJsonStorage = (key, fallback) => {
   try {

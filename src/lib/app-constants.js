@@ -143,6 +143,7 @@ export const INIT_USERS = [
   {
     id: "u_admin",
     name: "Admin",
+    email: "admin@protocolo.local",
     passwordHash: "c34e5438ee9a41a666e0a07824cdb5c955f100aead223eb951eaefebb34e0921",
     perms: FULL_PERMS,
   },

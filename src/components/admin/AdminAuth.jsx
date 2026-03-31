@@ -9,6 +9,7 @@ import {
 } from "../../lib/app-services";
 
 export const AdminLogin = ({ brand, navigate, setLoggedUser, Logo, Field, Btn }) => {
+  const [email, setEmail] = useState("");
   const [pwd, setPwd] = useState("");
   const [err, setErr] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -25,11 +26,17 @@ export const AdminLogin = ({ brand, navigate, setLoggedUser, Logo, Field, Btn })
 
   const tryLogin = async () => {
     if (submitting || lockRemainingMs > 0) return;
+    if (!email.trim() || !pwd.trim()) {
+      setErr(true);
+      setTimeout(() => setErr(false), 2500);
+      return;
+    }
     setSubmitting(true);
     try {
-      const user = await loginAdmin(pwd);
+      const user = await loginAdmin({ email, password: pwd });
       clearLoginGuardState();
       setLoggedUser(user);
+      setEmail("");
       setPwd("");
       navigate("/admin");
     } catch {
@@ -66,6 +73,14 @@ export const AdminLogin = ({ brand, navigate, setLoggedUser, Logo, Field, Btn })
           <p style={{ color: B.muted, fontSize: 14, margin: 0 }}>Acesso restrito a equipe interna</p>
         </div>
         <Field
+          label="E-mail"
+          value={email}
+          onChange={setEmail}
+          type="email"
+          placeholder="Digite seu e-mail de acesso"
+          note="Durante a migracao, acessos antigos ainda podem usar o identificador anterior."
+        />
+        <Field
           label="Senha"
           value={pwd}
           onChange={setPwd}
@@ -84,7 +99,7 @@ export const AdminLogin = ({ brand, navigate, setLoggedUser, Logo, Field, Btn })
               marginBottom: 14,
             }}
           >
-            Senha incorreta
+            E-mail ou senha incorretos
           </div>
         )}
         {lockRemainingMs > 0 && (
@@ -124,6 +139,9 @@ export const AdminLogin = ({ brand, navigate, setLoggedUser, Logo, Field, Btn })
         >
           Voltar ao site
         </button>
+        <div style={{ marginTop: 14, fontSize: 12, color: B.muted, lineHeight: 1.5, textAlign: "center" }}>
+          Se esqueceu a senha, use seu e-mail cadastrado para localizar o acesso e redefinir com o administrador.
+        </div>
       </div>
     </div>
   );
