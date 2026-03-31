@@ -2384,9 +2384,13 @@ const AdminProtForm = ({ prot, products, protocols, indications, categories, pha
   const togConcern=id=>setF(x=>({...x,concerns:x.concerns.includes(id)?x.concerns.filter(c=>c!==id):[...x.concerns,id]}));
   
   const extractPageIdFromNotionUrl = (url) => {
+    // Remove parâmetros da URL (como ?source=copy_link)
+    const cleanUrl = url.split('?')[0];
+    
     // https://www.notion.so/Page-Title-09bfa8de63a64b27bd379d6b2a8b813f
     // ou https://notion.so/09bfa8de63a64b27bd379d6b2a8b813f
-    const match = url.match(/([a-f0-9]{32})/i);
+    // ou https://extratosdaterra.notion.site/Protocolo-Limpeza-...
+    const match = cleanUrl.match(/([a-f0-9]{32})/i);
     if (match) {
       let pageId = match[1];
       // formato com hífens: 09bfa8de-63a6-4b27-bd37-9d6b2a8b813f
@@ -2405,57 +2409,63 @@ const AdminProtForm = ({ prot, products, protocols, indications, categories, pha
     setNotionError('');
     
     try {
-      const pageId = extractPageIdFromNotionUrl(notionUrl);
+      // Remove parâmetros da URL
+      const cleanUrl = notionUrl.trim().split('?')[0];
+      
+      const pageId = extractPageIdFromNotionUrl(cleanUrl);
       if (!pageId) {
         setNotionError('URL inválida. Certifique-se de copiar o link completo do Notion.');
         setNotionLoading(false);
         return;
       }
 
-      // Tenta buscar via proxy público do Notion
-      const response = await fetch(`https://notion-api.splitbee.io/v1/page/${pageId.replace(/-/g, '')}`);
-      if (!response.ok) {
-        setNotionError('Não foi possível acessar a página. Certifique-se que ela é pública no Notion.');
-        setNotionLoading(false);
-        return;
-      }
-
-      const data = await response.json();
-      
-      // Extrai título da página
       let pageTitle = '';
       let pageDescription = '';
       
-      // Tenta encontrar o título nos blocos
-      if (data && typeof data === 'object') {
-        const blocks = Object.values(data);
-        for (const block of blocks) {
-          if (block.type === 'heading_1' || block.type === 'heading_2') {
-            const text = block[block.type]?.rich_text?.[0]?.plain_text || '';
-            if (text && !pageTitle) {
-              pageTitle = text;
-            }
-          } else if (block.type === 'paragraph' && !pageDescription) {
-            pageDescription = block.paragraph?.rich_text?.[0]?.plain_text || '';
-          }
-        }
+      // Estratégia 1: Tenta extrair título e descrição da URL (se estiver no nome)
+      const urlParts = cleanUrl.split('/');
+      const lastPart = urlParts[urlParts.length - 1];
+      const titleFromUrl = lastPart
+        .split('-' + pageId)[0] // Remove o ID e tudo depois dele
+        .replace(/-/g, ' ')
+        .trim();
+      
+      if (titleFromUrl) {
+        pageTitle = titleFromUrl;
       }
 
-      // Se não achou, tenta extrair do HTML da página
-      if (!pageTitle) {
-        try {
-          const htmlResponse = await fetch(notionUrl);
-          const html = await htmlResponse.text();
-          const titleMatch = html.match(/<title>(.*?)<\/title>/);
-          if (titleMatch) {
-            pageTitle = titleMatch[1]
-              .replace(/Notion|–|–/g, '')
-              .replace(/^[^a-zA-Z0-9]*/, '')
-              .trim();
+      // Estratégia 2: Tenta buscar via proxy público do Notion (com timeout)
+      try {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 5000); // Timeout de 5 segundos
+        
+        const response = await fetch(`https://notion-api.splitbee.io/v1/page/${pageId.replace(/-/g, '')}`, {
+          signal: controller.signal
+        });
+        
+        clearTimeout(timeout);
+        
+        if (response.ok) {
+          const data = await response.json();
+          
+          // Tenta encontrar o título nos blocos
+          if (data && typeof data === 'object') {
+            const blocks = Object.values(data);
+            for (const block of blocks) {
+              if ((block.type === 'heading_1' || block.type === 'heading_2' || block.type === 'title') && !pageTitle) {
+                const richText = block[block.type]?.rich_text?.[0]?.plain_text || block.title?.rich_text?.[0]?.plain_text || '';
+                if (richText) {
+                  pageTitle = richText;
+                  break;
+                }
+              } else if (block.type === 'paragraph' && !pageDescription) {
+                pageDescription = block.paragraph?.rich_text?.[0]?.plain_text || '';
+              }
+            }
           }
-        } catch (e) {
-          // silencioso
         }
+      } catch (proxyErr) {
+        // Proxy falhou, continua com título extraído da URL
       }
 
       // Popula o formulário com os dados obtidos
@@ -2470,7 +2480,8 @@ const AdminProtForm = ({ prot, products, protocols, indications, categories, pha
       setShowNotionImport(false);
 
     } catch (err) {
-      setNotionError('Erro ao processar: ' + (err?.message || 'desconhecido'));
+      setNotionError('Erro ao carregar. Tente novamente ou edite os dados manualmente.');
+      console.error('Notion fetch error:', err);
     }
     setNotionLoading(false);
   };
@@ -3058,12 +3069,12 @@ const AdminAlertsLegacy = ({ products, protocols, saveProducts, setEditProt, set
 };
 
 export default function App() {
-  const [loading,setLoading]=useState(true);
-  const [products,setProducts]=useState([]);
-  const [protocols,setProtocols]=useState([]);
-  const [indications,setIndications]=useState([]);
-  const [categories,setCategories]=useState([]);
-  const [phases,setPhases]=useState([]);
+  const [loading,setLoading]=useState(false); // Começa false porque carregamos dados locais rapidinho
+  const [products,setProducts]=useState(()=>(load(PRODUCTS_KEY,INIT_PRODUCTS).then(p => p.map(normalizeProductForStorage)), INIT_PRODUCTS)); // valores iniciais
+  const [protocols,setProtocols]=useState(INIT_PROTOCOLS);
+  const [indications,setIndications]=useState(INIT_INDICATIONS);
+  const [categories,setCategories]=useState(INIT_CATEGORIES);
+  const [phases,setPhases]=useState(INIT_PHASES);
   const [brand,setBrand]=useState(INIT_BRAND);
   const [users,setUsers]=useState([]);
   const [marketing,setMarketing]=useState(INIT_MARKETING);
@@ -3084,17 +3095,41 @@ export default function App() {
 
   useEffect(()=>{
     (async()=>{
-      setProducts((await load(PRODUCTS_KEY,INIT_PRODUCTS)).map(normalizeProductForStorage));
-      setProtocols(await load(PROTOCOLS_KEY,INIT_PROTOCOLS));
-      setIndications(await load(INDICATIONS_KEY,INIT_INDICATIONS));
-      setCategories(await load(CATEGORIES_KEY,INIT_CATEGORIES));
-      setPhases(await load(PHASES_KEY,INIT_PHASES));
-      setMarketing(await load(MARKETING_KEY,INIT_MARKETING));
-      setViews(await load(VIEWS_KEY,{}));
-      const b = await load(BRAND_KEY,INIT_BRAND);
-      setBrand(b);
-      if (b.colorMain) B.purple = b.colorMain;
-      if (b.colorAccent) B.gold = b.colorAccent;
+      // Carrega dados do localStorage em paralelo (operações rápidas)
+      const [
+        loadedProducts,
+        loadedProtocols,
+        loadedIndications,
+        loadedCategories,
+        loadedPhases,
+        loadedMarketing,
+        loadedViews,
+        loadedBrand
+      ] = await Promise.all([
+        load(PRODUCTS_KEY,INIT_PRODUCTS),
+        load(PROTOCOLS_KEY,INIT_PROTOCOLS),
+        load(INDICATIONS_KEY,INIT_INDICATIONS),
+        load(CATEGORIES_KEY,INIT_CATEGORIES),
+        load(PHASES_KEY,INIT_PHASES),
+        load(MARKETING_KEY,INIT_MARKETING),
+        load(VIEWS_KEY,{}),
+        load(BRAND_KEY,INIT_BRAND)
+      ]);
+
+      // Atualiza estados com dados do localStorage
+      setProducts(loadedProducts.map(normalizeProductForStorage));
+      setProtocols(loadedProtocols);
+      setIndications(loadedIndications);
+      setCategories(loadedCategories);
+      setPhases(loadedPhases);
+      setMarketing(loadedMarketing);
+      setViews(loadedViews);
+      setBrand(loadedBrand);
+      
+      if (loadedBrand.colorMain) B.purple = loadedBrand.colorMain;
+      if (loadedBrand.colorAccent) B.gold = loadedBrand.colorAccent;
+
+      // Só agora verifica sessão (isso sim pode demorar um pouco)
       const sessionUser = await getAdminSession().catch(() => null);
       if (sessionUser) {
         const loadedUsers = await load(USERS_KEY, INIT_USERS);
@@ -3102,7 +3137,6 @@ export default function App() {
         setUsers(securedUsers);
         setLoggedUser(securedUsers.find((user) => user.id === sessionUser.id) || sessionUser);
       }
-      setLoading(false);
     })();
   },[]);
 
