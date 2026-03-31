@@ -1,5 +1,6 @@
 ﻿import { useState, useEffect, useRef } from "react";
 import { useIsMobile, useRoute } from "./hooks/useAppShell";
+import { useNotionImporter } from "./hooks/useNotionImporter";
 import { lazy, Suspense } from "react";
 import {
   B,
@@ -2330,10 +2331,13 @@ const AdminProtForm = ({ prot, products, protocols, indications, categories, pha
   const isMobile = useIsMobile();
   const [f,setF]=useState({...prot,professionalKitId:prot.professionalKitId||'',homeKitId:prot.homeKitId||'',steps:[...(prot.steps||[])],homeUse:{morning:[...(prot.homeUse?.morning||[])],night:[...(prot.homeUse?.night||[])]}, concerns: [...(prot.concerns||[])]});
   
-  const [notionUrl, setNotionUrl] = useState('');
-  const [notionLoading, setNotionLoading] = useState(false);
-  const [notionError, setNotionError] = useState('');
-  const [showNotionImport, setShowNotionImport] = useState(false);
+  // Hook para importar do Notion
+  const {
+    notionUrl, setNotionUrl,
+    notionLoading, notionError,
+    showNotionImport, setShowNotionImport,
+    fetchNotionProtocol
+  } = useNotionImporter();
   
   const [newIndication, setNewIndication] = useState('');
   const [showNewIndication, setShowNewIndication] = useState(false);
@@ -2383,198 +2387,25 @@ const AdminProtForm = ({ prot, products, protocols, indications, categories, pha
   
   const togConcern=id=>setF(x=>({...x,concerns:x.concerns.includes(id)?x.concerns.filter(c=>c!==id):[...x.concerns,id]}));
   
-  const extractPageIdFromNotionUrl = (url) => {
-    // Remove parâmetros da URL (como ?source=copy_link)
-    const cleanUrl = url.split('?')[0];
-    
-    // https://www.notion.so/Page-Title-09bfa8de63a64b27bd379d6b2a8b813f
-    // ou https://notion.so/09bfa8de63a64b27bd379d6b2a8b813f
-    // ou https://extratosdaterra.notion.site/Protocolo-Limpeza-...
-    const match = cleanUrl.match(/([a-f0-9]{32})/i);
-    if (match) {
-      let pageId = match[1];
-      // formato com hífens: 09bfa8de-63a6-4b27-bd37-9d6b2a8b813f
-      pageId = `${pageId.slice(0, 8)}-${pageId.slice(8, 12)}-${pageId.slice(12, 16)}-${pageId.slice(16, 20)}-${pageId.slice(20)}`;
-      return pageId;
-    }
-    return null;
+  // Callback quando Notion import é bem-sucedido
+  const handleNotionImportSuccess = (data) => {
+    setF(x => ({
+      ...x,
+      externalSourceId: data.pageId,
+      name: data.pageTitle || x.name,
+      description: x.description,
+      steps: data.steps.length > 0 ? data.steps : x.steps
+    }));
   };
   
-  const fetchNotionProtocol = async () => {
-    if (!notionUrl.trim()) {
-      setNotionError('Cole uma URL do Notion válida');
-      return;
-    }
-    setNotionLoading(true);
-    setNotionError('');
-    
-    try {
-      // Remove parâmetros da URL
-      const cleanUrl = notionUrl.trim().split('?')[0];
-      
-      const pageId = extractPageIdFromNotionUrl(cleanUrl);
-      if (!pageId) {
-        setNotionError('URL inválida. Certifique-se de copiar o link completo do Notion.');
-        setNotionLoading(false);
-        return;
-      }
-
-      let pageTitle = '';
-      let pageDescription = '';
-      let extractedSteps = [];
-      
-      // Estratégia 1: Extrai título da URL
-      const urlParts = cleanUrl.split('/');
-      const lastPart = urlParts[urlParts.length - 1];
-      const titleFromUrl = lastPart
-        .split('-' + pageId)[0]
-        .replace(/-/g, ' ')
-        .trim();
-      
-      if (titleFromUrl) {
-        pageTitle = titleFromUrl;
-      }
-
-      // Estratégia 2: Tenta buscar HTML da página do Notion e extrair dados
-      try {
-        const htmlResponse = await fetch(`https://www.notion.so/${pageId.replace(/-/g, '')}`);
-        if (htmlResponse.ok) {
-          const html = await htmlResponse.text();
-          
-          // Tenta extrair o conteúdo JSON embedded na página do Notion
-          const jsonMatch = html.match(/<script[^>]*>[\s\S]*?"collection"[\s\S]*?<\/script>/);
-          
-          if (jsonMatch) {
-            try {
-              // Extrai as etapas procurando por padrões no HTML
-              const stepMatches = html.matchAll(/<h[23][^>]*>(?:<[^>]*>)*(\d+)\.?\s*([^<]+)/gi);
-              
-              for (const match of stepMatches) {
-                const stepNum = match[1];
-                const stepTitle = match[2].trim();
-                
-                if (stepTitle && !extractedSteps.find(s => s.step === stepNum)) {
-                  // Procura pela descrição logo após cada heading
-                  const headingIndex = html.indexOf(match[0]);
-                  const nextContent = html.substring(headingIndex, headingIndex + 500);
-                  const descMatch = nextContent.match(/<p[^>]*>([^<]+)<\/p>/);
-                  
-                  extractedSteps.push({
-                    id: uid(),
-                    step: stepNum.toString(),
-                    name: stepTitle,
-                    instruction: descMatch ? descMatch[1].trim() : '',
-                    productId: null,
-                    time: '',
-                    repetition: '',
-                    phase: '',
-                    observation: ''
-                  });
-                }
-              }
-            } catch (parseErr) {
-              // Silencioso - continua com o que conseguiu
-            }
-          }
-        }
-      } catch (htmlErr) {
-        // Silencioso - continua com o que conseguiu
-      }
-
-      // Estratégia 3: Tenta buscar via API Splitbee (fallback)
-      if (extractedSteps.length === 0) {
-        try {
-          const controller = new AbortController();
-          const timeout = setTimeout(() => controller.abort(), 5000);
-          
-          const response = await fetch(`https://notion-api.splitbee.io/v1/page/${pageId.replace(/-/g, '')}`, {
-            signal: controller.signal
-          });
-          
-          clearTimeout(timeout);
-          
-          if (response.ok) {
-            const data = await response.json();
-            
-            if (data && typeof data === 'object') {
-              const blocks = Object.values(data);
-              
-              for (let i = 0; i < blocks.length; i++) {
-                const block = blocks[i];
-                
-                // Procura por etapas numeradas
-                if ((block.type === 'heading_2' || block.type === 'heading_3')) {
-                  const headingText = block[block.type]?.rich_text?.[0]?.plain_text || '';
-                  const stepMatch = headingText.match(/^(\d+)\.\s*(.+)/);
-                  
-                  if (stepMatch) {
-                    const stepNum = parseInt(stepMatch[1]);
-                    const stepTitle = stepMatch[2].trim();
-                    
-                    let stepDescription = '';
-                    for (let j = i + 1; j < blocks.length; j++) {
-                      const nextBlock = blocks[j];
-                      if (nextBlock.type && (nextBlock.type.startsWith('heading') || nextBlock.type === 'heading_1')) {
-                        break;
-                      }
-                      if (nextBlock.type === 'paragraph') {
-                        const para = nextBlock.paragraph?.rich_text?.[0]?.plain_text || '';
-                        if (para) {
-                          stepDescription += (stepDescription ? ' ' : '') + para;
-                        }
-                      }
-                    }
-                    
-                    extractedSteps.push({
-                      id: uid(),
-                      step: stepNum.toString(),
-                      name: stepTitle,
-                      instruction: stepDescription,
-                      productId: null,
-                      time: '',
-                      repetition: '',
-                      phase: '',
-                      observation: ''
-                    });
-                  }
-                }
-              }
-            }
-          }
-        } catch (apiErr) {
-          // Silencioso
-        }
-      }
-
-      // Popula o formulário
-      setF(x => {
-        const updates = {
-          ...x,
-          externalSourceId: pageId,
-          name: pageTitle || x.name,
-          description: pageDescription || x.description
-        };
-        
-        if (extractedSteps.length > 0) {
-          updates.steps = extractedSteps;
-        }
-        
-        return updates;
-      });
-      
-      setNotionUrl('');
-      setShowNotionImport(false);
-
-    } catch (err) {
-      setNotionError('Erro ao carregar. Verifique se a URL é pública no Notion: ' + (err?.message || ''));
-      console.error('Notion fetch error:', err);
-    }
-    setNotionLoading(false);
+  // Wrapper para chamar o hook com callback
+  const handleFetchNotion = async () => {
+    await fetchNotionProtocol(handleNotionImportSuccess);
   };
   
   const handleKeyDown = (e) => {
     if (e.key === 'Enter' && notionUrl.trim()) {
-      fetchNotionProtocol();
+      handleFetchNotion();
     }
   };
   
@@ -2766,7 +2597,7 @@ const AdminProtForm = ({ prot, products, protocols, indications, categories, pha
               style={{...inpSt,flex:1}}
             />
             <button
-              onClick={fetchNotionProtocol}
+              onClick={handleFetchNotion}
               disabled={notionLoading || !notionUrl.trim()}
               style={{padding:'7px 16px',background:notionLoading?B.border:B.purple,color:B.white,border:'none',borderRadius:7,fontSize:13,fontWeight:700,cursor:notionLoading?'default':'pointer',fontFamily:'inherit',opacity:notionLoading || !notionUrl.trim()?0.6:1}}
             >
