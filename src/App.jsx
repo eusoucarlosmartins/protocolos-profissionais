@@ -2086,14 +2086,51 @@ const AdminProdForm = ({ prod, products, categories, saveProducts, setEditProd, 
     setJsonText('');
   };
 
+  const normalizePlainName = (value) =>
+    String(value || '')
+      .toLowerCase()
+      .normalize('NFKD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9 ]/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+
+  const getFuzzyScore = (a, b) => {
+    const tokensA = a.split(' ').filter(Boolean);
+    const tokensB = b.split(' ').filter(Boolean);
+    if (!tokensA.length || !tokensB.length) return 0;
+    const setB = new Set(tokensB);
+    const matched = tokensA.filter((t) => setB.has(t)).length;
+    return matched / tokensA.length;
+  };
+
   const doSave = () => {
     if(!f.name.trim()) return alert('Nome obrigatorio');
     if(!String(f.code||'').trim()) return alert('Codigo obrigatorio');
+
     const normalizedCode = String(f.code || '').trim().toLowerCase();
     const codeInUse = products.some(p => p.id !== f.id && String(p.code || '').trim().toLowerCase() === normalizedCode);
     if(codeInUse) return alert('Ja existe um produto com este codigo.');
+
+    const normalizedName = normalizePlainName(f.name);
+    const exactMatch = products.find(p => p.id !== f.id && normalizePlainName(p.name) === normalizedName);
+    if (exactMatch) {
+      if (!window.confirm(`Ja existe produto similar encontrado: "${exactMatch.name}". Deseja continuar e salvar mesmo assim?`)) return;
+    } else {
+      const possible = products
+        .map((p) => ({ product: p, score: getFuzzyScore(normalizedName, normalizePlainName(p.name)) }))
+        .filter(item => item.score >= 0.6)
+        .sort((a, b) => b.score - a.score);
+      if (possible.length > 0) {
+        const top = possible[0];
+        if (!window.confirm(`Existe um produto parecido ("${top.product.name}", ${Math.round(top.score * 100)}% similar). Deseja continuar?`)) return;
+      }
+    }
+
     const {_new,...clean}=normalizeProductForStorage(f);
     clean.code = String(clean.code || '').trim();
+    clean.importSource = clean.importSource || 'manual';
+
     if(prod._new) saveProducts([...products,clean]);
     else saveProducts(products.map(p=>p.id===clean.id?clean:p));
     onClose?.();
@@ -2139,6 +2176,10 @@ const AdminProdForm = ({ prod, products, categories, saveProducts, setEditProd, 
         <div style={{display:'grid',gridTemplateColumns:isMobile?'1fr':'220px 1fr',gap:14}}>
           <Field label="Codigo do produto *" value={f.code||''} onChange={set('code')} placeholder="Ex: PROD-045" note="Use um codigo unico para facilitar busca, estoque e vinculacao." />
           <Field label="Nome do produto *" value={f.name} onChange={set('name')} placeholder="Ex: Omega 7 Creme de Massagem Corporal" />
+        </div>
+        <div style={{display:'grid',gridTemplateColumns:isMobile?'1fr':'1fr 1fr',gap:14,marginBottom:16}}>
+          <Sel label="Origem" value={f.importSource || 'manual'} onChange={(v) => setF({...f, importSource: v})} options={[{v:'manual', l:'Manual'}, {v:'xml', l:'Importado por XML'}]} />
+          <Sel label="Revisao" value={f.reviewStatus || 'needs_review'} onChange={(v) => setF({...f, reviewStatus: v})} options={[{v:'needs_review', l:'A Revisar'}, {v:'reviewed', l:'Revisado'}, {v:'approved', l:'Aprovado'}]} />
         </div>
         <div style={{marginBottom:16}}>
           <label style={{display:'block',fontSize:12,fontWeight:700,color:B.muted,marginBottom:8,textTransform:'uppercase',letterSpacing:'0.06em'}}>Foto do Produto</label>
@@ -2375,14 +2416,46 @@ const AdminProtForm = ({ prot, products, protocols, indications, categories, pha
 
   const handleDragEnd = () => setDraggedIdx(null);
 
+  const normalizePlainName = (value) =>
+    String(value || '')
+      .toLowerCase()
+      .normalize('NFKD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9 ]/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+
+  const getFuzzyScore = (a, b) => {
+    const tokensA = a.split(' ').filter(Boolean);
+    const tokensB = b.split(' ').filter(Boolean);
+    if (!tokensA.length || !tokensB.length) return 0;
+    const setB = new Set(tokensB);
+    const matched = tokensA.filter((t) => setB.has(t)).length;
+    return matched / tokensA.length;
+  };
+
   const doSave=(pub=null)=>{
     if(!f.name.trim()) return alert('Nome obrigatorio');
     if(!String(f.code||'').trim()) return alert('Codigo obrigatorio');
     const normalizedCode = String(f.code || '').trim().toLowerCase();
     const codeInUse = protocols.some(p => p.id !== f.id && String(p.code || '').trim().toLowerCase() === normalizedCode);
     if(codeInUse) return alert('Ja existe um protocolo com este codigo.');
+
+    const normalizedName = normalizePlainName(f.name);
+    const exactMatch = protocols.find(p => p.id !== f.id && normalizePlainName(p.name) === normalizedName);
+    if (exactMatch) {
+      if (!window.confirm(`Ja existe protocolo similar: "${exactMatch.name}". Deseja continuar?`)) return;
+    } else {
+      const possible = protocols
+        .map((p) => ({ protocol: p, score: getFuzzyScore(normalizedName, normalizePlainName(p.name)) }))
+        .filter(item => item.score >= 0.6)
+        .sort((a, b) => b.score - a.score);
+      if (possible.length > 0 && !window.confirm(`Protocolo similar encontrado: "${possible[0].protocol.name}" (${Math.round(possible[0].score * 100)}% similar). Deseja continuar?`)) return;
+    }
+
     const {_new,...clean}=f;
     clean.code = String(clean.code || '').trim();
+    clean.reviewStatus = clean.reviewStatus || 'needs_review';
     if(pub!==null) clean.published=pub;
     if(prot._new) saveProtocols([...protocols,clean]);
     else saveProtocols(protocols.map(p=>p.id===clean.id?clean:p));

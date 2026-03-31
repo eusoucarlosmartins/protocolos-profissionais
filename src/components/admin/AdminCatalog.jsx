@@ -159,8 +159,8 @@ export const AdminProducts = ({
                   {getProductTypes(product).map((typeId) => {
                     const style = PRODUCT_TYPE_TAG_STYLES[typeId] || { color: B.purpleLight, text: B.purpleDark };
                     return <Tag key={typeId} label={getProductTypeLabel(typeId)} color={style.color} text={style.text} />;
-                  })}
-                  {!isActive(product) && <Tag label="Inativo" color={B.redLight} text={B.red} />}
+                  })}                  {product.importSource && <Tag label={product.importSource === 'xml' ? 'Importado XML' : 'Manual'} color={B.cream} text={B.purpleDark} />}
+                  {product.reviewStatus && <Tag label={product.reviewStatus === 'needs_review' ? 'A Revisar' : product.reviewStatus === 'reviewed' ? 'Revisado' : 'Aprovado'} color={product.reviewStatus === 'approved' ? B.greenLight : product.reviewStatus === 'reviewed' ? B.blueLight : B.goldLight} text={product.reviewStatus === 'approved' ? B.green : product.reviewStatus === 'reviewed' ? B.blue : '#7A5C1E'} />}                  {!isActive(product) && <Tag label="Inativo" color={B.redLight} text={B.red} />}
                 </div>
                 {hasPerm(loggedUser, 'products', 'edit') && <Btn size="sm" variant="secondary" onClick={() => setEditProd(product)}>Editar</Btn>}
                 {hasPerm(loggedUser, 'products', 'edit') && <Btn size="sm" variant="ghost" onClick={() => duplicate(product)}>Duplicar</Btn>}
