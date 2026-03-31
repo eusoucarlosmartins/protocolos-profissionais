@@ -297,7 +297,7 @@ const RichTextField = ({ label, value, onChange, placeholder, rows=3, note }) =>
           <button type="button" onClick={()=>applyTag('<i>','</i>')} style={{fontStyle:'italic', padding:'2px 8px', border:'none', background:'transparent', cursor:'pointer', color:B.purpleDark}}>I</button>
           <button type="button" onClick={()=>applyTag('<u>','</u>')} style={{textDecoration:'underline', padding:'2px 8px', border:'none', background:'transparent', cursor:'pointer', color:B.purpleDark}}>S</button>
           <div style={{width:1, background:B.border, margin:'0 4px'}} />
-          <button type="button" onClick={()=>applyTag('<ul>\n<li>','</li>\n</ul>')} style={{padding:'2px 8px', border:'none', background:'transparent', cursor:'pointer', color:B.purpleDark}}>� Lista</button>
+          <button type="button" onClick={()=>applyTag('<ul>\n<li>','</li>\n</ul>')} style={{padding:'2px 8px', border:'none', background:'transparent', cursor:'pointer', color:B.purpleDark}}>• Lista</button>
         </div>
         <textarea 
           ref={ref}
@@ -720,7 +720,7 @@ const ProtocolDetail = ({ protocol:p, products, indications, categories, navigat
     .filter(Boolean);
   const homeRoutineText = encodeURIComponent(
     [
-      `Ol�! Segue a rotina de uso em casa do protocolo ${p.name}.`,
+      `Olá! Segue a rotina de uso em casa do protocolo ${p.name}.`,
       homeKit ? `Kit de uso em casa recomendado: ${homeKit.name}` : '',
       '',
       ...homeRoutineSections,
@@ -1081,7 +1081,7 @@ const PublicProductPage = ({ product: p, protocols, categories, navigate, brand,
                 <Section title="Beneficios">
                   {p.benefits.split(';').map((b,i)=>b.trim()&&(
                     <div key={i} style={{display:'flex',gap:8,marginBottom:7,alignItems:'flex-start'}}>
-                      <span style={{color:B.purple,fontWeight:700,flexShrink:0,marginTop:3}}>�</span>
+                      <span style={{color:B.purple,fontWeight:700,flexShrink:0,marginTop:3}}>•</span>
                       <span style={{fontSize:isMobile?13:15,color:B.text,lineHeight:1.6}} dangerouslySetInnerHTML={{__html: clean(b.trim())}} />
                     </div>
                   ))}
@@ -1337,7 +1337,7 @@ const TextProtocolImporter = ({ onImport, products }) => {
                 const itemText = line.replace(/^\d+\.\s*/, '').trim();
                 const matchedProductId = tryMatchProduct(itemText);
                 if (matchedProductId) {
-                    homeUse[homeUseTime].push({ instruction: 'Aplicar na regi�o conforme recomenda��o.', productId: matchedProductId });
+                    homeUse[homeUseTime].push({ instruction: 'Aplicar na região conforme recomendação.', productId: matchedProductId });
                 } else {
                     homeUse[homeUseTime].push({ instruction: itemText, productId: null });
                 }
@@ -1353,21 +1353,21 @@ const TextProtocolImporter = ({ onImport, products }) => {
             if (lower.includes('frequencia:') && lower.includes('associacoes:')) {
                 const m = line.match(/frequencia:\s*(.*?)\s*associacoes:\s*(.*)$/i);
                 if (m) {
-                    frequency = m[1].replace(/[�]/g, '').trim();
-                    associations = m[2].replace(/[�]/g, '').trim();
+                    frequency = m[1].replace(/[]/g, '').trim();
+                    associations = m[2].replace(/[]/g, '').trim();
                     continue;
                 }
             }
 
             if (lower.includes('frequencia:')) {
-                frequency = line.replace(/.*frequencia:\s*/i, '').replace(/[�]/g, '').trim();
-                // se a linha continuar com associacoes, extrai tamb�m
+                frequency = line.replace(/.*frequencia:\s*/i, '').replace(/[]/g, '').trim();
+                // se a linha continuar com associacoes, extrai tambm
                 const assocPart = line.match(/associacoes:\s*(.*)$/i);
-                if (assocPart) associations = assocPart[1].replace(/[�]/g, '').trim();
+                if (assocPart) associations = assocPart[1].replace(/[]/g, '').trim();
                 continue;
             }
             if (lower.includes('associacoes:')) {
-                associations = line.replace(/.*associacoes:\s*/i, '').replace(/[�]/g, '').trim();
+                associations = line.replace(/.*associacoes:\s*/i, '').replace(/[]/g, '').trim();
                 continue;
             }
         }
@@ -1379,7 +1379,7 @@ const TextProtocolImporter = ({ onImport, products }) => {
             continue;
         }
 
-        if (currentStep && !lower.includes('�')) {
+        if (currentStep && !lower.includes('')) {
             currentStep.instruction += (currentStep.instruction ? '\n' : '') + line;
         }
     }
@@ -1857,7 +1857,7 @@ const AdminPanel = ({ products, protocols, indications, categories, phases, bran
     return (
       <div style={{padding:24}}>
         <div style={{fontSize:16,fontWeight:700,color:B.purpleDark,marginBottom:12}}>Acesso nenhuma area</div>
-        <div style={{color:B.muted}}>Usu�rio sem permiss�es definidas para este painel. Verifique as configura��es ou entre em contato com o administrador.</div>
+        <div style={{color:B.muted}}>Usurio sem permisses definidas para este painel. Verifique as configuraes ou entre em contato com o administrador.</div>
       </div>
     );
   }
@@ -2093,6 +2093,7 @@ const AdminProdForm = ({ prod, products, categories, saveProducts, setEditProd, 
   const [jsonModal, setJsonModal] = useState(false);
   const [jsonText, setJsonText] = useState('');
   const [jsonErr, setJsonErr] = useState('');
+  const [errors, setErrors] = useState({});
 
   const applyJson = () => {
     setJsonErr('');
@@ -2138,34 +2139,45 @@ const AdminProdForm = ({ prod, products, categories, saveProducts, setEditProd, 
   };
 
   const doSave = () => {
-    if(!f.name.trim()) return alert('Nome obrigatorio');
-    if(!String(f.code||'').trim()) return alert('Codigo obrigatorio');
-
-    const normalizedCode = String(f.code || '').trim().toLowerCase();
-    const codeInUse = products.some(p => p.id !== f.id && String(p.code || '').trim().toLowerCase() === normalizedCode);
-    if(codeInUse) return alert('Ja existe um produto com este codigo.');
+    // Validação inline — sem alert(), dados nunca são perdidos
+    const errs = {};
+    if (!f.name.trim()) errs.name = 'Nome é obrigatório.';
+    if (!String(f.code || '').trim()) errs.code = 'Código é obrigatório.';
+    else {
+      const normalizedCode = String(f.code).trim().toLowerCase();
+      const codeInUse = products.some(p => p.id !== f.id && String(p.code || '').trim().toLowerCase() === normalizedCode);
+      if (codeInUse) errs.code = 'Já existe um produto com este código.';
+    }
+    if (Object.keys(errs).length) {
+      setErrors(errs);
+      // Rola até o primeiro campo com erro
+      setTimeout(() => {
+        document.querySelector('[data-field-error]')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 50);
+      return;
+    }
+    setErrors({});
 
     const normalizedName = normalizePlainName(f.name);
     const exactMatch = products.find(p => p.id !== f.id && normalizePlainName(p.name) === normalizedName);
     if (exactMatch) {
-      if (!window.confirm(`Ja existe produto similar encontrado: "${exactMatch.name}". Deseja continuar e salvar mesmo assim?`)) return;
+      if (!window.confirm(`Já existe produto com nome idêntico: "${exactMatch.name}". Deseja continuar?`)) return;
     } else {
       const possible = products
         .map((p) => ({ product: p, score: getFuzzyScore(normalizedName, normalizePlainName(p.name)) }))
         .filter(item => item.score >= 0.6)
         .sort((a, b) => b.score - a.score);
       if (possible.length > 0) {
-        const top = possible[0];
-        if (!window.confirm(`Existe um produto parecido ("${top.product.name}", ${Math.round(top.score * 100)}% similar). Deseja continuar?`)) return;
+        if (!window.confirm(`Produto similar: "${possible[0].product.name}" (${Math.round(possible[0].score * 100)}% similar). Deseja continuar?`)) return;
       }
     }
 
-    const {_new,...clean}=normalizeProductForStorage(f);
+    const {_new, ...clean} = normalizeProductForStorage(f);
     clean.code = String(clean.code || '').trim();
     clean.importSource = clean.importSource || 'manual';
 
-    if(prod._new) saveProducts([...products,clean]);
-    else saveProducts(products.map(p=>p.id===clean.id?clean:p));
+    if (prod._new) saveProducts([...products, clean]);
+    else saveProducts(products.map(p => p.id === clean.id ? clean : p));
     onClose?.();
   };
 
@@ -2179,7 +2191,7 @@ const AdminProdForm = ({ prod, products, categories, saveProducts, setEditProd, 
   return (
     <div style={{maxWidth:680}}>
       <div style={{display:'flex',alignItems:'center',gap:12,marginBottom:24,flexWrap:'wrap'}}>
-        <button onClick={()=>onClose?.()} style={{background:'none',border:'none',color:B.purple,fontWeight:700,cursor:'pointer',fontSize:14,fontFamily:'inherit'}}>? Voltar</button>
+        <button onClick={()=>onClose?.()} style={{background:'none',border:'none',color:B.purple,fontWeight:700,cursor:'pointer',fontSize:14,fontFamily:'inherit'}}>← Voltar</button>
         <h2 style={{margin:0,color:B.purpleDark,fontSize:20,fontFamily:'Georgia, serif',flex:1}}>{prod._new?'Novo Produto':'Editar Produto'}</h2>
         <button onClick={()=>{setJsonModal(true);setJsonErr('');}} style={{background:B.gold,color:B.white,border:'none',padding:'8px 14px',borderRadius:8,fontWeight:700,fontSize:13,cursor:'pointer',fontFamily:'inherit',whiteSpace:'nowrap'}}>Preencher com IA (Colar JSON)</button>
       </div>
@@ -2207,8 +2219,14 @@ const AdminProdForm = ({ prod, products, categories, saveProducts, setEditProd, 
       <div style={{background:B.white,borderRadius:12,border:`1px solid ${B.border}`,padding:24,marginBottom:16}}>
         <SectionTitle>Identificacao</SectionTitle>
         <div style={{display:'grid',gridTemplateColumns:isMobile?'1fr':'220px 1fr',gap:14}}>
-          <Field label="Codigo do produto *" value={f.code||''} onChange={set('code')} placeholder="Ex: PROD-045" note="Use um codigo unico para facilitar busca, estoque e vinculacao." />
-          <Field label="Nome do produto *" value={f.name} onChange={set('name')} placeholder="Ex: Omega 7 Creme de Massagem Corporal" />
+          <div data-field-error={errors.code ? true : undefined}>
+            <Field label="Código do produto *" value={f.code||''} onChange={v => { set('code')(v); setErrors(e => ({...e, code: ''})); }} placeholder="Ex: PROD-045" note={errors.code ? undefined : 'Use um código único para facilitar busca, estoque e vinculação.'} />
+            {errors.code && <div style={{marginTop:-10,marginBottom:10,fontSize:12,color:B.red,fontWeight:600}}>{errors.code}</div>}
+          </div>
+          <div data-field-error={errors.name ? true : undefined}>
+            <Field label="Nome do produto *" value={f.name} onChange={v => { set('name')(v); setErrors(e => ({...e, name: ''})); }} placeholder="Ex: Omega 7 Creme de Massagem Corporal" />
+            {errors.name && <div style={{marginTop:-10,marginBottom:10,fontSize:12,color:B.red,fontWeight:600}}>{errors.name}</div>}
+          </div>
         </div>
         <div style={{display:'grid',gridTemplateColumns:isMobile?'1fr':'1fr 1fr',gap:14,marginBottom:16}}>
           <Sel label="Origem" value={f.importSource || 'manual'} onChange={(v) => setF({...f, importSource: v})} options={[{v:'manual', l:'Manual'}, {v:'xml', l:'Importado por XML'}]} />
@@ -2322,7 +2340,7 @@ const AdminProdForm = ({ prod, products, categories, saveProducts, setEditProd, 
           <div style={{background:B.greenLight,border:`1px solid ${B.green}`,borderRadius:10,padding:'14px 18px',display:'flex',justifyContent:'space-between',alignItems:'center'}}>
             <div>
               <div style={{fontWeight:700,fontSize:14,color:B.green}}>Custo por Aplicacao Calculado</div>
-              <div style={{fontSize:12,color:B.muted,marginTop:2}}>R$ {f.cost} � {f.yieldApplications} aplicacoes</div>
+              <div style={{fontSize:12,color:B.muted,marginTop:2}}>R$ {f.cost} ÷ {f.yieldApplications} aplicações</div>
             </div>
             <div style={{fontSize:24,fontWeight:700,color:B.green}}>{fmtCurrency(cpa)}</div>
           </div>
@@ -2434,7 +2452,7 @@ const AdminAlertsLegacy = ({ products, protocols, saveProducts, setEditProt, set
 };
 
 export default function App() {
-  const [loading,setLoading]=useState(false); // Come�a false porque carregamos dados locais rapidinho
+  const [loading,setLoading]=useState(false); // Comea false porque carregamos dados locais rapidinho
   const [products,setProducts]=useState(()=>(load(PRODUCTS_KEY,INIT_PRODUCTS).then(p => p.map(normalizeProductForStorage)), INIT_PRODUCTS)); // valores iniciais
   const [protocols,setProtocols]=useState(INIT_PROTOCOLS);
   const [indications,setIndications]=useState(INIT_INDICATIONS);
@@ -2460,7 +2478,7 @@ export default function App() {
 
   useEffect(()=>{
     (async()=>{
-      // Carrega dados do localStorage em paralelo (opera��es r�pidas)
+      // Carrega dados do localStorage em paralelo (operaes rpidas)
       const [
         loadedProducts,
         loadedProtocols,
@@ -2494,7 +2512,7 @@ export default function App() {
       if (loadedBrand.colorMain) B.purple = loadedBrand.colorMain;
       if (loadedBrand.colorAccent) B.gold = loadedBrand.colorAccent;
 
-      // S� agora verifica sess�o (isso sim pode demorar um pouco)
+      // S agora verifica sesso (isso sim pode demorar um pouco)
       const sessionUser = await getAdminSession().catch(() => null);
       if (sessionUser) {
         const loadedUsers = await load(USERS_KEY, INIT_USERS);
