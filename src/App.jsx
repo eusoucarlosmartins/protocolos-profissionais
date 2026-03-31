@@ -1801,11 +1801,13 @@ const AdminPanel = ({ products, protocols, indications, categories, phases, bran
   const adminScrollRef = useRef(null);
   const productListScrollRef = useRef(0);
   const protocolListScrollRef = useRef(0);
-  const [aView,setAView]=useState(()=>{
-    const first = ['dashboard','products','protocols','categories','indications','phases','alerts','settings','marketing','users'].find(s=>hasPerm(loggedUser,s,'view'));
-    return first||'dashboard';
-  });
+  const [aView,setAView]=useState('dashboard');
   const [editProd,setEditProd]=useState(null);
+
+  useEffect(() => {
+    const first = ['dashboard','products','protocols','categories','indications','phases','alerts','settings','marketing','users'].find(s => hasPerm(loggedUser, s, 'view'));
+    setAView(first || 'dashboard');
+  }, [loggedUser]);
   const [editProt,setEditProt]=useState(null);
   const EMPTY_PROD_FILTERS = { status: 'all', category: 'all', type: 'all' };
   const EMPTY_PROT_FILTERS = { status: 'all', category: 'all', indication: 'all', reviewStatus: 'all' };
@@ -1828,6 +1830,15 @@ const AdminPanel = ({ products, protocols, indications, categories, phases, bran
   ].filter(n=>hasPerm(loggedUser, n.id, 'view'));
 
   const accessibleAreas = Object.entries(loggedUser.perms||{}).filter(([,v])=>Object.values(v).some(Boolean)).length;
+
+  if (accessibleAreas === 0) {
+    return (
+      <div style={{padding:24}}>
+        <div style={{fontSize:16,fontWeight:700,color:B.purpleDark,marginBottom:12}}>Acesso nenhuma area</div>
+        <div style={{color:B.muted}}>Usuário sem permissões definidas para este painel. Verifique as configurações ou entre em contato com o administrador.</div>
+      </div>
+    );
+  }
 
   const openSection = (sectionId) => {
     setAView(sectionId);
