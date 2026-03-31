@@ -721,7 +721,6 @@ const ProtocolDetail = ({ protocol:p, products, indications, categories, navigat
       '',
       ...homeRoutineSections,
       '',
-      `Link do protocolo: ${shareUrl}`
     ].filter(Boolean).join('\n')
   );
 
