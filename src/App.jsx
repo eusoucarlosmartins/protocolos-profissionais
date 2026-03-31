@@ -166,7 +166,7 @@ const CampaignSection = ({ campaign, protocols, navigate }) => {
         <div style={{color:'rgba(255,255,255,0.7)', fontSize:13, fontWeight:600}}>{campaign.title||'Protocolo em Destaque'}</div>
         <div style={{color:'#fff', fontSize:22, fontWeight:700, fontFamily:'Georgia,serif', lineHeight:1.3}}>{prot.name}</div>
         {campaign.subtitle&&<div style={{color:'rgba(255,255,255,0.75)', fontSize:14, lineHeight:1.6}}>{campaign.subtitle}</div>}
-        <button onClick={()=>navigate(`/protocolo/${prot.id}`)} style={{alignSelf:'flex-start', background:B.gold, color:'#fff', border:'none', padding:'10px 24px', borderRadius:8, fontWeight:700, fontSize:14, cursor:'pointer', fontFamily:'inherit'}}>Ver protocolo completo -></button>
+        <button onClick={()=>navigate(`/protocolo/${prot.id}`)} style={{alignSelf:'flex-start', background:B.gold, color:'#fff', border:'none', padding:'10px 24px', borderRadius:8, fontWeight:700, fontSize:14, cursor:'pointer', fontFamily:'inherit'}}>Ver protocolo completo &rarr;</button>
       </div>
     </div>
   );
@@ -934,7 +934,7 @@ const ProtocolDetail = ({ protocol:p, products, indications, categories, navigat
             
             {hasCostData && (
               <div className="avoid-break" style={{background:B.white, borderRadius:10, padding:'16px', marginTop:16, border:`1px solid ${B.border}`}}>
-                 <h3 style={{margin:'0 0 12px',fontSize:15,color:B.purpleDark}}>Analise de Rentabilidade do Kit</h3>
+                 <h3 style={{margin:'0 0 12px',fontSize:15,color:B.purpleDark}}>Analise de Rentabilidade dos Produtos</h3>
                  <ul style={{listStyle:'none', padding:0, margin:0, fontSize:13, color:B.text, lineHeight:1.8}}>
                    <li style={{display:'flex', justifyContent:'space-between', borderBottom:`1px solid ${B.cream}`, paddingBottom:6, marginBottom:6}}>
                      <span><strong>Investimento Total:</strong> <span style={{color:B.muted, fontSize:11}}>(soma dos produtos)</span></span>
