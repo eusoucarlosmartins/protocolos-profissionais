@@ -1,7 +1,7 @@
 ﻿import { useState, useEffect, useRef } from "react";
 import { useIsMobile, useRoute } from "./hooks/useAppShell";
-import { useNotionImporter } from "./hooks/useNotionImporter";
 import { lazy, Suspense } from "react";
+import AdminProtForm from "./components/admin/AdminProtForm";
 import {
   B,
   BRAND_KEY,
@@ -2901,6 +2901,8 @@ const AdminProtForm = ({ prot, products, protocols, indications, categories, pha
     </div>
   );
 };
+
+// AdminProtForm moved to src/components/admin/AdminProtForm.jsx
 
 const AdminAlertsLegacy = ({ products, protocols, saveProducts, setEditProt, setAView }) => {
   const inactive = products.filter(p => !isActive(p));
