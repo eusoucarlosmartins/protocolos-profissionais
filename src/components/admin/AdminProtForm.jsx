@@ -124,20 +124,28 @@ const AdminProtForm = ({ prot, products, protocols, indications, categories, pha
   const handleDragStart = (e, index) => {
     setDraggedIdx(index);
     e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/html', ''); // Required for Firefox
   };
 
   const handleDragOver = (e, index) => {
     e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
     if (draggedIdx === null || draggedIdx === index) return;
-    const newSteps = [...f.steps];
-    const draggedItem = newSteps[draggedIdx];
-    newSteps.splice(draggedIdx, 1);
-    newSteps.splice(index, 0, draggedItem);
-    setDraggedIdx(index);
-    setF({ ...f, steps: newSteps });
+
+    // Only reorder if we're hovering over a different index
+    if (draggedIdx !== index) {
+      const newSteps = [...f.steps];
+      const draggedItem = newSteps[draggedIdx];
+      newSteps.splice(draggedIdx, 1);
+      newSteps.splice(index, 0, draggedItem);
+      setDraggedIdx(index);
+      setF({ ...f, steps: newSteps });
+    }
   };
 
-  const handleDragEnd = () => setDraggedIdx(null);
+  const handleDragEnd = () => {
+    setDraggedIdx(null);
+  };
 
   const normalizePlainName = (value) =>
     String(value || '')
@@ -359,9 +367,30 @@ const AdminProtForm = ({ prot, products, protocols, indications, categories, pha
         <div style={sectionBoxStyle}>
           <SectionTitle>Cabine (Etapas)</SectionTitle>
           {f.steps.map((step, idx) => (
-            <div key={step.id || idx} style={{ marginBottom: 10, border: `1px solid ${B.border}`, borderRadius: 10, padding: 10, background: '#FAFAFC' }}>
+            <div
+              key={step.id || idx}
+              draggable
+              onDragStart={(e) => handleDragStart(e, idx)}
+              onDragOver={(e) => handleDragOver(e, idx)}
+              onDragEnd={handleDragEnd}
+              style={{
+                marginBottom: 10,
+                border: `2px solid ${draggedIdx === idx ? B.purple : B.border}`,
+                borderRadius: 10,
+                padding: 10,
+                background: draggedIdx === idx ? '#F0EEFF' : '#FAFAFC',
+                cursor: draggedIdx === idx ? 'grabbing' : 'grab',
+                transition: 'all 0.2s ease',
+                userSelect: 'none',
+                boxShadow: draggedIdx === idx ? '0 4px 12px rgba(113, 93, 168, 0.15)' : 'none',
+                transform: draggedIdx === idx ? 'scale(1.02)' : 'scale(1)'
+              }}
+            >
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-                <span style={{ width: 24, height: 24, borderRadius: '50%', background: B.purple, color: '#fff', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: 12 }}>{step.step || idx + 1}</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'grab', opacity: draggedIdx === idx ? 0.5 : 1 }}>
+                  <span style={{ fontSize: 14, color: B.muted, userSelect: 'none' }}>⋮⋮</span>
+                  <span style={{ width: 24, height: 24, borderRadius: '50%', background: B.purple, color: '#fff', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 'bold' }}>{step.step || idx + 1}</span>
+                </div>
                 <Field label="Nome da etapa" value={step.name || ''} onChange={(v) => updStep(step.id, 'name', v)} placeholder="Ex: Higienizacao" />
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 8 }}>
@@ -379,7 +408,10 @@ const AdminProtForm = ({ prot, products, protocols, indications, categories, pha
                 />
               </div>
               <Field label="Instrucao" value={step.instruction || ''} onChange={(v) => updStep(step.id, 'instruction', v)} placeholder="Detalhar a execucao" multi rows={2} />
-              <button type="button" onClick={() => rmStep(step.id)} style={{ background: B.redLight, color: B.red, border: 'none', borderRadius: 6, padding: '6px 10px', cursor: 'pointer' }}>Remover etapa</button>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 8 }}>
+                <button type="button" onClick={() => rmStep(step.id)} style={{ background: B.redLight, color: B.red, border: 'none', borderRadius: 6, padding: '6px 10px', cursor: 'pointer' }}>Remover</button>
+                <div style={{ fontSize: 11, color: B.muted, fontStyle: 'italic' }}>Clique e arraste para reordenar</div>
+              </div>
             </div>
           ))}
           <button type="button" onClick={addStep} style={{ background: B.purple, color: '#fff', border: 'none', borderRadius: 8, padding: '8px 12px', fontWeight: 700, cursor: 'pointer' }}>+ Adicionar etapa</button>
