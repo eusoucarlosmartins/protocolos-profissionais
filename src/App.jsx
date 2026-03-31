@@ -639,7 +639,7 @@ const ProtocolCard = ({ protocol:p, products, indications, categories, onClick, 
       style={{position:'relative', background:B.white,borderRadius:16,border:`1px solid ${hov?B.purpleMid:B.border}`,padding:22,cursor:'pointer',transition:'all 0.18s',transform:hov?'translateY(-3px)':'none',boxShadow:hov?'0 14px 36px rgba(94,61,143,0.14)':'0 8px 22px rgba(44,31,64,0.05)'}}>
       {p.badge&&<span style={{position:'absolute',top:-8,left:14,background:B.gold,color:'#fff',fontSize:10,fontWeight:700,padding:'3px 10px',borderRadius:20,textTransform:'uppercase',letterSpacing:'0.07em',zIndex:3}}>{p.badge}</span>}
       <button onClick={toggleFav} style={{position:'absolute', top: 18, right: 18, background:'none', border:'none', fontSize: 22, cursor:'pointer', color: isFav ? B.red : B.border, zIndex: 2}}>
-        {isFav ? '?' : '?'}
+        {isFav ? '❤' : '♡'}
       </button>
       <div style={{display:'flex',gap:6,marginBottom:12,flexWrap:'wrap', paddingRight: 30}}>
         {(p.concerns || []).map(c=><Tag key={c} label={indications.find(x=>x.id===c)?.label||c} />)}
