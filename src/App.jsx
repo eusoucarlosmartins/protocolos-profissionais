@@ -671,11 +671,7 @@ const ProtocolDetail = ({ protocol:p, products, indications, categories, navigat
 
   const protocolProducts = p.steps.filter(s=>s.productId).map(s=>get(s.productId)).filter(Boolean);
   const uniqueProducts = [...new Map(protocolProducts.map(pr=>[pr.id,pr])).values()];
-  const summaryProducts = [
-    ...uniqueProducts.map(pr => ({ ...pr, _summaryRole: 'product' })),
-    ...(professionalKit && !uniqueProducts.some(pr => pr.id === professionalKit.id) ? [{ ...professionalKit, _summaryRole: 'professionalKit' }] : []),
-    ...(homeKit && !uniqueProducts.some(pr => pr.id === homeKit.id) && (!professionalKit || professionalKit.id !== homeKit.id) ? [{ ...homeKit, _summaryRole: 'homeKit' }] : [])
-  ];
+  const summaryProducts = uniqueProducts.map(pr => ({ ...pr, _summaryRole: 'product' }));
   
   const totalInvestment = uniqueProducts.reduce((acc, pr) => acc + (parseFloat(pr.cost) || 0), 0);
   const yields = uniqueProducts.map(pr => parseFloat(pr.yieldApplications)).filter(y => y > 0 && !isNaN(y));
@@ -888,17 +884,34 @@ const ProtocolDetail = ({ protocol:p, products, indications, categories, navigat
         )}
 
         {/* Product & Cost Summary */}
-        {summaryProducts.length > 0 && (
+        {(summaryProducts.length > 0 || professionalKit) && (
           <div className="rp-cost-summary avoid-break" style={{background:`linear-gradient(135deg, ${B.purpleLight}, ${B.goldLight})`,borderRadius:16,border:`1px solid ${B.border}`,padding:'22px 28px', pageBreakInside: 'avoid', boxShadow:'0 10px 28px rgba(44,31,64,0.06)'}}>
-            <h2 style={{margin:'0 0 14px',fontSize:16,fontWeight:700,color:B.purpleDark}}>Resumo de Produtos do Protocolo</h2>
+            <h2 style={{margin:'0 0 14px',fontSize:16,fontWeight:700,color:B.purpleDark}}>Uso em Cabine</h2>
+            {professionalKit && (
+              <div style={{background:`linear-gradient(135deg, ${B.purpleLight}, rgba(245,236,216,0.82))`,border:`1px solid ${B.border}`,borderRadius:12,padding:isMobile?'12px':'14px 16px',marginBottom:16}}>
+                <div style={{fontSize:11,fontWeight:700,color:B.purple,textTransform:'uppercase',letterSpacing:'0.08em',marginBottom:8}}>Kit Profissional Recomendado</div>
+                <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',gap:10,flexWrap:'wrap'}}>
+                  <div style={{display:'flex',alignItems:'center',gap:12,minWidth:0,flex:'1 1 240px'}}>
+                    {professionalKit.image ? (
+                      <img src={professionalKit.image} alt={professionalKit.name} style={{width:52,height:52,objectFit:'contain',borderRadius:10,background:B.white,border:`1px solid ${B.border}`,flexShrink:0}} />
+                    ) : (
+                      <div style={{width:52,height:52,borderRadius:10,background:B.white,display:'flex',alignItems:'center',justifyContent:'center',fontSize:18,flexShrink:0}}>P</div>
+                    )}
+                    <div style={{minWidth:0}}>
+                      <div style={{fontSize:11,color:B.muted,fontWeight:700,textTransform:'uppercase',letterSpacing:'0.06em',marginBottom:2}}>Recomendado para o profissional</div>
+                      <ProductTooltip product={professionalKit} navigate={navigate}>
+                        <span style={{fontWeight:700,fontSize:14,color:B.purpleDark,lineHeight:1.35}}>{professionalKit.name}</span>
+                      </ProductTooltip>
+                    </div>
+                  </div>
+                  <BuyLink href={professionalKit.siteUrl} isMobile={isMobile} sx={{padding:'8px 14px',fontSize:11}} />
+                </div>
+              </div>
+            )}
+            {summaryProducts.length > 0 && (
             <div style={{display:'flex',flexDirection:'column',gap:8,marginBottom:16}}>
               {summaryProducts.map(pr=>{
                 const c=costPerApp(pr);
-                const roleLabel = pr._summaryRole === 'professionalKit'
-                  ? 'Kit Profissional'
-                  : pr._summaryRole === 'homeKit'
-                    ? 'Kit Uso em Casa'
-                    : null;
                 return (
                   <div key={pr.id} className="avoid-break" style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',background:'rgba(255,255,255,0.8)',borderRadius:10,padding:'12px 14px', border:`1px solid rgba(255,255,255,0.4)`}}>
                     <div style={{display:'flex', alignItems:'center', gap:12}}>
@@ -908,16 +921,16 @@ const ProtocolDetail = ({ protocol:p, products, indications, categories, navigat
                           <div style={{width:40,height:40,borderRadius:6,background:B.cream,display:'flex',alignItems:'center',justifyContent:'center',fontSize:18}}>P</div>
                       )}
                       <div style={{display:'flex', flexDirection:'column', alignItems: 'flex-start', justifyContent: 'center'}}>
-                        {roleLabel && <span style={{fontSize:10,color:B.purple,fontWeight:700,textTransform:'uppercase',letterSpacing:'0.08em',marginBottom:3}}>{roleLabel}</span>}
                         <span style={{fontSize:isMobile?13:14,color:B.text,fontWeight:700,lineHeight:1.2, marginBottom: 4}}>{pr.name}</span>
                         <BuyLink href={pr.siteUrl} isMobile={isMobile} sx={{padding: '5px 12px', fontSize: 11}} />
                       </div>
                     </div>
-                    {c!=null && pr._summaryRole === 'product' && <span className="no-print" style={{fontSize:13,fontWeight:700,color:B.green,flexShrink:0, marginLeft: 10}}>{fmtCurrency(c)}/apl.</span>}
+                    {c!=null && <span className="no-print" style={{fontSize:13,fontWeight:700,color:B.green,flexShrink:0, marginLeft: 10}}>{fmtCurrency(c)}/apl.</span>}
                   </div>
                 );
               })}
             </div>
+            )}
             
             {hasCostData && (
               <div className="avoid-break" style={{background:B.white, borderRadius:10, padding:'16px', marginTop:16, border:`1px solid ${B.border}`}}>
