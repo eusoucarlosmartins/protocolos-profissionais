@@ -763,6 +763,13 @@ const ProtocolDetail = ({ protocol:p, products, indications, categories, navigat
             {p.youtubeUrl&&(
               <a href={p.youtubeUrl} target="_blank" rel="noreferrer" className="no-print" style={{display:'inline-flex',alignItems:'center',gap:7,background:'#FF0000',color:B.white,padding:'7px 14px',borderRadius:8,fontWeight:700,fontSize:12,textDecoration:'none'}}>Video no YouTube</a>
             )}
+            {p.version && (
+              <div style={{marginLeft:'auto',textAlign:'right'}}>
+                <span style={{fontSize:10,color:B.muted,fontWeight:600,letterSpacing:'0.04em'}}>
+                  v{p.version}{p.updatedAt ? ` · ${new Date(p.updatedAt).toLocaleDateString('pt-BR')}` : ''}
+                </span>
+              </div>
+            )}
           </div>
         </div>
 

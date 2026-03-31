@@ -335,6 +335,9 @@ const AdminProtForm = ({ prot, products, protocols, indications, categories, pha
     data.code = String(data.code || '').trim();
     data.reviewStatus = data.reviewStatus || 'needs_review';
     if (pub !== null) data.published = pub;
+    data.version = (Number(prot.version) || 0) + 1;
+    data.updatedAt = new Date().toISOString();
+    if (loggedUser) data.updatedBy = loggedUser;
     if (prot._new) saveProtocols([...protocols, data]);
     else saveProtocols(protocols.map(p => p.id === data.id ? data : p));
     onClose?.();
