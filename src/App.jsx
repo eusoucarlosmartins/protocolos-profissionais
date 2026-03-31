@@ -2421,12 +2421,13 @@ const AdminProtForm = ({ prot, products, protocols, indications, categories, pha
 
       let pageTitle = '';
       let pageDescription = '';
+      let extractedSteps = [];
       
-      // Estratégia 1: Tenta extrair título e descrição da URL (se estiver no nome)
+      // Estratégia 1: Extrai título da URL
       const urlParts = cleanUrl.split('/');
       const lastPart = urlParts[urlParts.length - 1];
       const titleFromUrl = lastPart
-        .split('-' + pageId)[0] // Remove o ID e tudo depois dele
+        .split('-' + pageId)[0]
         .replace(/-/g, ' ')
         .trim();
       
@@ -2434,10 +2435,10 @@ const AdminProtForm = ({ prot, products, protocols, indications, categories, pha
         pageTitle = titleFromUrl;
       }
 
-      // Estratégia 2: Tenta buscar via proxy público do Notion (com timeout)
+      // Estratégia 2: Tenta buscar dados da API
       try {
         const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 5000); // Timeout de 5 segundos
+        const timeout = setTimeout(() => controller.abort(), 5000);
         
         const response = await fetch(`https://notion-api.splitbee.io/v1/page/${pageId.replace(/-/g, '')}`, {
           signal: controller.signal
@@ -2448,33 +2449,84 @@ const AdminProtForm = ({ prot, products, protocols, indications, categories, pha
         if (response.ok) {
           const data = await response.json();
           
-          // Tenta encontrar o título nos blocos
           if (data && typeof data === 'object') {
             const blocks = Object.values(data);
-            for (const block of blocks) {
-              if ((block.type === 'heading_1' || block.type === 'heading_2' || block.type === 'title') && !pageTitle) {
-                const richText = block[block.type]?.rich_text?.[0]?.plain_text || block.title?.rich_text?.[0]?.plain_text || '';
+            
+            for (let i = 0; i < blocks.length; i++) {
+              const block = blocks[i];
+              
+              // Procura pelo título
+              if ((block.type === 'heading_1' || block.type === 'title') && !pageTitle) {
+                const richText = block[block.type]?.rich_text?.[0]?.plain_text || 
+                                 block.title?.rich_text?.[0]?.plain_text || '';
                 if (richText) {
                   pageTitle = richText;
-                  break;
                 }
-              } else if (block.type === 'paragraph' && !pageDescription) {
+              }
+              
+              // Procura pela descrição (primeiro parágrafo)
+              if (block.type === 'paragraph' && !pageDescription) {
                 pageDescription = block.paragraph?.rich_text?.[0]?.plain_text || '';
+              }
+              
+              // Procura por etapas numeradas (heading_2 ou heading_3 com número)
+              if ((block.type === 'heading_2' || block.type === 'heading_3')) {
+                const headingText = block[block.type]?.rich_text?.[0]?.plain_text || '';
+                const stepMatch = headingText.match(/^(\d+)\.\s*(.+)/);
+                
+                if (stepMatch) {
+                  const stepNum = parseInt(stepMatch[1]);
+                  const stepTitle = stepMatch[2].trim();
+                  
+                  // Reúne a descrição do passo (próximos parágrafos)
+                  let stepDescription = '';
+                  for (let j = i + 1; j < blocks.length; j++) {
+                    const nextBlock = blocks[j];
+                    // Para quando encontra outro heading
+                    if (nextBlock.type && (nextBlock.type.startsWith('heading') || nextBlock.type === 'heading_1')) {
+                      break;
+                    }
+                    if (nextBlock.type === 'paragraph') {
+                      const para = nextBlock.paragraph?.rich_text?.[0]?.plain_text || '';
+                      if (para) {
+                        stepDescription += (stepDescription ? ' ' : '') + para;
+                      }
+                    }
+                  }
+                  
+                  extractedSteps.push({
+                    id: uid(),
+                    step: stepNum.toString(),
+                    name: stepTitle,
+                    instruction: stepDescription,
+                    productId: null,
+                    time: '',
+                    repetition: '',
+                    phase: '',
+                    observation: ''
+                  });
+                }
               }
             }
           }
         }
       } catch (proxyErr) {
-        // Proxy falhou, continua com título extraído da URL
+        // Proxy falhou, continua com dados que conseguiu
       }
 
-      // Popula o formulário com os dados obtidos
-      setF(x => ({
-        ...x,
+      // Popula o formulário
+      const updates = {
         externalSourceId: pageId,
         name: pageTitle || x.name,
         description: pageDescription || x.description
-      }));
+      };
+      
+      // Se conseguiu extrair etapas, adiciona ao formulário
+      if (extractedSteps.length > 0) {
+        updates.steps = extractedSteps;
+      }
+      
+      setF(x => ({...x, ...updates}));
       
       setNotionUrl('');
       setShowNotionImport(false);
