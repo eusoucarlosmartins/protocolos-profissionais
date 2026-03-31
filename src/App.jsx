@@ -1236,6 +1236,52 @@ const TextProtocolImporter = ({ onImport, products }) => {
       return;
     }
 
+    const normalizeText = (input) => {
+      let s = String(input || '').toLowerCase();
+      s = s.replace(/[•–—‑_–]/g, ' '); // remove bullets/hyphens/dashes
+      s = s.replace(/\s+([gml]b?|kg|mg|ml|cm|mm)\b/g, '$1'); // normaliza unidades como 700 g -> 700g
+      s = s.replace(/[^a-z0-9\s]/g, ' '); // tira pontuação
+      s = s.replace(/\s+/g, ' ').trim();
+      return s;
+    };
+
+    const getTokens = (input) => normalizeText(input).split(/\s+/).filter(Boolean);
+
+    const tryMatchProduct = (textInstruction) => {
+      const productTokens = getTokens(textInstruction);
+      if (productTokens.length === 0) return null;
+
+      const candidates = [];
+      for (const p of products) {
+        if (!isActive(p)) continue;
+        const pTokens = getTokens(p.name.split('-')[0]);
+        if (pTokens.length === 0) continue;
+
+        const uniqueTokens = Array.from(new Set(pTokens));
+        const tokenSet = new Set(getTokens(textInstruction));
+
+        let matches = 0;
+        for (const t of uniqueTokens) {
+          if (tokenSet.has(t)) matches += 1;
+        }
+
+        const score = matches / uniqueTokens.length;
+        if (score >= 0.4) {
+          candidates.push({ product: p, score, matches, length: uniqueTokens.length });
+        }
+      }
+
+      if (candidates.length === 0) return null;
+
+      candidates.sort((a, b) => {
+        if (b.score !== a.score) return b.score - a.score;
+        if (b.matches !== a.matches) return b.matches - a.matches;
+        return b.length - a.length;
+      });
+
+      return candidates[0].product.id;
+    };
+
     const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
     let name = '';
     let category = '';
@@ -1274,7 +1320,13 @@ const TextProtocolImporter = ({ onImport, products }) => {
             if (lower.includes('manha:')) { homeUseTime = 'morning'; continue; }
             if (lower.includes('noite:')) { homeUseTime = 'night'; continue; }
             if (homeUseTime && line.match(/^\d+\.\s*/)) {
-                homeUse[homeUseTime].push({ instruction: line.replace(/^\d+\.\s*/, ''), productId: null });
+                const itemText = line.replace(/^\d+\.\s*/, '').trim();
+                const matchedProductId = tryMatchProduct(itemText);
+                if (matchedProductId) {
+                    homeUse[homeUseTime].push({ instruction: 'Aplicar na região conforme recomendação.', productId: matchedProductId });
+                } else {
+                    homeUse[homeUseTime].push({ instruction: itemText, productId: null });
+                }
             } else if (homeUseTime && line.length > 3) {
                 let arr = homeUse[homeUseTime];
                 if (arr.length > 0) arr[arr.length-1].instruction += ' ' + line;
@@ -1283,13 +1335,27 @@ const TextProtocolImporter = ({ onImport, products }) => {
             continue;
         }
 
-        if (lower.includes('frequencia:')) {
-            frequency = line.replace(/.*frequencia:\s*/i, '').replace(/[•]/g, '').trim();
-            continue;
-        }
-        if (lower.includes('associacoes:')) {
-            associations = line.replace(/.*associacoes:\s*/i, '').replace(/[•]/g, '').trim();
-            continue;
+        if (lower.includes('frequencia:') || lower.includes('associacoes:')) {
+            if (lower.includes('frequencia:') && lower.includes('associacoes:')) {
+                const m = line.match(/frequencia:\s*(.*?)\s*associacoes:\s*(.*)$/i);
+                if (m) {
+                    frequency = m[1].replace(/[•]/g, '').trim();
+                    associations = m[2].replace(/[•]/g, '').trim();
+                    continue;
+                }
+            }
+
+            if (lower.includes('frequencia:')) {
+                frequency = line.replace(/.*frequencia:\s*/i, '').replace(/[•]/g, '').trim();
+                // se a linha continuar com associacoes, extrai também
+                const assocPart = line.match(/associacoes:\s*(.*)$/i);
+                if (assocPart) associations = assocPart[1].replace(/[•]/g, '').trim();
+                continue;
+            }
+            if (lower.includes('associacoes:')) {
+                associations = line.replace(/.*associacoes:\s*/i, '').replace(/[•]/g, '').trim();
+                continue;
+            }
         }
 
         const stepMatch = line.match(/^\d+\.\s*(.+)$/);
@@ -1304,19 +1370,6 @@ const TextProtocolImporter = ({ onImport, products }) => {
         }
     }
     if (currentStep) steps.push(currentStep);
-
-    const tryMatchProduct = (textInstruction) => {
-        const lowerText = textInstruction.toLowerCase();
-        let matched = null;
-        for (const p of products) {
-            if (!isActive(p)) continue;
-            const simpleName = p.name.split('-')[0].trim().toLowerCase(); 
-            if (lowerText.includes(simpleName)) {
-                if (!matched || p.name.length > matched.name.length) matched = p;
-            }
-        }
-        return matched ? matched.id : null;
-    };
 
     steps.forEach(s => { s.productId = tryMatchProduct(s.instruction); });
     homeUse.morning.forEach(h => { h.productId = tryMatchProduct(h.instruction); });
