@@ -2412,14 +2412,65 @@ const AdminProtForm = ({ prot, products, protocols, indications, categories, pha
         return;
       }
 
-      // Tenta buscar via API endpoint do servidor (você vai precisar adicionar isso depois)
-      // Por enquanto, mostra mensagem de sucesso e deixa o usuário editar manualmente
-      setF(x => ({...x, externalSourceId: pageId}));
+      // Tenta buscar via proxy público do Notion
+      const response = await fetch(`https://notion-api.splitbee.io/v1/page/${pageId.replace(/-/g, '')}`);
+      if (!response.ok) {
+        setNotionError('Não foi possível acessar a página. Certifique-se que ela é pública no Notion.');
+        setNotionLoading(false);
+        return;
+      }
+
+      const data = await response.json();
+      
+      // Extrai título da página
+      let pageTitle = '';
+      let pageDescription = '';
+      
+      // Tenta encontrar o título nos blocos
+      if (data && typeof data === 'object') {
+        const blocks = Object.values(data);
+        for (const block of blocks) {
+          if (block.type === 'heading_1' || block.type === 'heading_2') {
+            const text = block[block.type]?.rich_text?.[0]?.plain_text || '';
+            if (text && !pageTitle) {
+              pageTitle = text;
+            }
+          } else if (block.type === 'paragraph' && !pageDescription) {
+            pageDescription = block.paragraph?.rich_text?.[0]?.plain_text || '';
+          }
+        }
+      }
+
+      // Se não achou, tenta extrair do HTML da página
+      if (!pageTitle) {
+        try {
+          const htmlResponse = await fetch(notionUrl);
+          const html = await htmlResponse.text();
+          const titleMatch = html.match(/<title>(.*?)<\/title>/);
+          if (titleMatch) {
+            pageTitle = titleMatch[1]
+              .replace(/Notion|–|–/g, '')
+              .replace(/^[^a-zA-Z0-9]*/, '')
+              .trim();
+          }
+        } catch (e) {
+          // silencioso
+        }
+      }
+
+      // Popula o formulário com os dados obtidos
+      setF(x => ({
+        ...x,
+        externalSourceId: pageId,
+        name: pageTitle || x.name,
+        description: pageDescription || x.description
+      }));
+      
       setNotionUrl('');
       setShowNotionImport(false);
-      alert('URL do Notion memorizada (pageId: ' + pageId + '). Você pode agora editar os dados do protocolo manualmente ou esperar pela integração completa.');
+
     } catch (err) {
-      setNotionError('Erro ao processar URL: ' + (err?.message || 'desconhecido'));
+      setNotionError('Erro ao processar: ' + (err?.message || 'desconhecido'));
     }
     setNotionLoading(false);
   };
