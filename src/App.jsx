@@ -1930,7 +1930,12 @@ const AdminProdForm = ({ prod, products, categories, saveProducts, setEditProd, 
 
   const doSave = () => {
     if(!f.name.trim()) return alert('Nome obrigatorio');
+    if(!String(f.code||'').trim()) return alert('Codigo obrigatorio');
+    const normalizedCode = String(f.code || '').trim().toLowerCase();
+    const codeInUse = products.some(p => p.id !== f.id && String(p.code || '').trim().toLowerCase() === normalizedCode);
+    if(codeInUse) return alert('Ja existe um produto com este codigo.');
     const {_new,...clean}=normalizeProductForStorage(f);
+    clean.code = String(clean.code || '').trim();
     if(prod._new) saveProducts([...products,clean]);
     else saveProducts(products.map(p=>p.id===clean.id?clean:p));
     onClose?.();
@@ -1973,7 +1978,10 @@ const AdminProdForm = ({ prod, products, categories, saveProducts, setEditProd, 
 
       <div style={{background:B.white,borderRadius:12,border:`1px solid ${B.border}`,padding:24,marginBottom:16}}>
         <SectionTitle>Identificacao</SectionTitle>
-        <Field label="Nome do produto *" value={f.name} onChange={set('name')} placeholder="Ex: Omega 7 Creme de Massagem Corporal" />
+        <div style={{display:'grid',gridTemplateColumns:isMobile?'1fr':'220px 1fr',gap:14}}>
+          <Field label="Codigo do produto *" value={f.code||''} onChange={set('code')} placeholder="Ex: PROD-045" note="Use um codigo unico para facilitar busca, estoque e vinculacao." />
+          <Field label="Nome do produto *" value={f.name} onChange={set('name')} placeholder="Ex: Omega 7 Creme de Massagem Corporal" />
+        </div>
         <div style={{marginBottom:16}}>
           <label style={{display:'block',fontSize:12,fontWeight:700,color:B.muted,marginBottom:8,textTransform:'uppercase',letterSpacing:'0.06em'}}>Foto do Produto</label>
           <div style={{display:'flex',gap:14,alignItems:'flex-start',flexDirection:isMobile?'column':'row'}}>
@@ -2211,7 +2219,12 @@ const AdminProtForm = ({ prot, products, protocols, indications, categories, pha
 
   const doSave=(pub=null)=>{
     if(!f.name.trim()) return alert('Nome obrigatorio');
+    if(!String(f.code||'').trim()) return alert('Codigo obrigatorio');
+    const normalizedCode = String(f.code || '').trim().toLowerCase();
+    const codeInUse = protocols.some(p => p.id !== f.id && String(p.code || '').trim().toLowerCase() === normalizedCode);
+    if(codeInUse) return alert('Ja existe um protocolo com este codigo.');
     const {_new,...clean}=f;
+    clean.code = String(clean.code || '').trim();
     if(pub!==null) clean.published=pub;
     if(prot._new) saveProtocols([...protocols,clean]);
     else saveProtocols(protocols.map(p=>p.id===clean.id?clean:p));
@@ -2280,7 +2293,10 @@ const AdminProtForm = ({ prot, products, protocols, indications, categories, pha
         <div style={{background:B.cream,border:`1px solid ${B.border}`,borderRadius:12,padding:'12px 14px',marginBottom:16,fontSize:12,color:B.muted,lineHeight:1.6}}>
           Dica: pense nessa etapa como a vitrine do protocolo. Se alguem olhar so o card da home, essas informacoes ja precisam explicar o valor dele.
         </div>
-        <Field label="Nome do protocolo *" value={f.name} onChange={v=>setF({...f,name:v})} placeholder="Ex: Peeling de Diamante para Clareamento e Uniformizacao" note="Use um nome que a equipe reconheca rapido e que tambem fique claro para consulta futura." />
+        <div style={{display:'grid',gridTemplateColumns:isMobile?'1fr':'220px 1fr',gap:14}}>
+          <Field label="Codigo do protocolo *" value={f.code||''} onChange={v=>setF({...f,code:v})} placeholder="Ex: PROTO-023" note="Use um codigo curto e unico para localizar rapido no admin." />
+          <Field label="Nome do protocolo *" value={f.name} onChange={v=>setF({...f,name:v})} placeholder="Ex: Peeling de Diamante para Clareamento e Uniformizacao" note="Use um nome que a equipe reconheca rapido e que tambem fique claro para consulta futura." />
+        </div>
         <Field label="Etiqueta de destaque" value={f.badge||''} onChange={v=>setF({...f,badge:v})} placeholder="Ex: Lancamento, Novo, Exclusivo" note="Aparece como selo no card da home. Use so quando realmente quiser destacar." />
         <Field label="Resumo do protocolo" value={f.description} onChange={v=>setF({...f,description:v})} placeholder="Explique o objetivo principal, para quem ele foi pensado e o resultado esperado." multi rows={3} />
         <div style={{display:'grid',gridTemplateColumns:isMobile?'1fr':'1fr 1fr',gap:14}}>

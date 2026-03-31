@@ -156,6 +156,7 @@ export const INIT_MARKETING = {
 
 export const EMPTY_PRODUCT = {
   id: "",
+  code: "",
   name: "",
   categories: ["facial"],
   uso: ["profissional"],
@@ -193,6 +194,7 @@ export const PRODUCT_TYPE_OPTIONS = [
 
 export const INIT_PRODUCTS = [
   {
+    code: "PROD-001",
     name: "Advanced Detox Creme de Massagem 700g - Profissional",
     uso: ["profissional"],
     categories: ["corporal"],
@@ -208,6 +210,7 @@ export const INIT_PRODUCTS = [
 export const INIT_PROTOCOLS = [
   {
     id: "prot1",
+    code: "PROTO-001",
     name: "Peeling de Diamante – Clareamento e Uniformização",
     description:
       "Protocolo facial completo associado ao peeling de diamante para auxiliar no clareamento e uniformização da pele, ideal para manchas e tom irregular.",

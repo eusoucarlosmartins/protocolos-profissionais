@@ -60,11 +60,21 @@ export const AdminProducts = ({
   };
 
   const duplicate = (product) => {
-    setEditProd({ ...product, id: uid(), name: buildCopyName(product.name, products.map((item) => item.name)), _new: true });
+    setEditProd({
+      ...product,
+      id: uid(),
+      code: "",
+      name: buildCopyName(product.name, products.map((item) => item.name)),
+      _new: true,
+    });
   };
 
   const filtered = products.filter((product) => {
-    const matchSearch = !search || product.name.toLowerCase().includes(search.toLowerCase());
+    const needle = search.toLowerCase();
+    const matchSearch =
+      !search ||
+      product.name.toLowerCase().includes(needle) ||
+      String(product.code || "").toLowerCase().includes(needle);
     const matchStatus = filters.status === 'all' || (filters.status === 'active' ? isActive(product) : !isActive(product));
     const matchCategory = filters.category === 'all' || (product.categories || [product.category]).includes(filters.category);
     const matchType = filters.type === 'all' || productHasType(product, filters.type);
@@ -91,7 +101,7 @@ export const AdminProducts = ({
           {hasActiveFilters && <button onClick={onClearFilters} style={{ background: 'none', border: `1px solid ${B.border}`, borderRadius: 7, padding: '5px 12px', fontSize: 12, fontWeight: 700, color: B.muted, cursor: 'pointer', fontFamily: 'inherit' }}>Limpar filtros</button>}
         </div>
         <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', flexDirection: isMobile ? 'column' : 'row' }}>
-          <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Buscar produto por nome..." style={{ flex: 1, minWidth: isMobile ? '100%' : 200, width: isMobile ? '100%' : 'auto', padding: '9px 12px', border: `1.5px solid ${B.border}`, borderRadius: 8, fontSize: 14, outline: 'none', fontFamily: 'inherit' }} />
+          <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Buscar produto por nome ou codigo..." style={{ flex: 1, minWidth: isMobile ? '100%' : 200, width: isMobile ? '100%' : 'auto', padding: '9px 12px', border: `1.5px solid ${B.border}`, borderRadius: 8, fontSize: 14, outline: 'none', fontFamily: 'inherit' }} />
           <select value={filters.status} onChange={(e) => setFilters({ ...filters, status: e.target.value })} style={{ padding: '9px 12px', border: `1.5px solid ${B.border}`, borderRadius: 8, fontSize: 14, outline: 'none', fontFamily: 'inherit', background: B.white, width: isMobile ? '100%' : 'auto' }}>
             <option value="all">Status: Todos</option>
             <option value="active">Ativos</option>
@@ -136,6 +146,7 @@ export const AdminProducts = ({
           return (
             <div key={product.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: isMobile ? 'flex-start' : 'center', flexDirection: isMobile ? 'column' : 'row', gap: isMobile ? 12 : 16, padding: isMobile ? '14px 16px' : '14px 20px', borderBottom: index < filtered.length - 1 ? `1px solid ${B.border}` : 'none', borderLeft:`4px solid ${accentColor}` }}>
               <div style={{ width: isMobile ? '100%' : 'auto' }}>
+                {product.code && <div style={{ fontSize: 11, fontWeight: 800, color: B.purple, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 4 }}>{product.code}</div>}
                 <div style={{ fontWeight: 700, fontSize: 14, color: B.text, marginBottom: 3 }}>{product.name}</div>
                 <div style={{ fontSize: 12, color: B.muted, display: 'flex', gap: 12, flexWrap: 'wrap' }}>
                   <span dangerouslySetInnerHTML={{ __html: clean((product.actives || '').slice(0, 60) + ((product.actives || '').length > 60 ? '...' : '')) }} />

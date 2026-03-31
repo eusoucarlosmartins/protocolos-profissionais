@@ -62,6 +62,7 @@ export const AdminProtocols = ({
     setEditProt({
       ...protocol,
       id: uid(),
+      code: "",
       name: buildCopyName(protocol.name, protocols.map((item) => item.name)),
       _new: true,
     });
@@ -70,6 +71,7 @@ export const AdminProtocols = ({
   const newProtocol = () =>
     setEditProt({
       id: uid(),
+      code: "",
       name: "",
       description: "",
       concerns: [],
@@ -89,6 +91,7 @@ export const AdminProtocols = ({
     const matchSearch =
       !search ||
       protocol.name.toLowerCase().includes(search.toLowerCase()) ||
+      String(protocol.code || "").toLowerCase().includes(search.toLowerCase()) ||
       protocol.description?.toLowerCase().includes(search.toLowerCase());
     const matchStatus =
       filters.status === "all" ||
@@ -164,7 +167,7 @@ export const AdminProtocols = ({
           )}
         </div>
         <div style={{ display: "flex", gap: 10, flexWrap: "wrap", flexDirection: isMobile ? "column" : "row" }}>
-          <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Buscar protocolo por nome ou descricao..." style={{ flex: 1, minWidth: isMobile ? "100%" : 200, width: isMobile ? "100%" : "auto", padding: "9px 12px", border: `1.5px solid ${B.border}`, borderRadius: 8, fontSize: 14, outline: "none", fontFamily: "inherit" }} />
+          <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Buscar protocolo por nome, codigo ou descricao..." style={{ flex: 1, minWidth: isMobile ? "100%" : 200, width: isMobile ? "100%" : "auto", padding: "9px 12px", border: `1.5px solid ${B.border}`, borderRadius: 8, fontSize: 14, outline: "none", fontFamily: "inherit" }} />
           <select value={filters.status} onChange={(event) => setFilters({ ...filters, status: event.target.value })} style={{ padding: "9px 12px", border: `1.5px solid ${B.border}`, borderRadius: 8, fontSize: 14, outline: "none", fontFamily: "inherit", background: B.white, width: isMobile ? "100%" : "auto" }}>
             <option value="all">Status: Todos</option>
             <option value="published">Publicados</option>
@@ -213,6 +216,7 @@ export const AdminProtocols = ({
             <div style={{ width: isMobile ? "100%" : "auto", flex: 1 }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 10, marginBottom: 8, flexDirection: isMobile ? "column" : "row" }}>
                 <div style={{ flex: 1, minWidth: 0 }}>
+                  {protocol.code && <div style={{ fontSize: 11, fontWeight: 800, color: B.purple, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 4 }}>{protocol.code}</div>}
                   <div style={{ fontWeight: 700, fontSize: 17, color: B.text, marginBottom: 6, lineHeight: 1.3 }}>{protocol.name}</div>
                   {protocol.description && <div style={{ fontSize: 13, color: B.muted, lineHeight: 1.55, marginBottom: 10 }} dangerouslySetInnerHTML={{ __html: clean((protocol.description || "").slice(0, 140) + ((protocol.description || "").length > 140 ? "..." : "")) }} />}
                 </div>

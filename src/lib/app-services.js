@@ -322,6 +322,7 @@ export const normalizeProductForStorage = (product) => {
 
   return {
     ...product,
+    code: String(product?.code || "").trim(),
     productTypes,
     uso: [...new Set(normalizedUso)],
   };
