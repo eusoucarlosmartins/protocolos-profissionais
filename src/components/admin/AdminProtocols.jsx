@@ -211,89 +211,77 @@ export const AdminProtocols = ({
         </div>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr 1fr" : "repeat(4, minmax(0, 1fr))", gap: 12, marginBottom: 20 }}>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 10, marginBottom: 16 }}>
         {[
-          { label: "Publicados", value: publishedCount, tone: B.green, helper: "visiveis no site" },
-          { label: "Rascunhos", value: draftCount, tone: "#7A5C1E", helper: "em preparacao" },
-          { label: "Com rotina em casa", value: homeRoutineCount, tone: B.purple, helper: "cliente acompanhada" },
-          { label: "Com kits", value: kitLinkedCount, tone: B.purpleDark, helper: "fechamento estruturado" },
-          { label: "A Revisar", value: needsReviewCount, tone: B.gold, helper: "aguardando aprovacao" },
-          { label: "Revisados", value: reviewedCount, tone: B.blue, helper: "aguardando aprovação final" },
-          { label: "Aprovados", value: approvedCount, tone: B.green, helper: "pronto para publicacao" },
-        ].map((card) => (
-          <div key={card.label} style={{ background: B.white, border: `1px solid ${B.border}`, borderRadius: 14, padding: "14px 16px", boxShadow: "0 10px 24px rgba(44,31,64,0.04)" }}>
-            <div style={{ fontSize: 11, fontWeight: 700, color: B.muted, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 5 }}>{card.label}</div>
-            <div style={{ fontSize: 26, fontWeight: 800, color: card.tone }}>{card.value}</div>
-            <div style={{ fontSize: 12, color: B.muted, marginTop: 4 }}>{card.helper}</div>
+          { label: "Publicados", value: publishedCount, color: B.green },
+          { label: "Rascunhos", value: draftCount, color: "#7A5C1E" },
+          { label: "Rotina Home", value: homeRoutineCount, color: B.purple },
+          { label: "Kits", value: kitLinkedCount, color: B.purpleDark },
+          { label: "A Revisar", value: needsReviewCount, color: B.gold },
+          { label: "Revisados", value: reviewedCount, color: B.blue },
+          { label: "Aprovados", value: approvedCount, color: B.green },
+        ].map((chip) => (
+          <div key={chip.label} style={{ background: B.white, border: `1px solid ${B.border}`, borderRadius: 999, padding: "8px 12px", display: "flex", alignItems: "center", gap: 8, minWidth: 132, boxShadow: "0 5px 14px rgba(44,31,64,0.07)" }}>
+            <span style={{ fontSize: 12, fontWeight: 700, color: chip.color }}>{chip.value}</span>
+            <span style={{ fontSize: 11, color: B.muted, textTransform: "uppercase", fontWeight: 600 }}>{chip.label}</span>
           </div>
         ))}
       </div>
 
       <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-        {filtered.map((protocol) => (
-          <div key={protocol.id} style={{ background: B.white, borderRadius: 16, border: `1px solid ${B.border}`, borderLeft: `4px solid ${protocol.published ? B.green : B.gold}`, padding: isMobile ? "16px" : "18px 20px", display: "flex", justifyContent: "space-between", alignItems: isMobile ? "flex-start" : "center", flexDirection: isMobile ? "column" : "row", gap: isMobile ? 14 : 18, boxShadow: "0 12px 28px rgba(44,31,64,0.05)" }}>
-            <div style={{ width: isMobile ? "100%" : "auto", flex: 1 }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 10, marginBottom: 8, flexDirection: isMobile ? "column" : "row" }}>
-                <div style={{ flex: 1, minWidth: 0 }}>
+        {filtered.map((protocol) => {
+          const inactiveCount = protocol.steps.filter((step) => step.productId && !isActive(products.find((item) => item.id === step.productId))).length;
+          const homeCount = (protocol.homeUse?.morning?.length || 0) + (protocol.homeUse?.night?.length || 0);
+          const kitCount = (protocol.professionalKitId ? 1 : 0) + (protocol.homeKitId ? 1 : 0);
+          return (
+            <div key={protocol.id} style={{ background: B.white, borderRadius: 14, border: `1px solid ${B.border}`, borderLeft: `4px solid ${protocol.published ? B.green : B.gold}`, padding: isMobile ? "16px" : "18px 20px", boxShadow: "0 8px 18px rgba(44,31,64,0.08)" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: isMobile ? "flex-start" : "center", flexWrap: "wrap", gap: 10 }}>
+                <div style={{ minWidth: 0, flex: 1 }}>
                   {protocol.code && <div style={{ fontSize: 11, fontWeight: 800, color: B.purple, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 4 }}>{protocol.code}</div>}
-                  <div style={{ fontWeight: 700, fontSize: 17, color: B.text, marginBottom: 6, lineHeight: 1.3 }}>{protocol.name}</div>
-                  {protocol.description && <div style={{ fontSize: 13, color: B.muted, lineHeight: 1.55, marginBottom: 10 }} dangerouslySetInnerHTML={{ __html: clean((protocol.description || "").slice(0, 140) + ((protocol.description || "").length > 140 ? "..." : "")) }} />}
+                  <div style={{ fontSize: 18, fontWeight: 800, color: B.text, marginBottom: 5, lineHeight: 1.25 }}>{protocol.name}</div>
+                  {protocol.description && <div style={{ fontSize: 13, color: B.muted, lineHeight: 1.5, maxWidth: isMobile ? '100%' : 760 }} dangerouslySetInnerHTML={{ __html: clean((protocol.description || '').slice(0, 120) + ((protocol.description || '').length > 120 ? '...' : '')) }} />}
                 </div>
-                {hasPerm(loggedUser, "protocols", "publish") ? (
-                  <button onClick={() => toggle(protocol.id)} style={{ padding: "6px 12px", borderRadius: 999, border: "none", background: protocol.published ? B.greenLight : B.goldLight, color: protocol.published ? B.green : "#7A5C1E", fontSize: 12, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", whiteSpace: "nowrap" }}>
-                    {protocol.published ? "Publicado" : "Rascunho"}
-                  </button>
-                ) : (
-                  <span style={{ padding: "6px 12px", borderRadius: 999, background: protocol.published ? B.greenLight : B.goldLight, color: protocol.published ? B.green : "#7A5C1E", fontSize: 12, fontWeight: 700, whiteSpace: "nowrap" }}>
-                    {protocol.published ? "Publicado" : "Rascunho"}
-                  </span>
-                )}
-                <select value={protocol.reviewStatus || 'needs_review'} onChange={(event) => setReviewStatus(protocol.id, event.target.value)} style={{ padding: "6px 10px", borderRadius: 999, border: `1px solid ${B.border}`, background: B.white, color: B.purpleDark, fontSize: 12, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", whiteSpace: "nowrap", marginLeft: 8, height: 30 }}>
-                  <option value="needs_review">A Revisar</option>
-                  <option value="reviewed">Revisado</option>
-                  <option value="approved">Aprovado</option>
-                </select>
+                <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
+                  <span style={{ padding: "6px 12px", borderRadius: 999, background: protocol.published ? B.greenLight : B.goldLight, color: protocol.published ? B.green : '#7A5C1E', fontSize: 12, fontWeight: 700 }}>{protocol.published ? 'Publicado' : 'Rascunho'}</span>
+                  <select value={protocol.reviewStatus || 'needs_review'} onChange={(event) => setReviewStatus(protocol.id, event.target.value)} style={{ padding: "6px 10px", borderRadius: 999, border: `1px solid ${B.border}`, background: B.white, color: B.purpleDark, fontSize: 12, fontWeight: 700, cursor: "pointer", height: 30 }}>
+                    <option value="needs_review">A Revisar</option>
+                    <option value="reviewed">Revisado</option>
+                    <option value="approved">Aprovado</option>
+                  </select>
+                </div>
               </div>
-              <div style={{ display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center", marginBottom: 10 }}>
-                {(protocol.concerns || []).map((concern) => <Tag key={concern} label={indications.find((item) => item.id === concern)?.label || concern} />)}
-                <div style={{ display: "flex", gap: 4, flexShrink: 0 }}>
-                  <Tag label={categories.find((category) => category.id === protocol.category)?.label || protocol.category} color={B.goldLight} text={"#7A5C1E"} />
-                </div>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 10, marginBottom: 8 }}>
+                {(protocol.concerns || []).slice(0, 3).map((concern) => <Tag key={concern} label={indications.find((item) => item.id === concern)?.label || concern} />)}
+                <Tag label={categories.find((category) => category.id === protocol.category)?.label || protocol.category || 'Sem cat.'} color={B.goldLight} text="#7A5C1E" />
                 {protocol.professionalKitId && <Tag label="Kit Profissional" color={B.purpleLight} text={B.purpleDark} />}
                 {protocol.homeKitId && <Tag label="Kit Home Care" color={B.greenLight} text={B.green} />}
-                {protocol.youtubeUrl && <span style={{ fontSize: 12, background: "#FF0000", color: B.white, padding: "1px 7px", borderRadius: 10, fontWeight: 700 }}>YT</span>}
-                {(() => {
-                  const inactiveCount = protocol.steps.filter((step) => step.productId && !isActive(products.find((item) => item.id === step.productId))).length;
-                  return inactiveCount > 0 && <span style={{ fontSize: 12, background: B.redLight, color: B.red, padding: "2px 8px", borderRadius: 10, fontWeight: 700, border: `1px solid ${B.red}` }}>{inactiveCount} inativo{inactiveCount > 1 ? "s" : ""}</span>;
-                })()}
+                {protocol.youtubeUrl && <Tag label="Vídeo" color="#FFEEEE" text="#C42020" />}
+                {inactiveCount > 0 && <Tag label={`${inactiveCount} Inativo${inactiveCount > 1 ? 's' : ''}`} color={B.redLight} text={B.red} />}
               </div>
-              <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "repeat(4, minmax(0, 1fr))", gap: 10 }}>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 10 }}>
                 {[
-                  { label: "Cabine", value: protocol.steps.length, helper: "etapas cadastradas" },
-                  { label: "Casa", value: (protocol.homeUse?.morning?.length || 0) + (protocol.homeUse?.night?.length || 0), helper: "passos de rotina" },
-                  { label: "Kits", value: (protocol.professionalKitId ? 1 : 0) + (protocol.homeKitId ? 1 : 0), helper: "vinculados" },
-                  { label: "Material", value: (protocol.youtubeUrl ? 1 : 0) + (protocol.featuredImage ? 1 : 0), helper: "extras ativos" },
+                  { label: 'Cabine', value: protocol.steps.length },
+                  { label: 'Casa', value: homeCount },
+                  { label: 'Kits', value: kitCount },
+                  { label: 'Slides', value: (protocol.youtubeUrl ? 1 : 0) + (protocol.featuredImage ? 1 : 0) },
                 ].map((item) => (
-                  <div key={item.label} style={{ background: B.cream, border: `1px solid ${B.border}`, borderRadius: 12, padding: "10px 12px" }}>
-                    <div style={{ fontSize: 10, fontWeight: 700, color: B.muted, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 4 }}>{item.label}</div>
-                    <div style={{ fontSize: 18, fontWeight: 800, color: B.purpleDark }}>{item.value}</div>
-                    <div style={{ fontSize: 11, color: B.muted, marginTop: 2 }}>{item.helper}</div>
+                  <div key={item.label} style={{ padding: '6px 10px', background: B.cream, border: `1px solid ${B.border}`, borderRadius: 10, fontSize: 12, color: B.muted, display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <strong style={{ fontWeight: 700, color: B.purpleDark }}>{item.value}</strong>
+                    <span>{item.label}</span>
                   </div>
                 ))}
               </div>
-            </div>
-            <div style={{ display: "flex", gap: 8, alignItems: "stretch", justifyContent: isMobile ? "stretch" : "flex-start", flexDirection: isMobile ? "column" : "row", flexShrink: 0, flexWrap: "wrap", width: isMobile ? "100%" : "auto", minWidth: isMobile ? "100%" : 220 }}>
-              <div style={{ display: "flex", gap: 8, width: isMobile ? "100%" : "auto" }}>
-                {hasPerm(loggedUser, "protocols", "edit") && <button onClick={() => moveProtocol(protocol.id, -1)} title="Mover para cima" style={{ background: B.white, border: `1px solid ${B.border}`, borderRadius: 10, padding: "8px 11px", cursor: "pointer", fontSize: 13, flex: isMobile ? 1 : "0 0 auto" }}>↑</button>}
-                {hasPerm(loggedUser, "protocols", "edit") && <button onClick={() => moveProtocol(protocol.id, 1)} title="Mover para baixo" style={{ background: B.white, border: `1px solid ${B.border}`, borderRadius: 10, padding: "8px 11px", cursor: "pointer", fontSize: 13, flex: isMobile ? 1 : "0 0 auto" }}>↓</button>}
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center', justifyContent: isMobile ? 'stretch' : 'flex-end' }}>
+                {hasPerm(loggedUser, 'protocols', 'edit') && <button onClick={() => moveProtocol(protocol.id, -1)} title='Mover para cima' style={{ padding: '6px 10px', borderRadius: 8, border: `1px solid ${B.border}`, background: B.white, cursor: 'pointer' }}>↑</button>}
+                {hasPerm(loggedUser, 'protocols', 'edit') && <button onClick={() => moveProtocol(protocol.id, 1)} title='Mover para baixo' style={{ padding: '6px 10px', borderRadius: 8, border: `1px solid ${B.border}`, background: B.white, cursor: 'pointer' }}>↓</button>}
+                {hasPerm(loggedUser, 'protocols', 'edit') && <Btn size='sm' variant='secondary' onClick={() => setEditProt(protocol)}>{protocol._new ? 'Editar (novo)' : 'Editar'}</Btn>}
+                {hasPerm(loggedUser, 'protocols', 'edit') && <Btn size='sm' variant='ghost' onClick={() => duplicate(protocol)}>Duplicar</Btn>}
+                {hasPerm(loggedUser, 'protocols', 'delete') && <Btn size='sm' variant='danger' onClick={() => del(protocol.id)}>Excluir</Btn>}
               </div>
-              {hasPerm(loggedUser, "protocols", "edit") && <Btn size="sm" variant="secondary" onClick={() => setEditProt(protocol)} sx={isMobile ? { width: "100%" } : { minWidth: 88 }}>Editar</Btn>}
-              {hasPerm(loggedUser, "protocols", "edit") && <Btn size="sm" variant="ghost" onClick={() => duplicate(protocol)} sx={isMobile ? { width: "100%" } : { minWidth: 88 }}>Duplicar</Btn>}
-              {hasPerm(loggedUser, "protocols", "delete") && <Btn size="sm" variant="danger" onClick={() => del(protocol.id)} sx={isMobile ? { width: "100%" } : { minWidth: 88 }}>Excluir</Btn>}
             </div>
-          </div>
-        ))}
-        {filtered.length === 0 && <div style={{ background: B.white, borderRadius: 12, border: `1px solid ${B.border}`, padding: 40, textAlign: "center", color: B.muted }}>Nenhum protocolo encontrado</div>}
+          );
+        })}
+        {filtered.length === 0 && <div style={{ background: B.white, borderRadius: 12, border: `1px solid ${B.border}`, padding: 40, textAlign: 'center', color: B.muted }}>Nenhum protocolo encontrado</div>}
       </div>
     </div>
   );
