@@ -181,7 +181,7 @@ const AdminProtForm = ({ prot, products, protocols, indications, categories, pha
   const {
     notionUrl, setNotionUrl, notionLoading, notionError,
     showNotionImport, setShowNotionImport, fetchNotionProtocol
-  } = useNotionImporter();
+  } = useNotionImporter(products);
 
   const [newIndication, setNewIndication] = useState('');
   const [showNewIndication, setShowNewIndication] = useState(false);
@@ -237,12 +237,15 @@ const AdminProtForm = ({ prot, products, protocols, indications, categories, pha
   const handleNotionImportSuccess = (data) => {
     setF(x => ({
       ...x,
-      externalSourceId: data.pageId,
-      name: data.pageTitle || x.name,
-      description: data.description || x.description || '',
-      steps: Array.isArray(data.steps) && data.steps.length > 0 ? data.steps : x.steps,
-      homeUse: data.homeUse || x.homeUse,
-      concerns: data.concerns || x.concerns,
+      externalSourceId: data.pageId || x.externalSourceId,
+      name:         data.pageTitle    || x.name,
+      description:  data.description  || x.description  || '',
+      category:     data.category     || x.category,
+      frequency:    data.frequency    || x.frequency,
+      associations: data.associations || x.associations,
+      steps:    Array.isArray(data.steps) && data.steps.length > 0 ? data.steps : x.steps,
+      homeUse:  (data.homeUse?.morning?.length || data.homeUse?.night?.length) ? data.homeUse : x.homeUse,
+      concerns: data.concerns?.length > 0 ? data.concerns : x.concerns,
     }));
   };
 
@@ -433,7 +436,7 @@ const AdminProtForm = ({ prot, products, protocols, indications, categories, pha
               value={notionUrl}
               onChange={e => setNotionUrl(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && notionUrl.trim() && handleFetchNotion()}
-              placeholder="URL do Notion ou texto com '1.…', '2.…'"
+              placeholder="Cole aqui o texto copiado do Notion (1. Higienização, 2. Esfoliação…)"
               disabled={notionLoading}
               style={{ ...inpSt, flex: 1 }}
             />
