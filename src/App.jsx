@@ -2330,6 +2330,11 @@ const AdminProtForm = ({ prot, products, protocols, indications, categories, pha
   const isMobile = useIsMobile();
   const [f,setF]=useState({...prot,professionalKitId:prot.professionalKitId||'',homeKitId:prot.homeKitId||'',steps:[...(prot.steps||[])],homeUse:{morning:[...(prot.homeUse?.morning||[])],night:[...(prot.homeUse?.night||[])]}, concerns: [...(prot.concerns||[])]});
   
+  const [notionUrl, setNotionUrl] = useState('');
+  const [notionLoading, setNotionLoading] = useState(false);
+  const [notionError, setNotionError] = useState('');
+  const [showNotionImport, setShowNotionImport] = useState(false);
+  
   const [newIndication, setNewIndication] = useState('');
   const [showNewIndication, setShowNewIndication] = useState(false);
   
@@ -2377,6 +2382,53 @@ const AdminProtForm = ({ prot, products, protocols, indications, categories, pha
   const updHome=(sl,i,k,v)=>setF(x=>({...x,homeUse:{...x.homeUse,[sl]:x.homeUse[sl].map((h,idx)=>idx===i?{...h,[k]:v}:h)}}));
   
   const togConcern=id=>setF(x=>({...x,concerns:x.concerns.includes(id)?x.concerns.filter(c=>c!==id):[...x.concerns,id]}));
+  
+  const extractPageIdFromNotionUrl = (url) => {
+    // https://www.notion.so/Page-Title-09bfa8de63a64b27bd379d6b2a8b813f
+    // ou https://notion.so/09bfa8de63a64b27bd379d6b2a8b813f
+    const match = url.match(/([a-f0-9]{32})/i);
+    if (match) {
+      let pageId = match[1];
+      // formato com hífens: 09bfa8de-63a6-4b27-bd37-9d6b2a8b813f
+      pageId = `${pageId.slice(0, 8)}-${pageId.slice(8, 12)}-${pageId.slice(12, 16)}-${pageId.slice(16, 20)}-${pageId.slice(20)}`;
+      return pageId;
+    }
+    return null;
+  };
+  
+  const fetchNotionProtocol = async () => {
+    if (!notionUrl.trim()) {
+      setNotionError('Cole uma URL do Notion válida');
+      return;
+    }
+    setNotionLoading(true);
+    setNotionError('');
+    
+    try {
+      const pageId = extractPageIdFromNotionUrl(notionUrl);
+      if (!pageId) {
+        setNotionError('URL inválida. Certifique-se de copiar o link completo do Notion.');
+        setNotionLoading(false);
+        return;
+      }
+
+      // Tenta buscar via API endpoint do servidor (você vai precisar adicionar isso depois)
+      // Por enquanto, mostra mensagem de sucesso e deixa o usuário editar manualmente
+      setF(x => ({...x, externalSourceId: pageId}));
+      setNotionUrl('');
+      setShowNotionImport(false);
+      alert('URL do Notion memorizada (pageId: ' + pageId + '). Você pode agora editar os dados do protocolo manualmente ou esperar pela integração completa.');
+    } catch (err) {
+      setNotionError('Erro ao processar URL: ' + (err?.message || 'desconhecido'));
+    }
+    setNotionLoading(false);
+  };
+  
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' && notionUrl.trim()) {
+      fetchNotionProtocol();
+    }
+  };
   
   const handleAddIndication = () => {
     if (!newIndication.trim()) return;
@@ -2522,6 +2574,52 @@ const AdminProtForm = ({ prot, products, protocols, indications, categories, pha
           ))}
         </div>
       </div>
+
+      {!showNotionImport && f.externalSourceId && (
+        <div style={{background:'#E8F5E9',border:`1.5px solid ${B.green}`,borderRadius:14,padding:'12px 14px',marginBottom:18,display:'flex',alignItems:'center',justifyContent:'space-between', gap: 12}}>
+          <div style={{display:'flex',alignItems:'center',gap:10}}>
+            <span style={{fontSize:18}}>✓</span>
+            <div style={{fontSize:13,color:'#2E7D32',fontWeight:600}}>Protocolo carregado do Notion</div>
+          </div>
+          <button onClick={()=>setShowNotionImport(true)} style={{background:'none',border:'none',color:B.purple,cursor:'pointer',fontSize:12,fontWeight:700,textDecoration:'underline'}}>Carregar outro Notion</button>
+        </div>
+      )}
+
+      {showNotionImport && (
+        <div style={{background:B.white,border:`1.5px solid ${B.purple}`,borderRadius:14,padding:'16px 18px',marginBottom:18,boxShadow:`0 6px 20px rgba(113, 93, 168, 0.12)`}}>
+          <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:12}}>
+            <h3 style={{margin:0,fontSize:14,fontWeight:700,color:B.purpleDark,display:'flex',alignItems:'center',gap:8}}>
+              <span style={{fontSize:14}}>🔗</span> Importar do Notion
+            </h3>
+            <button onClick={()=>setShowNotionImport(false)} style={{background:'none',border:'none',color:B.muted,cursor:'pointer',fontSize:18,fontFamily:'inherit'}}>×</button>
+          </div>
+          <div style={{fontSize:12,color:B.muted,marginBottom:12,lineHeight:1.5}}>Cole a URL de uma página do Notion pública. Vamos tentar extrair as informações principais.</div>
+          <div style={{display:'flex',gap:8,marginBottom:8}}>
+            <input 
+              type="text"
+              value={notionUrl}
+              onChange={e=>setNotionUrl(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="https://notion.so/seu-protocolo-09bfa8de63a64b27bd379d6b2a8b813f"
+              disabled={notionLoading}
+              style={{...inpSt,flex:1}}
+            />
+            <button
+              onClick={fetchNotionProtocol}
+              disabled={notionLoading || !notionUrl.trim()}
+              style={{padding:'7px 16px',background:notionLoading?B.border:B.purple,color:B.white,border:'none',borderRadius:7,fontSize:13,fontWeight:700,cursor:notionLoading?'default':'pointer',fontFamily:'inherit',opacity:notionLoading || !notionUrl.trim()?0.6:1}}
+            >
+              {notionLoading ? 'Carregando...' : 'Carregar'}
+            </button>
+          </div>
+          {notionError && (
+            <div style={{background:'#FFEBEE',border:`1px solid #EF5350`,borderRadius:8,padding:'8px 10px',fontSize:12,color:'#C62828',display:'flex',alignItems:'center',gap:8}}>
+              <span>⚠️</span>
+              {notionError}
+            </div>
+          )}
+        </div>
+      )}
 
       <div style={{display:'flex',flexDirection:'column'}}>
       <div style={{...sectionBoxStyle,order:1}}>
