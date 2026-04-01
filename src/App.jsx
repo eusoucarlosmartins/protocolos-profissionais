@@ -513,25 +513,98 @@ const Header = ({ navigate, adminAuth, setAdminAuth, brand }) => {
 };
 
 const PublicHome = ({ protocols, products, indications, categories, favorites, setFavorites, navigate, brand, marketing }) => {
-  const [filterInd, setFilterInd] = useState('all');
+  const [filterInds, setFilterInds] = useState([]);
+  const [showFavorites, setShowFavorites] = useState(false);
   const [filterCat, setFilterCat] = useState('all');
-  const [filterProd, setFilterProd] = useState('all');
+  const [filterProds, setFilterProds] = useState([]);
+  const [prodSearch, setProdSearch] = useState('');
+  const [prodDropOpen, setProdDropOpen] = useState(false);
   const [search, setSearch] = useState('');
-  
+  const [page, setPage] = useState(1);
+  const PAGE_SIZE = 12;
+
   const isMobile = useIsMobile();
-  const pub = protocols.filter(p=>p.published);
-  const activeQuickFilter = filterInd === 'favorites' ? 'favorites' : 'all';
-  const selectedIndication = filterInd !== 'all' && filterInd !== 'favorites' ? filterInd : 'all';
-  
+  const pub = protocols.filter(p => p.published);
+
+  const protocolHasProd = (p, prodId) =>
+    p.steps?.some(s => s.productId === prodId) ||
+    p.homeUse?.morning?.some(h => h.productId === prodId) ||
+    p.homeUse?.night?.some(h => h.productId === prodId) ||
+    p.professionalKitId === prodId ||
+    p.homeKitId === prodId;
+
   const filtered = pub.filter(p => {
-    if (filterInd === 'favorites' && !favorites.includes(p.id)) return false;
+    if (showFavorites && !favorites.includes(p.id)) return false;
     const matchSearch = !search || p.name.toLowerCase().includes(search.toLowerCase()) || p.description?.toLowerCase().includes(search.toLowerCase());
-    const matchInd = filterInd === 'all' || filterInd === 'favorites' || p.concerns?.includes(filterInd);
+    const matchInd = filterInds.length === 0 || filterInds.some(ind => p.concerns?.includes(ind));
     const matchCat = filterCat === 'all' || p.category === filterCat || p.categories?.includes(filterCat);
-    const matchProd = filterProd === 'all' || p.steps?.some(s => s.productId === filterProd) || p.homeUse?.morning?.some(h => h.productId === filterProd) || p.homeUse?.night?.some(h => h.productId === filterProd) || p.professionalKitId === filterProd || p.homeKitId === filterProd;
-    
+    const matchProd = filterProds.length === 0 || filterProds.every(id => protocolHasProd(p, id));
     return matchSearch && matchInd && matchCat && matchProd;
   });
+
+  const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
+  const safePage = Math.min(page, Math.max(1, totalPages));
+  const paginated = filtered.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
+
+  // Contagem por categoria (ignorando o filtro de categoria para mostrar counts reais)
+  const catCounts = {};
+  pub.filter(p => {
+    if (showFavorites && !favorites.includes(p.id)) return false;
+    const matchSearch = !search || p.name.toLowerCase().includes(search.toLowerCase()) || p.description?.toLowerCase().includes(search.toLowerCase());
+    const matchInd = filterInds.length === 0 || filterInds.some(ind => p.concerns?.includes(ind));
+    const matchProd = filterProds.length === 0 || filterProds.every(id => protocolHasProd(p, id));
+    return matchSearch && matchInd && matchProd;
+  }).forEach(p => {
+    const cats = p.categories || (p.category ? [p.category] : []);
+    cats.forEach(c => { catCounts[c] = (catCounts[c] || 0) + 1; });
+  });
+
+  const hasActiveFilters = search || filterCat !== 'all' || filterProds.length > 0 || filterInds.length > 0 || showFavorites;
+  const clearAll = () => { setSearch(''); setFilterCat('all'); setFilterProds([]); setProdSearch(''); setFilterInds([]); setShowFavorites(false); setPage(1); };
+
+  const toggleInd = (id) => {
+    setFilterInds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
+    setPage(1);
+  };
+
+  const addProd = (id) => {
+    if (!filterProds.includes(id)) { setFilterProds(prev => [...prev, id]); setPage(1); }
+    setProdSearch('');
+    setProdDropOpen(false);
+  };
+  const removeProd = (id) => { setFilterProds(prev => prev.filter(x => x !== id)); setPage(1); };
+
+  const prodOptions = sortByName(products).filter(p =>
+    isActive(p) &&
+    !filterProds.includes(p.id) &&
+    (!prodSearch || p.name.toLowerCase().includes(prodSearch.toLowerCase()))
+  );
+
+  const activeChips = [
+    filterCat !== 'all' && { key: 'cat', label: categories.find(c => c.id === filterCat)?.label || filterCat, onRemove: () => { setFilterCat('all'); setPage(1); } },
+    showFavorites && { key: 'fav', label: 'Meus Favoritos', onRemove: () => { setShowFavorites(false); setPage(1); } },
+    ...filterProds.map(id => ({ key: `prod-${id}`, label: products.find(p => p.id === id)?.name || id, onRemove: () => removeProd(id) })),
+    ...filterInds.map(id => ({ key: id, label: indications.find(i => i.id === id)?.label || id, onRemove: () => toggleInd(id) })),
+  ].filter(Boolean);
+
+  const renderPageButtons = () => {
+    if (totalPages <= 7) return Array.from({length:totalPages},(_,i)=>i+1).map(n=>pageBtn(n));
+    const pages = new Set([1, totalPages, safePage, safePage-1, safePage+1].filter(n=>n>=1&&n<=totalPages));
+    const sorted = [...pages].sort((a,b)=>a-b);
+    const result = [];
+    let prev = null;
+    for (const n of sorted) {
+      if (prev !== null && n - prev > 1) result.push(<span key={`el-${n}`} style={{color:B.muted,fontSize:13,padding:'0 2px'}}>…</span>);
+      result.push(pageBtn(n));
+      prev = n;
+    }
+    return result;
+  };
+  const pageBtn = (n) => (
+    <button key={n} onClick={()=>setPage(n)} style={{width:36,height:36,borderRadius:10,border:`1px solid ${n===safePage?B.purple:B.border}`,background:n===safePage?B.purple:B.white,color:n===safePage?'#fff':B.text,fontWeight:700,fontSize:13,cursor:'pointer',fontFamily:'inherit',flexShrink:0}}>
+      {n}
+    </button>
+  );
 
   return (
     <div style={{background:B.cream, flex: 1}}>
@@ -541,19 +614,16 @@ const PublicHome = ({ protocols, products, indications, categories, favorites, s
         <div style={{fontSize:10,color:'#fadbff',fontWeight:700,letterSpacing:'0.16em',marginBottom:8,textTransform:'uppercase'}}>Cosmetologia Avancada</div>
         <h1 className="rp-hero" style={{color:B.white,fontWeight:700,fontFamily:'Georgia, serif',margin:'0 0 10px',letterSpacing:'-0.01em'}}>Protocolos Profissionais</h1>
         <p style={{color:'rgba(255,255,255,0.7)',fontSize:isMobile?13:15,margin:`0 0 ${isMobile?18:28}px`,lineHeight:1.5}}>Passo a passo completo para esteticistas, com os produtos {brand?.companyName || 'Extratos da Terra'}</p>
-        
+
         <div style={{maxWidth:900, margin:'0 auto', padding:`0 ${isMobile?4:0}px`}}>
           <div style={{background:'rgba(255,255,255,0.14)',backdropFilter:'blur(6px)', padding: '18px', borderRadius: 18, border: '1px solid rgba(255,255,255,0.28)', boxShadow:'0 16px 42px rgba(27, 9, 71, 0.26)'}}>
             <div style={{display:'flex',justifyContent:'space-between',alignItems:isMobile?'flex-start':'center',gap:12,flexDirection:isMobile?'column':'row',textAlign:'left'}}>
               <div>
                 <div style={{fontSize:10,fontWeight:700,color:'rgba(255,255,255,0.78)',textTransform:'uppercase',letterSpacing:'0.115em',marginBottom:5}}>Encontre o protocolo ideal</div>
-                <div style={{fontSize:14,color:'rgba(255,255,255,0.92)',lineHeight:1.35}}>Filtre por nome, categoria, produto vinculado, indicacao e favoritos.</div>
+                <div style={{fontSize:14,color:'rgba(255,255,255,0.92)',lineHeight:1.35}}>Filtre por nome, categoria, produto vinculado e indicacao.</div>
               </div>
-              {(search || filterCat !== 'all' || filterProd !== 'all' || filterInd !== 'all') && (
-                <button
-                  onClick={() => { setSearch(''); setFilterCat('all'); setFilterProd('all'); setFilterInd('all'); }}
-                  style={{padding:'10px 16px',borderRadius:999,border:'1px solid rgba(255,255,255,0.3)',background:'rgba(255,255,255,0.12)',color:'#fff',fontSize:12,fontWeight:700,cursor:'pointer',fontFamily:'inherit',textTransform:'uppercase',letterSpacing:'0.05em'}}
-                >
+              {hasActiveFilters && (
+                <button onClick={clearAll} style={{padding:'10px 16px',borderRadius:999,border:'1px solid rgba(255,255,255,0.3)',background:'rgba(255,255,255,0.12)',color:'#fff',fontSize:12,fontWeight:700,cursor:'pointer',fontFamily:'inherit',textTransform:'uppercase',letterSpacing:'0.05em'}}>
                   Limpar tudo
                 </button>
               )}
@@ -562,65 +632,118 @@ const PublicHome = ({ protocols, products, indications, categories, favorites, s
             <div style={{marginTop:14, display:'grid', gridTemplateColumns:isMobile?'1fr':'3fr 2fr', gap:10}}>
               <input
                 value={search}
-                onChange={e=>setSearch(e.target.value)}
+                onChange={e=>{setSearch(e.target.value);setPage(1);}}
                 placeholder="Pesquisar protocolo por nome ou descricao..."
                 style={{width:'100%',padding:'12px 16px',borderRadius:12,border:'none',fontSize:14,outline:'none',boxSizing:'border-box',background:'#fff',color:B.text,fontFamily:'inherit',fontWeight:600}}
               />
-              <div style={{display:'flex',gap:10,flexDirection:isMobile?'column':'column'}}>
+              <div style={{display:'flex',gap:10,flexDirection:'column'}}>
                 <select
                   value={filterCat}
-                  onChange={e=>setFilterCat(e.target.value)}
+                  onChange={e=>{setFilterCat(e.target.value);setPage(1);}}
                   style={{width:'100%',padding:'12px 12px',borderRadius:12,border:'1px solid rgba(153,153,153,0.3)',fontSize:14,outline:'none',background:'#fff',color:B.text,fontFamily:'inherit',fontWeight:600}}
                 >
                   <option value="all">Todas as Categorias</option>
-                  {[...categories].sort((a,b)=>a.label.localeCompare(b.label)).map(c=><option key={c.id} value={c.id}>{c.label}</option>)}
+                  {[...categories].sort((a,b)=>a.label.localeCompare(b.label)).map(c=><option key={c.id} value={c.id}>{c.label}{catCounts[c.id]!=null ? ` (${catCounts[c.id]})` : ''}</option>)}
                 </select>
-                <select
-                  value={filterProd}
-                  onChange={e=>setFilterProd(e.target.value)}
-                  style={{width:'100%',padding:'12px 12px',borderRadius:12,border:'1px solid rgba(153,153,153,0.3)',fontSize:14,outline:'none',background:'#fff',color:B.text,fontFamily:'inherit',fontWeight:600}}
-                >
-                  <option value="all">Todos os Produtos Vinculados</option>
-                  {sortByName(products).filter(p=>isActive(p)).map(p=><option key={p.id} value={p.id}>{p.name}</option>)}
-                </select>
+                <div style={{position:'relative'}}>
+                  <input
+                    value={prodSearch}
+                    onChange={e=>{setProdSearch(e.target.value);setProdDropOpen(true);}}
+                    onFocus={()=>setProdDropOpen(true)}
+                    onBlur={()=>setTimeout(()=>setProdDropOpen(false),150)}
+                    placeholder={filterProds.length>0?`+${filterProds.length} produto(s) selecionado(s)`:'Filtrar por produto...'}
+                    style={{width:'100%',padding:'12px 12px',borderRadius:12,border:'1px solid rgba(153,153,153,0.3)',fontSize:14,outline:'none',background:'#fff',color:B.text,fontFamily:'inherit',fontWeight:600,boxSizing:'border-box'}}
+                  />
+                  {prodDropOpen && prodOptions.length > 0 && (
+                    <div style={{position:'absolute',top:'calc(100% + 4px)',left:0,right:0,background:'#fff',borderRadius:10,border:`1px solid ${B.border}`,boxShadow:'0 8px 24px rgba(0,0,0,0.12)',zIndex:200,maxHeight:200,overflowY:'auto'}}>
+                      {prodOptions.map(p=>(
+                        <div key={p.id} onMouseDown={()=>addProd(p.id)} style={{padding:'10px 14px',fontSize:13,color:B.text,fontWeight:600,cursor:'pointer',borderBottom:`1px solid ${B.cream}`}}
+                          onMouseEnter={e=>e.currentTarget.style.background=B.purpleLight}
+                          onMouseLeave={e=>e.currentTarget.style.background='#fff'}
+                        >
+                          {p.name}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {filterProds.length > 0 && (
+                    <div style={{display:'flex',flexWrap:'wrap',gap:4,marginTop:6}}>
+                      {filterProds.map(id=>{
+                        const prod = products.find(p=>p.id===id);
+                        return (
+                          <span key={id} onClick={()=>removeProd(id)} style={{display:'inline-flex',alignItems:'center',gap:4,padding:'3px 8px',borderRadius:999,background:'rgba(255,255,255,0.22)',border:'1px solid rgba(255,255,255,0.4)',color:'#fff',fontSize:11,fontWeight:700,cursor:'pointer'}}>
+                            {prod?.name} &times;
+                          </span>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 
             <div style={{marginTop:12,background:'rgba(255,255,255,0.08)',border:'1px solid rgba(255,255,255,0.2)',borderRadius:12,padding:'12px 12px 10px'}}>
-              <div style={{fontSize:10,fontWeight:700,color:'rgba(255,255,255,0.75)',textTransform:'uppercase',letterSpacing:'0.09em',marginBottom:8}}>Refino rápido</div>
+              <div style={{fontSize:10,fontWeight:700,color:'rgba(255,255,255,0.75)',textTransform:'uppercase',letterSpacing:'0.09em',marginBottom:8}}>Refino rapido</div>
               <div style={{display:'flex',flexWrap:'wrap',gap:8}}>
-                <button onClick={()=>setFilterInd('all')} style={{padding:'8px 14px',borderRadius:999,border:'1px solid rgba(255,255,255,0.28)',background:activeQuickFilter==='all' && selectedIndication==='all' ? '#fff' : 'rgba(255,255,255,0.16)',color:activeQuickFilter==='all' && selectedIndication==='all' ? B.purpleDark : '#fff',fontSize:12,fontWeight:700,cursor:'pointer',fontFamily:'inherit'}}>
+                <button onClick={()=>{setShowFavorites(false);setFilterInds([]);setPage(1);}} style={{padding:'8px 14px',borderRadius:999,border:'1px solid rgba(255,255,255,0.28)',background:!showFavorites&&filterInds.length===0?'#fff':'rgba(255,255,255,0.16)',color:!showFavorites&&filterInds.length===0?B.purpleDark:'#fff',fontSize:12,fontWeight:700,cursor:'pointer',fontFamily:'inherit'}}>
                   Todos
                 </button>
-                <button onClick={()=>setFilterInd('favorites')} style={{padding:'8px 14px',borderRadius:999,border:'1px solid rgba(255,255,255,0.28)',background:activeQuickFilter==='favorites' ? B.redLight : 'rgba(255,255,255,0.16)',color:activeQuickFilter==='favorites' ? B.red : '#fff',fontSize:12,fontWeight:700,cursor:'pointer',fontFamily:'inherit'}}>
+                <button onClick={()=>{setShowFavorites(v=>!v);setPage(1);}} style={{padding:'8px 14px',borderRadius:999,border:'1px solid rgba(255,255,255,0.28)',background:showFavorites?B.redLight:'rgba(255,255,255,0.16)',color:showFavorites?B.red:'#fff',fontSize:12,fontWeight:700,cursor:'pointer',fontFamily:'inherit'}}>
                   Meus Favoritos
                 </button>
-                <select
-                  value={selectedIndication}
-                  onChange={e=>setFilterInd(e.target.value)}
-                  style={{padding:'8px 12px',borderRadius:10,border:'1px solid rgba(255,255,255,0.28)',background:'#fff',color:B.text,fontSize:12,fontFamily:'inherit',fontWeight:600,minWidth:170}}
-                >
-                  <option value="all">Todas as indicacoes</option>
-                  {[...indications].sort((a,b)=>a.label.localeCompare(b.label)).map(c=><option key={c.id} value={c.id}>{c.label}</option>)}
-                </select>
-                {selectedIndication !== 'all' && (
-                  <button onClick={()=>setFilterInd(activeQuickFilter==='favorites'?'favorites':'all')} style={{padding:'8px 12px',borderRadius:10,border:'1px solid rgba(255,255,255,0.3)',background:'rgba(255,255,255,0.14)',color:'#fff',fontSize:12,fontWeight:700,cursor:'pointer',fontFamily:'inherit'}}>
-                    Limpar indicacao
-                  </button>
-                )}
+                {[...indications].sort((a,b)=>a.label.localeCompare(b.label)).map(ind=>{
+                  const active = filterInds.includes(ind.id);
+                  return (
+                    <button key={ind.id} onClick={()=>toggleInd(ind.id)} style={{padding:'8px 14px',borderRadius:999,border:`1px solid ${active?B.gold:'rgba(255,255,255,0.28)'}`,background:active?B.gold:'rgba(255,255,255,0.16)',color:active?'#fff':'rgba(255,255,255,0.9)',fontSize:12,fontWeight:700,cursor:'pointer',fontFamily:'inherit'}}>
+                      {ind.label}
+                    </button>
+                  );
+                })}
               </div>
             </div>
+
+            {activeChips.length > 0 && (
+              <div style={{marginTop:10,display:'flex',flexWrap:'wrap',gap:6,alignItems:'center'}}>
+                <span style={{fontSize:10,color:'rgba(255,255,255,0.6)',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.06em',marginRight:2}}>Ativos:</span>
+                {activeChips.map(chip=>(
+                  <button key={chip.key} onClick={chip.onRemove} style={{padding:'4px 10px',borderRadius:999,border:'1px solid rgba(255,255,255,0.4)',background:'rgba(255,255,255,0.22)',color:'#fff',fontSize:11,fontWeight:700,cursor:'pointer',fontFamily:'inherit',display:'inline-flex',alignItems:'center',gap:5}}>
+                    {chip.label} &times;
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         </div>
-        <div style={{marginTop:16,color:'rgba(255,255,255,0.85)',fontSize:12,fontWeight:600}}>{filtered.length} protocolo{filtered.length!==1?'s':''} encontrado{filtered.length!==1?'s':''}</div>
+
+        <div style={{marginTop:16,color:'rgba(255,255,255,0.85)',fontSize:12,fontWeight:600}}>
+          {filtered.length === 0
+            ? 'Nenhum protocolo encontrado'
+            : totalPages > 1
+              ? `Mostrando ${(safePage-1)*PAGE_SIZE+1}–${Math.min(safePage*PAGE_SIZE, filtered.length)} de ${filtered.length} protocolo${filtered.length!==1?'s':''}`
+              : `${filtered.length} protocolo${filtered.length!==1?'s':''} encontrado${filtered.length!==1?'s':''}`
+          }
+        </div>
       </div>
 
       <div style={{maxWidth:1100,margin:'0 auto',padding:`${isMobile?20:32}px ${isMobile?12:24}px`}}>
         {filtered.length===0
           ? <div style={{textAlign:'center',padding:'70px 0',color:B.muted}}><div style={{fontSize:52,marginBottom:14}}>...</div><div style={{fontSize:16,fontWeight:600,color:B.text,marginBottom:6}}>Nenhum protocolo encontrado com estes filtros</div></div>
-          : <div className="rp-grid-proto" style={{display:'grid',gap:16}}>
-              {filtered.map(p=><ProtocolCard key={p.id} protocol={p} products={products} indications={indications} categories={categories} onClick={()=>navigate(`/protocolo/${p.id}`)} isFav={favorites.includes(p.id)} toggleFav={(e)=>{e.stopPropagation(); setFavorites(prev => prev.includes(p.id)? prev.filter(x=>x!==p.id) : [...prev, p.id])}} />)}
-            </div>
+          : <>
+              <div className="rp-grid-proto" style={{display:'grid',gap:16}}>
+                {paginated.map(p=><ProtocolCard key={p.id} protocol={p} products={products} indications={indications} categories={categories} onClick={()=>navigate(`/protocolo/${p.id}`)} isFav={favorites.includes(p.id)} toggleFav={(e)=>{e.stopPropagation(); setFavorites(prev => prev.includes(p.id)? prev.filter(x=>x!==p.id) : [...prev, p.id])}} />)}
+              </div>
+              {totalPages > 1 && (
+                <div style={{display:'flex',justifyContent:'center',alignItems:'center',gap:6,marginTop:32,flexWrap:'wrap'}}>
+                  <button onClick={()=>setPage(p=>Math.max(1,p-1))} disabled={safePage===1} style={{padding:'8px 16px',borderRadius:10,border:`1px solid ${B.border}`,background:safePage===1?B.cream:B.white,color:safePage===1?B.muted:B.purple,fontWeight:700,fontSize:13,cursor:safePage===1?'default':'pointer',fontFamily:'inherit'}}>
+                    Anterior
+                  </button>
+                  {renderPageButtons()}
+                  <button onClick={()=>setPage(p=>Math.min(totalPages,p+1))} disabled={safePage===totalPages} style={{padding:'8px 16px',borderRadius:10,border:`1px solid ${B.border}`,background:safePage===totalPages?B.cream:B.white,color:safePage===totalPages?B.muted:B.purple,fontWeight:700,fontSize:13,cursor:safePage===totalPages?'default':'pointer',fontFamily:'inherit'}}>
+                    Proximo
+                  </button>
+                </div>
+              )}
+            </>
         }
       </div>
     </div>
