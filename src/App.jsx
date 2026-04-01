@@ -1958,7 +1958,7 @@ const AdminMarketingLegacy = ({ marketing, saveMarketing, protocols }) => {
   );
 };
 
-const AdminPanel = ({ products, protocols, indications, categories, phases, brand, saveProducts, saveProtocols, saveIndications, saveCategories, savePhases, saveBrand, navigate, setLoggedUser, loggedUser, users, saveUsers, marketing, saveMarketing, views }) => {
+const AdminPanel = ({ products, protocols, indications, categories, phases, brand, saveProducts, saveProtocols, saveIndications, saveCategories, savePhases, saveBrand, navigate, setLoggedUser, loggedUser, users, saveUsers, marketing, saveMarketing, views, resetViews }) => {
   const isMobile = useIsMobile();
   const adminScrollRef = useRef(null);
   const productListScrollRef = useRef(0);
@@ -2095,6 +2095,16 @@ const AdminPanel = ({ products, protocols, indications, categories, phases, bran
         {aView==='dashboard'&&!editProd&&!editProt&&hasPerm(loggedUser,'dashboard','view')&&(
           <Suspense fallback={<AdminModuleFallback />}>
             <AdminDashModule products={products} protocols={protocols} indications={indications} views={views} />
+            {hasPerm(loggedUser,'dashboard','edit')&&(
+              <div style={{padding:'0 24px 24px'}}>
+                <button
+                  onClick={async()=>{ if(window.confirm('Zerar todos os contadores de visualização? Esta ação não pode ser desfeita.')) await resetViews(); }}
+                  style={{background:'none',border:`1px solid ${B.border}`,borderRadius:8,padding:'8px 16px',fontSize:12,color:B.muted,cursor:'pointer',fontFamily:'inherit',fontWeight:600}}
+                >
+                  Zerar contadores de visualizacao
+                </button>
+              </div>
+            )}
           </Suspense>
         )}
         {aView==='alerts'&&!editProd&&!editProt&&hasPerm(loggedUser,'alerts','view')&&(
@@ -2694,6 +2704,8 @@ export default function App() {
     const loadedUsers = await load(USERS_KEY, INIT_USERS);
     setUsers(await secureUsersForStorage(loadedUsers));
   };
+  const resetViews=async()=>{ setViews({}); await savePublic(VIEWS_KEY,{}); };
+
   const handleView=async(type,id)=>{
     const key=`${type}_${id}`;
     const updated={...views,[key]:(views[key]||0)+1};
@@ -2780,7 +2792,7 @@ export default function App() {
           <AdminPasswordReset brand={brand} onSubmit={handleAdminPasswordReset} onLogout={async ()=>{await logoutAdmin();setLoggedUser(null);navigate('/login');}} Logo={Logo} Field={Field} Btn={Btn} />
         </Suspense>
       )}
-      {view==='admin'      &&loggedUser&&!loggedUser?.requirePasswordReset&&<AdminPanel products={products} protocols={protocols} indications={indications} categories={categories} phases={phases} brand={brand} saveProducts={saveProd} saveProtocols={saveProt} saveIndications={saveInd} saveCategories={saveCat} savePhases={savePha} saveBrand={saveBr} navigate={navigate} setLoggedUser={setLoggedUser} loggedUser={loggedUser} users={users} saveUsers={saveUsersDb} marketing={marketing} saveMarketing={saveMarketing} views={views} />}
+      {view==='admin'      &&loggedUser&&!loggedUser?.requirePasswordReset&&<AdminPanel products={products} protocols={protocols} indications={indications} categories={categories} phases={phases} brand={brand} saveProducts={saveProd} saveProtocols={saveProt} saveIndications={saveInd} saveCategories={saveCat} savePhases={savePha} saveBrand={saveBr} navigate={navigate} setLoggedUser={setLoggedUser} loggedUser={loggedUser} users={users} saveUsers={saveUsersDb} marketing={marketing} saveMarketing={saveMarketing} views={views} resetViews={resetViews} />}
       {view!=='admin'      &&<AppFooter brand={brand} />}
     </div>
   );
