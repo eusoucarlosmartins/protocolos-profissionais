@@ -487,7 +487,7 @@ const AdminProtForm = ({ prot, products, protocols, indications, categories, pha
           <div style={{ marginTop: 4 }}>
             <div style={{ fontSize: 12, color: B.muted, marginBottom: 8, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Indicações</div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-              {indications.map(ind => {
+              {[...indications].sort((a,b) => a.label.localeCompare(b.label, 'pt')).map(ind => {
                 const sel = f.concerns.includes(ind.id);
                 return (
                   <button
