@@ -64,9 +64,10 @@ const ProductCombobox = ({ value, onChange, options, placeholder = 'Digite para 
   const [inputVal, setInputVal] = useState(selectedLabel);
   const [open, setOpen] = useState(false);
   const wrapRef = useRef(null);
+  const typingRef = useRef(false); // impede que o useEffect apague o texto digitado
 
   useEffect(() => {
-    // Só exibe o label quando há um produto realmente selecionado
+    if (typingRef.current) { typingRef.current = false; return; }
     setInputVal(value ? (options.find(o => o.v === value)?.l || '') : '');
   }, [value, options]);
 
@@ -93,6 +94,7 @@ const ProductCombobox = ({ value, onChange, options, placeholder = 'Digite para 
   };
 
   const handleChange = (e) => {
+    typingRef.current = true;
     setInputVal(e.target.value);
     onChange(''); // limpa seleção ao digitar
     setOpen(true);
