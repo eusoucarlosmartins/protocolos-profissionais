@@ -512,7 +512,7 @@ const Header = ({ navigate, adminAuth, setAdminAuth, brand }) => {
   );
 };
 
-const PublicHome = ({ protocols, products, indications, categories, favorites, setFavorites, navigate, brand, marketing, homeFilters, setHomeFilters }) => {
+const PublicHome = ({ protocols, products, indications, categories, favorites, setFavorites, navigate, brand, marketing, homeFilters, setHomeFilters, views = {} }) => {
   const { search, filterCat, filterProds, filterInds, showFavorites, page } = homeFilters;
   const setSearch      = v => setHomeFilters(f => ({ ...f, search: v, page: 1 }));
   const setFilterCat   = v => setHomeFilters(f => ({ ...f, filterCat: v, page: 1 }));
@@ -542,6 +542,13 @@ const PublicHome = ({ protocols, products, indications, categories, favorites, s
     const matchCat = filterCat === 'all' || p.category === filterCat || p.categories?.includes(filterCat);
     const matchProd = filterProds.length === 0 || filterProds.every(id => protocolHasProd(p, id));
     return matchSearch && matchInd && matchCat && matchProd;
+  }).sort((a, b) => {
+    const va = views[`protocol_${a.id}`] || 0;
+    const vb = views[`protocol_${b.id}`] || 0;
+    if (vb !== va) return vb - va;
+    const ia = Math.max(0, ...(a.concerns || []).map(id => views[`indication_${id}`] || 0));
+    const ib = Math.max(0, ...(b.concerns || []).map(id => views[`indication_${id}`] || 0));
+    return ib - ia;
   });
 
   const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
@@ -682,7 +689,7 @@ const PublicHome = ({ protocols, products, indications, categories, favorites, s
             </div>
 
             <div style={{marginTop:12,background:'rgba(255,255,255,0.08)',border:'1px solid rgba(255,255,255,0.2)',borderRadius:12,padding:'12px 12px 10px'}}>
-              <div style={{fontSize:10,fontWeight:700,color:'rgba(255,255,255,0.75)',textTransform:'uppercase',letterSpacing:'0.09em',marginBottom:8}}>Refino rapido</div>
+              <div style={{fontSize:10,fontWeight:700,color:'rgba(255,255,255,0.75)',textTransform:'uppercase',letterSpacing:'0.09em',marginBottom:8}}>Indicacao</div>
               <div style={{display:'flex',flexWrap:'wrap',gap:8}}>
                 <button onClick={()=>{ setShowFavorites(false); setFilterInds([]); }} style={{padding:'8px 14px',borderRadius:999,border:'1px solid rgba(255,255,255,0.28)',background:!showFavorites&&filterInds.length===0?'#fff':'rgba(255,255,255,0.16)',color:!showFavorites&&filterInds.length===0?B.purpleDark:'#fff',fontSize:12,fontWeight:700,cursor:'pointer',fontFamily:'inherit'}}>
                   Todos
@@ -2690,6 +2697,13 @@ export default function App() {
   const handleView=async(type,id)=>{
     const key=`${type}_${id}`;
     const updated={...views,[key]:(views[key]||0)+1};
+    if (type==='protocol') {
+      const prot=protocols.find(p=>p.id===id);
+      for (const cid of (prot?.concerns||[])) {
+        const ik=`indication_${cid}`;
+        updated[ik]=(updated[ik]||0)+1;
+      }
+    }
     setViews(updated);
     await savePublic(VIEWS_KEY,updated);
   };
@@ -2752,7 +2766,7 @@ export default function App() {
       <style>{`* { box-sizing: border-box; margin: 0; padding: 0; } button, input, select, textarea { font-family: inherit; }` + RESPONSIVE_CSS}</style>
       <Header navigate={navigate} adminAuth={!!loggedUser} setAdminAuth={v=>{ if(!v) setLoggedUser(null); }} brand={brand} />
       <NoticeBanner notice={marketing?.notice} />
-      {view==='home'       &&<PublicHome protocols={protocols} products={products} indications={indications} categories={categories} favorites={favorites} setFavorites={setFavorites} navigate={navigate} brand={brand} marketing={marketing} homeFilters={homeFilters} setHomeFilters={setHomeFilters} />}
+      {view==='home'       &&<PublicHome protocols={protocols} products={products} indications={indications} categories={categories} favorites={favorites} setFavorites={setFavorites} navigate={navigate} brand={brand} marketing={marketing} homeFilters={homeFilters} setHomeFilters={setHomeFilters} views={views} />}
       {view==='product'    &&activeProd&&<PublicProductPage product={activeProd} protocols={protocols} categories={categories} navigate={navigate} brand={brand} onView={handleView} />}
       {view==='protocol'   &&activeProt&&<ProtocolDetail protocol={activeProt} products={products} indications={indications} categories={categories} navigate={navigate} brand={brand} onView={handleView} />}
       {view==='search'     &&<ProductSearch products={products} protocols={protocols} indications={indications} categories={categories} navigate={navigate} />}
