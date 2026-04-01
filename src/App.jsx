@@ -512,15 +512,17 @@ const Header = ({ navigate, adminAuth, setAdminAuth, brand }) => {
   );
 };
 
-const PublicHome = ({ protocols, products, indications, categories, favorites, setFavorites, navigate, brand, marketing }) => {
-  const [filterInds, setFilterInds] = useState([]);
-  const [showFavorites, setShowFavorites] = useState(false);
-  const [filterCat, setFilterCat] = useState('all');
-  const [filterProds, setFilterProds] = useState([]);
+const PublicHome = ({ protocols, products, indications, categories, favorites, setFavorites, navigate, brand, marketing, homeFilters, setHomeFilters }) => {
+  const { search, filterCat, filterProds, filterInds, showFavorites, page } = homeFilters;
+  const setSearch      = v => setHomeFilters(f => ({ ...f, search: v, page: 1 }));
+  const setFilterCat   = v => setHomeFilters(f => ({ ...f, filterCat: v, page: 1 }));
+  const setFilterProds = v => setHomeFilters(f => ({ ...f, filterProds: typeof v === 'function' ? v(f.filterProds) : v, page: 1 }));
+  const setFilterInds  = v => setHomeFilters(f => ({ ...f, filterInds: typeof v === 'function' ? v(f.filterInds) : v, page: 1 }));
+  const setShowFavorites = v => setHomeFilters(f => ({ ...f, showFavorites: typeof v === 'function' ? v(f.showFavorites) : v, page: 1 }));
+  const setPage        = v => setHomeFilters(f => ({ ...f, page: typeof v === 'function' ? v(f.page) : v }));
+
   const [prodSearch, setProdSearch] = useState('');
   const [prodDropOpen, setProdDropOpen] = useState(false);
-  const [search, setSearch] = useState('');
-  const [page, setPage] = useState(1);
   const PAGE_SIZE = 12;
 
   const isMobile = useIsMobile();
@@ -560,19 +562,16 @@ const PublicHome = ({ protocols, products, indications, categories, favorites, s
   });
 
   const hasActiveFilters = search || filterCat !== 'all' || filterProds.length > 0 || filterInds.length > 0 || showFavorites;
-  const clearAll = () => { setSearch(''); setFilterCat('all'); setFilterProds([]); setProdSearch(''); setFilterInds([]); setShowFavorites(false); setPage(1); };
+  const clearAll = () => { setProdSearch(''); setHomeFilters({ search:'', filterCat:'all', filterProds:[], filterInds:[], showFavorites:false, page:1 }); };
 
-  const toggleInd = (id) => {
-    setFilterInds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
-    setPage(1);
-  };
+  const toggleInd = (id) => setFilterInds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
 
   const addProd = (id) => {
-    if (!filterProds.includes(id)) { setFilterProds(prev => [...prev, id]); setPage(1); }
+    if (!filterProds.includes(id)) setFilterProds(prev => [...prev, id]);
     setProdSearch('');
     setProdDropOpen(false);
   };
-  const removeProd = (id) => { setFilterProds(prev => prev.filter(x => x !== id)); setPage(1); };
+  const removeProd = (id) => setFilterProds(prev => prev.filter(x => x !== id));
 
   const prodOptions = sortByName(products).filter(p =>
     isActive(p) &&
@@ -581,8 +580,8 @@ const PublicHome = ({ protocols, products, indications, categories, favorites, s
   );
 
   const activeChips = [
-    filterCat !== 'all' && { key: 'cat', label: categories.find(c => c.id === filterCat)?.label || filterCat, onRemove: () => { setFilterCat('all'); setPage(1); } },
-    showFavorites && { key: 'fav', label: 'Meus Favoritos', onRemove: () => { setShowFavorites(false); setPage(1); } },
+    filterCat !== 'all' && { key: 'cat', label: categories.find(c => c.id === filterCat)?.label || filterCat, onRemove: () => setFilterCat('all') },
+    showFavorites && { key: 'fav', label: 'Meus Favoritos', onRemove: () => setShowFavorites(false) },
     ...filterProds.map(id => ({ key: `prod-${id}`, label: products.find(p => p.id === id)?.name || id, onRemove: () => removeProd(id) })),
     ...filterInds.map(id => ({ key: id, label: indications.find(i => i.id === id)?.label || id, onRemove: () => toggleInd(id) })),
   ].filter(Boolean);
@@ -632,14 +631,14 @@ const PublicHome = ({ protocols, products, indications, categories, favorites, s
             <div style={{marginTop:14, display:'grid', gridTemplateColumns:isMobile?'1fr':'3fr 2fr', gap:10}}>
               <input
                 value={search}
-                onChange={e=>{setSearch(e.target.value);setPage(1);}}
+                onChange={e=>setSearch(e.target.value)}
                 placeholder="Pesquisar protocolo por nome ou descricao..."
                 style={{width:'100%',padding:'12px 16px',borderRadius:12,border:'none',fontSize:14,outline:'none',boxSizing:'border-box',background:'#fff',color:B.text,fontFamily:'inherit',fontWeight:600}}
               />
               <div style={{display:'flex',gap:10,flexDirection:'column'}}>
                 <select
                   value={filterCat}
-                  onChange={e=>{setFilterCat(e.target.value);setPage(1);}}
+                  onChange={e=>setFilterCat(e.target.value)}
                   style={{width:'100%',padding:'12px 12px',borderRadius:12,border:'1px solid rgba(153,153,153,0.3)',fontSize:14,outline:'none',background:'#fff',color:B.text,fontFamily:'inherit',fontWeight:600}}
                 >
                   <option value="all">Todas as Categorias</option>
@@ -685,10 +684,10 @@ const PublicHome = ({ protocols, products, indications, categories, favorites, s
             <div style={{marginTop:12,background:'rgba(255,255,255,0.08)',border:'1px solid rgba(255,255,255,0.2)',borderRadius:12,padding:'12px 12px 10px'}}>
               <div style={{fontSize:10,fontWeight:700,color:'rgba(255,255,255,0.75)',textTransform:'uppercase',letterSpacing:'0.09em',marginBottom:8}}>Refino rapido</div>
               <div style={{display:'flex',flexWrap:'wrap',gap:8}}>
-                <button onClick={()=>{setShowFavorites(false);setFilterInds([]);setPage(1);}} style={{padding:'8px 14px',borderRadius:999,border:'1px solid rgba(255,255,255,0.28)',background:!showFavorites&&filterInds.length===0?'#fff':'rgba(255,255,255,0.16)',color:!showFavorites&&filterInds.length===0?B.purpleDark:'#fff',fontSize:12,fontWeight:700,cursor:'pointer',fontFamily:'inherit'}}>
+                <button onClick={()=>{ setShowFavorites(false); setFilterInds([]); }} style={{padding:'8px 14px',borderRadius:999,border:'1px solid rgba(255,255,255,0.28)',background:!showFavorites&&filterInds.length===0?'#fff':'rgba(255,255,255,0.16)',color:!showFavorites&&filterInds.length===0?B.purpleDark:'#fff',fontSize:12,fontWeight:700,cursor:'pointer',fontFamily:'inherit'}}>
                   Todos
                 </button>
-                <button onClick={()=>{setShowFavorites(v=>!v);setPage(1);}} style={{padding:'8px 14px',borderRadius:999,border:'1px solid rgba(255,255,255,0.28)',background:showFavorites?B.redLight:'rgba(255,255,255,0.16)',color:showFavorites?B.red:'#fff',fontSize:12,fontWeight:700,cursor:'pointer',fontFamily:'inherit'}}>
+                <button onClick={()=>setShowFavorites(v=>!v)} style={{padding:'8px 14px',borderRadius:999,border:'1px solid rgba(255,255,255,0.28)',background:showFavorites?B.redLight:'rgba(255,255,255,0.16)',color:showFavorites?B.red:'#fff',fontSize:12,fontWeight:700,cursor:'pointer',fontFamily:'inherit'}}>
                   Meus Favoritos
                 </button>
                 {[...indications].sort((a,b)=>a.label.localeCompare(b.label)).map(ind=>{
@@ -2607,6 +2606,7 @@ export default function App() {
   const [favorites,setFavorites]=useState([]);
   const [loggedUser,setLoggedUser]=useState(null);
   const [path, navigate] = useRoute();
+  const [homeFilters, setHomeFilters] = useState({ search:'', filterCat:'all', filterProds:[], filterInds:[], showFavorites:false, page:1 });
 
   useEffect(() => {
     if (path === '/admin' || path === '/login') {
@@ -2752,7 +2752,7 @@ export default function App() {
       <style>{`* { box-sizing: border-box; margin: 0; padding: 0; } button, input, select, textarea { font-family: inherit; }` + RESPONSIVE_CSS}</style>
       <Header navigate={navigate} adminAuth={!!loggedUser} setAdminAuth={v=>{ if(!v) setLoggedUser(null); }} brand={brand} />
       <NoticeBanner notice={marketing?.notice} />
-      {view==='home'       &&<PublicHome protocols={protocols} products={products} indications={indications} categories={categories} favorites={favorites} setFavorites={setFavorites} navigate={navigate} brand={brand} marketing={marketing} />}
+      {view==='home'       &&<PublicHome protocols={protocols} products={products} indications={indications} categories={categories} favorites={favorites} setFavorites={setFavorites} navigate={navigate} brand={brand} marketing={marketing} homeFilters={homeFilters} setHomeFilters={setHomeFilters} />}
       {view==='product'    &&activeProd&&<PublicProductPage product={activeProd} protocols={protocols} categories={categories} navigate={navigate} brand={brand} onView={handleView} />}
       {view==='protocol'   &&activeProt&&<ProtocolDetail protocol={activeProt} products={products} indications={indications} categories={categories} navigate={navigate} brand={brand} onView={handleView} />}
       {view==='search'     &&<ProductSearch products={products} protocols={protocols} indications={indications} categories={categories} navigate={navigate} />}
