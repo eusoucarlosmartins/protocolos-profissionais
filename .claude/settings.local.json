@@ -5,7 +5,9 @@
       "WebFetch(domain:baymard.com)",
       "WebSearch",
       "WebFetch(domain:yesplz.ai)",
-      "WebFetch(domain:coaxsoft.com)"
+      "WebFetch(domain:coaxsoft.com)",
+      "WebFetch(domain:extratosdaterra.notion.site)",
+      "WebFetch(domain:notion-api.splitbee.io)"
     ]
   }
 }

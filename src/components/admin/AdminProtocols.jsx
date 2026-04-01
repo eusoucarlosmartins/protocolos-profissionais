@@ -110,7 +110,7 @@ export const AdminProtocols = ({
       filters.reviewStatus === "all" ||
       (protocol.reviewStatus || 'needs_review') === filters.reviewStatus;
     return matchSearch && matchStatus && matchCategory && matchIndication && matchReviewStatus;
-  });
+  }).sort((a, b) => String(a.code || '').localeCompare(String(b.code || ''), undefined, { numeric: true }));
 
   const publishedCount = protocols.filter((protocol) => protocol.published).length;
   const draftCount = protocols.length - publishedCount;
