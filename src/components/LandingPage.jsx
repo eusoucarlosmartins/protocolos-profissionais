@@ -33,25 +33,6 @@ export const LandingPage = ({ protocols, indications, categories, brand, landing
   return (
     <div style={{ fontFamily: "'Segoe UI', system-ui, sans-serif", color: B.text, background: B.cream, display: "flex", flexDirection: "column", minHeight: "100vh" }}>
 
-      {/* NAV */}
-      <nav className="no-print" style={{ background: B.purpleDark, padding: "14px 40px", display: "flex", justifyContent: "space-between", alignItems: "center", position: "sticky", top: 0, zIndex: 100 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          {brand?.logoUrl
-            ? <img src={brand.logoUrl} alt={brand.companyName || "Logo"} style={{ height: 32, objectFit: "contain" }} />
-            : <div style={{ width: 32, height: 32, background: `linear-gradient(135deg, ${B.gold}, #e8b96a)`, borderRadius: 7, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, color: B.white, fontWeight: 800 }}>ET</div>
-          }
-          <span style={{ color: B.white, fontWeight: 700, fontSize: 14, letterSpacing: "0.03em" }}>
-            {brand?.companyName || "Extratos da Terra"}
-          </span>
-        </div>
-        <button
-          onClick={() => goToCatalog(null)}
-          style={{ background: B.gold, color: B.purpleDark, border: "none", padding: "9px 22px", borderRadius: 6, fontWeight: 700, fontSize: 13, cursor: "pointer", letterSpacing: "0.04em", fontFamily: "inherit" }}
-        >
-          {hero.ctaText || "Acessar o Catálogo"}
-        </button>
-      </nav>
-
       {/* HERO */}
       <section className="rp-pad" style={{ background: B.cream, padding: "72px 40px 56px", position: "relative", overflow: "hidden" }}>
         <div style={{ position: "absolute", top: 0, right: 0, width: 420, height: 420, background: `radial-gradient(circle at top right, rgba(94,61,143,0.07) 0%, transparent 70%)`, pointerEvents: "none" }} />
