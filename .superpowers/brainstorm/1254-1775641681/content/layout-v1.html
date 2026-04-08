@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Layout — Landing Page Extratos da Terra</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', sans-serif; background: #1a1a2e; color: #e0e0e0; padding: 24px; }
+
+  .page-label {
+    text-align: center;
+    color: #aaa;
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+
+  .browser-frame {
+    background: #f7f4f0;
+    border-radius: 10px;
+    overflow: hidden;
+    max-width: 860px;
+    margin: 0 auto;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  }
+
+  /* ---- NAV ---- */
+  .lp-nav {
+    background: #2C1F40;
+    padding: 14px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .lp-logo {
+    color: #F7F4F0;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+  .lp-logo span { color: #C8A96E; }
+  .lp-nav-cta {
+    background: #C8A96E;
+    color: #2C1F40;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 7px 18px;
+    border-radius: 4px;
+  }
+
+  /* ---- HERO ---- */
+  .lp-hero {
+    background: #F7F4F0;
+    padding: 64px 40px 52px;
+    position: relative;
+    overflow: hidden;
+  }
+  .lp-hero::before {
+    content: '';
+    position: absolute;
+    top: 0; right: 0;
+    width: 340px; height: 340px;
+    background: radial-gradient(circle at top right, rgba(94,61,143,0.08) 0%, transparent 70%);
+  }
+  .lp-hero-eyebrow {
+    font-size: 10px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: #5E3D8F;
+    margin-bottom: 14px;
+    font-weight: 600;
+  }
+  .lp-hero-title {
+    font-size: 36px;
+    font-weight: 800;
+    color: #2C1F40;
+    line-height: 1.15;
+    max-width: 520px;
+    margin-bottom: 16px;
+  }
+  .lp-hero-title em {
+    color: #5E3D8F;
+    font-style: normal;
+  }
+  .lp-hero-subtitle {
+    color: #6B7280;
+    font-size: 15px;
+    line-height: 1.6;
+    max-width: 440px;
+    margin-bottom: 32px;
+  }
+  .lp-hero-actions {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+  .btn-primary {
+    background: #5E3D8F;
+    color: white;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 14px 32px;
+    border-radius: 6px;
+    display: inline-block;
+  }
+  .lp-hero-stats {
+    display: flex;
+    gap: 32px;
+    margin-top: 48px;
+    padding-top: 32px;
+    border-top: 1px solid #E2D9F3;
+  }
+  .stat-item {}
+  .stat-number {
+    font-size: 28px;
+    font-weight: 800;
+    color: #2C1F40;
+    line-height: 1;
+  }
+  .stat-number span { color: #C8A96E; }
+  .stat-label {
+    font-size: 11px;
+    color: #6B7280;
+    margin-top: 4px;
+    letter-spacing: 0.5px;
+  }
+
+  /* ---- SECTION LABEL ---- */
+  .section-eyebrow {
+    font-size: 10px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: #5E3D8F;
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+  .section-title {
+    font-size: 22px;
+    font-weight: 800;
+    color: #2C1F40;
+    margin-bottom: 28px;
+  }
+
+  /* ---- CATEGORIES ---- */
+  .lp-categories {
+    background: white;
+    padding: 52px 40px;
+  }
+  .cat-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+  .cat-card {
+    background: #F7F4F0;
+    border: 1px solid #E2D9F3;
+    border-radius: 10px;
+    padding: 28px 24px;
+    position: relative;
+    overflow: hidden;
+  }
+  .cat-card::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(to right, #5E3D8F, #C8A96E);
+  }
+  .cat-icon {
+    width: 44px;
+    height: 44px;
+    background: #EDE5F5;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
+    font-size: 20px;
+  }
+  .cat-name {
+    font-size: 16px;
+    font-weight: 800;
+    color: #2C1F40;
+    margin-bottom: 6px;
+  }
+  .cat-desc {
+    font-size: 12px;
+    color: #6B7280;
+    line-height: 1.5;
+  }
+  .cat-count {
+    margin-top: 14px;
+    font-size: 11px;
+    color: #5E3D8F;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+
+  /* ---- INDICATIONS ---- */
+  .lp-indications {
+    background: #F7F4F0;
+    padding: 52px 40px;
+  }
+  .ind-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .ind-chip {
+    background: white;
+    border: 1.5px solid #E2D9F3;
+    color: #2C1F40;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 8px 18px;
+    border-radius: 100px;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+  .ind-chip-dot {
+    width: 7px;
+    height: 7px;
+    background: #5E3D8F;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* ---- FINAL CTA ---- */
+  .lp-footer-cta {
+    background: #2C1F40;
+    padding: 52px 40px;
+    text-align: center;
+  }
+  .lp-footer-cta h2 {
+    font-size: 26px;
+    font-weight: 800;
+    color: #F7F4F0;
+    margin-bottom: 12px;
+  }
+  .lp-footer-cta p {
+    color: rgba(247,244,240,0.6);
+    font-size: 14px;
+    margin-bottom: 28px;
+  }
+  .lp-footer-cta .btn-gold {
+    background: #C8A96E;
+    color: #2C1F40;
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 14px 36px;
+    border-radius: 6px;
+    display: inline-block;
+  }
+
+  /* ANNOTATIONS */
+  .annotation {
+    background: rgba(94,61,143,0.15);
+    border-left: 3px solid #5E3D8F;
+    color: #ccc;
+    font-size: 11px;
+    padding: 6px 10px;
+    margin: 0 40px;
+    border-radius: 0 4px 4px 0;
+    letter-spacing: 0.3px;
+  }
+</style>
+</head>
+<body>
+
+<p class="page-label">Mockup de Layout — Landing Page Extratos da Terra</p>
+
+<div class="browser-frame">
+
+  <!-- NAV -->
+  <div class="lp-nav">
+    <div class="lp-logo">Extratos <span>da Terra</span></div>
+    <div class="lp-nav-cta">Acessar Catálogo</div>
+  </div>
+
+  <!-- HERO -->
+  <div class="lp-hero">
+    <div class="lp-hero-eyebrow">Para Profissionais de Estética</div>
+    <div class="lp-hero-title">Protocolos que <em>elevam</em> o resultado das suas sessões</div>
+    <div class="lp-hero-subtitle">Acesse o catálogo técnico completo com protocolos formulados para alta performance — Facial, Corporal e Capilar.</div>
+    <div class="lp-hero-actions">
+      <div class="btn-primary">Acessar o Catálogo</div>
+    </div>
+    <div class="lp-hero-stats">
+      <div class="stat-item">
+        <div class="stat-number">+20<span>+</span></div>
+        <div class="stat-label">Protocolos ativos</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number">3</div>
+        <div class="stat-label">Categorias</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number">10</div>
+        <div class="stat-label">Indicações cobertas</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="annotation">Seção 2 — Categorias de Tratamento</div>
+
+  <!-- CATEGORIES -->
+  <div class="lp-categories">
+    <div class="section-eyebrow">Especialidades</div>
+    <div class="section-title">Escolha sua área de atuação</div>
+    <div class="cat-grid">
+      <div class="cat-card">
+        <div class="cat-icon">✦</div>
+        <div class="cat-name">Facial</div>
+        <div class="cat-desc">Protocolos para pele do rosto: clareamento, antienvelhecimento, acne e mais.</div>
+        <div class="cat-count">Ver protocolos →</div>
+      </div>
+      <div class="cat-card">
+        <div class="cat-icon">◆</div>
+        <div class="cat-name">Corporal</div>
+        <div class="cat-desc">Tratamentos para corpo: modelagem, celulite, estrias, hidratação profunda.</div>
+        <div class="cat-count">Ver protocolos →</div>
+      </div>
+      <div class="cat-card">
+        <div class="cat-icon">❋</div>
+        <div class="cat-name">Capilar</div>
+        <div class="cat-desc">Protocolos para couro cabeludo e cabelos com tecnologia avançada.</div>
+        <div class="cat-count">Ver protocolos →</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="annotation">Seção 3 — Indicações / Necessidades do Cliente</div>
+
+  <!-- INDICATIONS -->
+  <div class="lp-indications">
+    <div class="section-eyebrow">Indicações</div>
+    <div class="section-title">Qual é a necessidade do seu cliente?</div>
+    <div class="ind-grid">
+      <div class="ind-chip"><span class="ind-chip-dot"></span>Clareamento</div>
+      <div class="ind-chip"><span class="ind-chip-dot"></span>Acne</div>
+      <div class="ind-chip"><span class="ind-chip-dot"></span>Antienvelhecimento</div>
+      <div class="ind-chip"><span class="ind-chip-dot"></span>Hidratação</div>
+      <div class="ind-chip"><span class="ind-chip-dot"></span>Lifting</div>
+      <div class="ind-chip"><span class="ind-chip-dot"></span>Relaxamento</div>
+      <div class="ind-chip"><span class="ind-chip-dot"></span>Rejuvenescimento</div>
+      <div class="ind-chip"><span class="ind-chip-dot"></span>Oleosidade</div>
+      <div class="ind-chip"><span class="ind-chip-dot"></span>Estrias</div>
+      <div class="ind-chip"><span class="ind-chip-dot"></span>Celulite</div>
+    </div>
+  </div>
+
+  <div class="annotation">Seção 4 — CTA Final</div>
+
+  <!-- FOOTER CTA -->
+  <div class="lp-footer-cta">
+    <h2>Pronto para elevar seus resultados?</h2>
+    <p>Acesse o catálogo completo e encontre o protocolo ideal para cada cliente.</p>
+    <div class="btn-gold">Acessar o Catálogo Agora</div>
+  </div>
+
+</div>
+
+<script>
+// Inject helper for click tracking
+(function() {
+  const choices = document.querySelectorAll('[data-choice]');
+  choices.forEach(el => {
+    el.addEventListener('click', () => {
+      el.style.outline = '3px solid #C8A96E';
+    });
+  });
+})();
+</script>
+</body>
+</html>

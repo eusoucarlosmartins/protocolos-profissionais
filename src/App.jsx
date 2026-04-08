@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useIsMobile, useRoute } from "./hooks/useAppShell";
 import { lazy, Suspense } from "react";
 import AdminProtForm from "./components/admin/AdminProtForm";
+import { LandingPage } from "./components/LandingPage";
 import {
   B,
   BRAND_KEY,
@@ -10,12 +11,14 @@ import {
   INIT_BRAND,
   INIT_CATEGORIES,
   INIT_INDICATIONS,
+  INIT_LANDING,
   INIT_MARKETING,
   INIT_PHASES,
   INIT_PRODUCTS,
   INIT_PROTOCOLS,
   INIT_USERS,
   INDICATIONS_KEY,
+  LANDING_KEY,
   MARKETING_KEY,
   PHASES_KEY,
   PRODUCT_TYPE_OPTIONS,
@@ -83,6 +86,11 @@ const AdminSettingsModule = lazy(() =>
 const AdminDashModule = lazy(() =>
   import("./components/admin/AdminPanels").then((module) => ({
     default: module.AdminDash,
+  })),
+);
+const AdminLandingModule = lazy(() =>
+  import("./components/admin/AdminLanding").then((module) => ({
+    default: module.AdminLanding,
   })),
 );
 const AdminProductsModule = lazy(() =>
@@ -465,7 +473,7 @@ const ProductTooltip = ({ product: p, children, navigate }) => {
 const Header = ({ navigate, adminAuth, setAdminAuth, brand }) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const isMobile = useIsMobile();
-  const navItems = [{l:'Protocolos',v:'/'},{l:'Buscar por Produto',v:'/busca'}];
+  const navItems = [{l:'Protocolos',v:'/protocolos'},{l:'Buscar por Produto',v:'/busca'}];
 
   return (
     <header className="no-print" style={{background:B.purpleDark,padding:`0 ${isMobile?12:24}px`,display:'flex',alignItems:'center',justifyContent:'space-between',gap:isMobile?8:16,height:isMobile?64:58,position:'sticky',top:0,zIndex:200,width:'100%',overflow:'clip',boxShadow:isMobile?'0 10px 24px rgba(19, 10, 35, 0.18)':'none'}}>
@@ -1958,7 +1966,7 @@ const AdminMarketingLegacy = ({ marketing, saveMarketing, protocols }) => {
   );
 };
 
-const AdminPanel = ({ products, protocols, indications, categories, phases, brand, saveProducts, saveProtocols, saveIndications, saveCategories, savePhases, saveBrand, navigate, setLoggedUser, loggedUser, users, saveUsers, marketing, saveMarketing, views, resetViews }) => {
+const AdminPanel = ({ products, protocols, indications, categories, phases, brand, saveProducts, saveProtocols, saveIndications, saveCategories, savePhases, saveBrand, navigate, setLoggedUser, loggedUser, users, saveUsers, marketing, saveMarketing, landingConfig, saveLanding, views, resetViews }) => {
   const isMobile = useIsMobile();
   const adminScrollRef = useRef(null);
   const productListScrollRef = useRef(0);
@@ -1995,9 +2003,10 @@ const AdminPanel = ({ products, protocols, indications, categories, phases, bran
     {id:'phases',     label:'Fases', icon:'FA'},
     {id:'settings',   label:'Configuracoes', icon:'CF'},
     {id:'marketing',  label:'Marketing', icon:'MK'},
+    {id:'landing',    label:'Landing Page', icon:'LP', permKey:'marketing'},
     {id:'alerts',     label:'Alertas', icon:'AL'},
     {id:'users',      label:'Usuarios', icon:'US'},
-  ].filter(n=>hasPerm(loggedUser, n.id, 'view'));
+  ].filter(n=>hasPerm(loggedUser, n.permKey || n.id, 'view'));
 
   const accessibleAreas = Object.entries(loggedUser?.perms||{}).filter(([,v])=>Object.values(v).some(Boolean)).length;
 
@@ -2120,6 +2129,11 @@ const AdminPanel = ({ products, protocols, indications, categories, phases, bran
         {aView==='marketing'&&!editProd&&!editProt&&hasPerm(loggedUser,'marketing','view')&&(
           <Suspense fallback={<AdminModuleFallback />}>
             <AdminMarketingModule marketing={marketing} saveMarketing={saveMarketing} protocols={protocols} Btn={Btn} Field={Field} SectionTitle={SectionTitle} uid={uid} />
+          </Suspense>
+        )}
+        {aView==='landing'&&!editProd&&!editProt&&hasPerm(loggedUser,'marketing','view')&&(
+          <Suspense fallback={<AdminModuleFallback />}>
+            <AdminLandingModule landingConfig={landingConfig} saveLanding={hasPerm(loggedUser,'marketing','edit')?saveLanding:null} Btn={Btn} />
           </Suspense>
         )}
         {aView==='users'&&!editProd&&!editProt&&hasPerm(loggedUser,'users','view')&&(
@@ -2619,6 +2633,7 @@ export default function App() {
   const [brand,setBrand]=useState(INIT_BRAND);
   const [users,setUsers]=useState([]);
   const [marketing,setMarketing]=useState(INIT_MARKETING);
+  const [landingConfig,setLandingConfig]=useState(INIT_LANDING);
   const [views,setViews]=useState({});
   const [favorites,setFavorites]=useState([]);
   const [loggedUser,setLoggedUser]=useState(null);
@@ -2646,7 +2661,8 @@ export default function App() {
         loadedPhases,
         loadedMarketing,
         loadedViews,
-        loadedBrand
+        loadedBrand,
+        loadedLanding
       ] = await Promise.all([
         load(PRODUCTS_KEY,INIT_PRODUCTS),
         load(PROTOCOLS_KEY,INIT_PROTOCOLS),
@@ -2655,7 +2671,8 @@ export default function App() {
         load(PHASES_KEY,INIT_PHASES),
         load(MARKETING_KEY,INIT_MARKETING),
         load(VIEWS_KEY,{}),
-        load(BRAND_KEY,INIT_BRAND)
+        load(BRAND_KEY,INIT_BRAND),
+        load(LANDING_KEY,INIT_LANDING)
       ]);
 
       // Atualiza estados com dados do localStorage
@@ -2667,6 +2684,7 @@ export default function App() {
       setMarketing(loadedMarketing);
       setViews(loadedViews);
       setBrand(loadedBrand);
+      setLandingConfig(loadedLanding);
       
       if (loadedBrand.colorMain) B.purple = loadedBrand.colorMain;
       if (loadedBrand.colorAccent) B.gold = loadedBrand.colorAccent;
@@ -2698,6 +2716,7 @@ export default function App() {
     await save(USERS_KEY,securedUsers);
   };
   const saveMarketing=async d=>{setMarketing(d);await save(MARKETING_KEY,d);};
+  const saveLanding=async d=>{setLandingConfig(d);await save(LANDING_KEY,d);};
   const handleAdminPasswordReset = async (nextPassword) => {
     const updatedUser = await updateAdminPassword(nextPassword);
     setLoggedUser(updatedUser);
@@ -2749,11 +2768,13 @@ export default function App() {
 
   if(loading) return <div style={{background:B.cream,height:'100vh',display:'flex',alignItems:'center',justifyContent:'center',color:B.muted,fontFamily:"'Segoe UI', system-ui, sans-serif",fontSize:14}}>Preparando a plataforma...</div>;
 
-  let view = 'home';
+  let view = 'landing';
   let activeProt = null;
   let activeProd = null;
 
-  if (path === '/busca') {
+  if (path === '/protocolos') {
+    view = 'home';
+  } else if (path === '/busca') {
     view = 'search';
   } else if (path === '/login') {
     view = 'admin_login';
@@ -2778,6 +2799,7 @@ export default function App() {
       <style>{`* { box-sizing: border-box; margin: 0; padding: 0; } button, input, select, textarea { font-family: inherit; }` + RESPONSIVE_CSS}</style>
       <Header navigate={navigate} adminAuth={!!loggedUser} setAdminAuth={v=>{ if(!v) setLoggedUser(null); }} brand={brand} />
       <NoticeBanner notice={marketing?.notice} />
+      {view==='landing'    &&<LandingPage protocols={protocols} indications={indications} categories={categories} brand={brand} landingConfig={landingConfig} setHomeFilters={setHomeFilters} navigate={navigate} />}
       {view==='home'       &&<PublicHome protocols={protocols} products={products} indications={indications} categories={categories} favorites={favorites} setFavorites={setFavorites} navigate={navigate} brand={brand} marketing={marketing} homeFilters={homeFilters} setHomeFilters={setHomeFilters} views={views} />}
       {view==='product'    &&activeProd&&<PublicProductPage product={activeProd} protocols={protocols} categories={categories} navigate={navigate} brand={brand} onView={handleView} />}
       {view==='protocol'   &&activeProt&&<ProtocolDetail protocol={activeProt} products={products} indications={indications} categories={categories} navigate={navigate} brand={brand} onView={handleView} />}
@@ -2792,7 +2814,7 @@ export default function App() {
           <AdminPasswordReset brand={brand} onSubmit={handleAdminPasswordReset} onLogout={async ()=>{await logoutAdmin();setLoggedUser(null);navigate('/login');}} Logo={Logo} Field={Field} Btn={Btn} />
         </Suspense>
       )}
-      {view==='admin'      &&loggedUser&&!loggedUser?.requirePasswordReset&&<AdminPanel products={products} protocols={protocols} indications={indications} categories={categories} phases={phases} brand={brand} saveProducts={saveProd} saveProtocols={saveProt} saveIndications={saveInd} saveCategories={saveCat} savePhases={savePha} saveBrand={saveBr} navigate={navigate} setLoggedUser={setLoggedUser} loggedUser={loggedUser} users={users} saveUsers={saveUsersDb} marketing={marketing} saveMarketing={saveMarketing} views={views} resetViews={resetViews} />}
+      {view==='admin'      &&loggedUser&&!loggedUser?.requirePasswordReset&&<AdminPanel products={products} protocols={protocols} indications={indications} categories={categories} phases={phases} brand={brand} saveProducts={saveProd} saveProtocols={saveProt} saveIndications={saveInd} saveCategories={saveCat} savePhases={savePha} saveBrand={saveBr} navigate={navigate} setLoggedUser={setLoggedUser} loggedUser={loggedUser} users={users} saveUsers={saveUsersDb} marketing={marketing} saveMarketing={saveMarketing} landingConfig={landingConfig} saveLanding={saveLanding} views={views} resetViews={resetViews} />}
       {view!=='admin'      &&<AppFooter brand={brand} />}
     </div>
   );

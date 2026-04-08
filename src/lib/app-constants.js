@@ -128,6 +128,7 @@ export const hasPerm = (user, section, action) => !!user?.perms?.[section]?.[act
 
 export const USERS_KEY = "edt_users_v10";
 export const BRAND_KEY = "edt_brand_v10";
+export const LANDING_KEY = "edt_landing_v10";
 export const PRODUCTS_KEY = "edt_products_v10";
 export const PROTOCOLS_KEY = "edt_protocols_v10";
 export const INDICATIONS_KEY = "edt_indications_v10";
@@ -148,6 +149,25 @@ export const INIT_USERS = [
     perms: FULL_PERMS,
   },
 ];
+
+export const INIT_LANDING = {
+  hero: {
+    eyebrow: "Para Profissionais de Estética",
+    headline: "Protocolos que elevam o resultado das suas sessões",
+    subtitle: "Acesse o catálogo técnico completo com protocolos formulados para alta performance — Facial, Corporal e Capilar.",
+    ctaText: "Acessar o Catálogo",
+  },
+  categories: {
+    facial:   { desc: "Protocolos para pele do rosto: clareamento, antienvelhecimento, acne e mais." },
+    corporal: { desc: "Tratamentos para corpo: modelagem, celulite, estrias, hidratação profunda." },
+    capilar:  { desc: "Protocolos para couro cabeludo e cabelos com tecnologia avançada." },
+  },
+  cta: {
+    headline: "Pronto para elevar seus resultados?",
+    subtitle: "Acesse o catálogo completo e encontre o protocolo ideal para cada cliente.",
+    ctaText: "Acessar o Catálogo Agora",
+  },
+};
 
 export const INIT_MARKETING = {
   banners: [],
