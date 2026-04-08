@@ -664,87 +664,83 @@ const PublicHome = ({ protocols, products, indications, categories, favorites, s
 
       {/* ── PAINEL DE FILTROS ── */}
       <div style={{background:B.white, borderBottom:`1px solid ${B.border}`, boxShadow:'0 2px 12px rgba(44,31,64,0.06)'}}>
-        <div style={{maxWidth:1100, margin:'0 auto', padding: isMobile ? '16px 14px' : '20px 24px'}}>
 
-          <div style={{display:'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr auto', gap: isMobile ? 16 : 24, alignItems:'start'}}>
-
-            {/* COLUNA ESQUERDA: Indicações */}
-            <div>
-              <div style={{fontSize:10,fontWeight:700,color:B.muted,textTransform:'uppercase',letterSpacing:'0.12em',marginBottom:10}}>Indicação</div>
-              <div style={{display:'flex', flexWrap:'wrap', gap:6}}>
-                <button onClick={()=>{setShowFavorites(false);setFilterInds([]);}}
-                  style={{padding:'6px 14px',borderRadius:999,border:`1.5px solid ${!showFavorites&&filterInds.length===0?B.purple:B.border}`,background:!showFavorites&&filterInds.length===0?B.purple:B.white,color:!showFavorites&&filterInds.length===0?'#fff':B.muted,fontSize:12,fontWeight:700,cursor:'pointer',fontFamily:'inherit',transition:'all 0.15s'}}>
-                  Todas
-                </button>
-                <button onClick={()=>setShowFavorites(v=>!v)}
-                  style={{padding:'6px 14px',borderRadius:999,border:`1.5px solid ${showFavorites?B.red:B.border}`,background:showFavorites?B.redLight:B.white,color:showFavorites?B.red:B.muted,fontSize:12,fontWeight:700,cursor:'pointer',fontFamily:'inherit',transition:'all 0.15s',display:'inline-flex',alignItems:'center',gap:5}}>
-                  <span>♡</span> Favoritos
-                </button>
-                {[...indications].sort((a,b)=>a.label.localeCompare(b.label)).map(ind=>{
-                  const active = filterInds.includes(ind.id);
-                  return (
-                    <button key={ind.id} onClick={()=>toggleInd(ind.id)}
-                      style={{padding:'6px 14px',borderRadius:999,border:`1.5px solid ${active?B.purple:B.border}`,background:active?B.purpleLight:B.white,color:active?B.purple:B.muted,fontSize:12,fontWeight:700,cursor:'pointer',fontFamily:'inherit',transition:'all 0.15s'}}>
-                      {active && <span style={{marginRight:4}}>✓</span>}{ind.label}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* COLUNA DIREITA: Produto + Limpar */}
-            <div style={{minWidth: isMobile ? '100%' : 260}}>
-              <div style={{fontSize:10,fontWeight:700,color:B.muted,textTransform:'uppercase',letterSpacing:'0.12em',marginBottom:10}}>Produto vinculado</div>
-              <div style={{position:'relative'}}>
+        {/* FAIXA DE DESTAQUE: Filtrar por produto */}
+        <div style={{background:B.purpleLight, borderBottom:`1px solid ${B.border}`}}>
+          <div style={{maxWidth:1100, margin:'0 auto', padding: isMobile ? '12px 14px' : '14px 24px'}}>
+            <div style={{display:'flex', gap: isMobile ? 8 : 12, alignItems:'center', flexWrap: isMobile ? 'wrap' : 'nowrap'}}>
+              <span style={{fontSize:11,fontWeight:700,color:B.purple,textTransform:'uppercase',letterSpacing:'0.12em',whiteSpace:'nowrap',flexShrink:0}}>📦 Filtrar por produto</span>
+              <div style={{position:'relative', flex:1, minWidth: isMobile ? '100%' : 280}}>
                 <input
                   value={prodSearch}
                   onChange={e=>{setProdSearch(e.target.value);setProdDropOpen(true);}}
                   onFocus={()=>setProdDropOpen(true)}
                   onBlur={()=>setTimeout(()=>setProdDropOpen(false),150)}
-                  placeholder="Buscar produto..."
-                  style={{width:'100%',padding:'9px 12px 9px 36px',borderRadius:10,border:`1.5px solid ${prodDropOpen||filterProds.length>0?B.purple:B.border}`,fontSize:13,outline:'none',background:B.white,color:B.text,fontFamily:'inherit',fontWeight:500,boxSizing:'border-box',transition:'border-color 0.15s'}}
+                  placeholder="Digite o nome do produto para encontrar protocolos que o utilizam..."
+                  style={{width:'100%',padding:'9px 14px',borderRadius:10,border:`1.5px solid ${prodDropOpen||filterProds.length>0?B.purple:'rgba(94,61,143,0.25)'}`,fontSize:13,outline:'none',background:B.white,color:B.text,fontFamily:'inherit',fontWeight:500,boxSizing:'border-box',transition:'border-color 0.15s',boxShadow:prodDropOpen?`0 0 0 3px rgba(94,61,143,0.12)`:'none'}}
                 />
-                <span style={{position:'absolute',left:11,top:'50%',transform:'translateY(-50%)',fontSize:13,opacity:0.3,pointerEvents:'none'}}>📦</span>
                 {prodDropOpen && prodOptions.length > 0 && (
-                  <div style={{position:'absolute',top:'calc(100% + 4px)',left:0,right:0,background:'#fff',borderRadius:10,border:`1.5px solid ${B.purple}`,boxShadow:'0 8px 32px rgba(94,61,143,0.14)',zIndex:200,maxHeight:200,overflowY:'auto'}}>
+                  <div style={{position:'absolute',top:'calc(100% + 4px)',left:0,right:0,background:'#fff',borderRadius:10,border:`1.5px solid ${B.purple}`,boxShadow:'0 8px 32px rgba(94,61,143,0.18)',zIndex:200,maxHeight:220,overflowY:'auto'}}>
                     {prodOptions.map(p=>(
                       <div key={p.id} onMouseDown={()=>addProd(p.id)}
-                        style={{padding:'10px 14px',fontSize:13,color:B.text,fontWeight:600,cursor:'pointer',borderBottom:`1px solid ${B.cream}`,display:'flex',alignItems:'center',gap:8}}
+                        style={{padding:'10px 16px',fontSize:13,color:B.text,fontWeight:600,cursor:'pointer',borderBottom:`1px solid ${B.cream}`,display:'flex',alignItems:'center',gap:10}}
                         onMouseEnter={e=>e.currentTarget.style.background=B.purpleLight}
                         onMouseLeave={e=>e.currentTarget.style.background='#fff'}>
-                        <span style={{width:6,height:6,borderRadius:'50%',background:B.purple,flexShrink:0,display:'inline-block'}}/>
+                        <span style={{width:7,height:7,borderRadius:'50%',background:B.purple,flexShrink:0,display:'inline-block'}}/>
                         {p.name}
                       </div>
                     ))}
                   </div>
                 )}
               </div>
-
-              {/* Chips de produtos selecionados */}
               {filterProds.length > 0 && (
-                <div style={{display:'flex',flexWrap:'wrap',gap:5,marginTop:8}}>
+                <div style={{display:'flex',flexWrap:'wrap',gap:6,alignItems:'center'}}>
                   {filterProds.map(id=>{
                     const prod = products.find(p=>p.id===id);
                     return (
                       <span key={id} onClick={()=>removeProd(id)}
-                        style={{display:'inline-flex',alignItems:'center',gap:5,padding:'4px 10px',borderRadius:999,background:B.purpleLight,border:`1.5px solid ${B.purple}`,color:B.purple,fontSize:12,fontWeight:700,cursor:'pointer'}}>
-                        {prod?.name} ×
+                        style={{display:'inline-flex',alignItems:'center',gap:5,padding:'5px 12px',borderRadius:999,background:B.purple,color:'#fff',fontSize:12,fontWeight:700,cursor:'pointer',whiteSpace:'nowrap'}}>
+                        {prod?.name} <span style={{fontSize:15,lineHeight:1,opacity:0.8}}>×</span>
                       </span>
                     );
                   })}
                 </div>
               )}
-
-              {/* Limpar tudo */}
-              {hasActiveFilters && (
-                <button onClick={clearAll}
-                  style={{marginTop:10,width:'100%',padding:'8px',borderRadius:10,border:`1.5px solid ${B.border}`,background:'transparent',color:B.muted,fontSize:12,fontWeight:700,cursor:'pointer',fontFamily:'inherit',transition:'all 0.15s'}}
-                  onMouseEnter={e=>{e.currentTarget.style.borderColor=B.red;e.currentTarget.style.color=B.red;e.currentTarget.style.background=B.redLight;}}
-                  onMouseLeave={e=>{e.currentTarget.style.borderColor=B.border;e.currentTarget.style.color=B.muted;e.currentTarget.style.background='transparent';}}>
-                  Limpar todos os filtros
-                </button>
-              )}
             </div>
+          </div>
+        </div>
+
+        {/* SEÇÃO DE INDICAÇÕES */}
+        <div style={{maxWidth:1100, margin:'0 auto', padding: isMobile ? '12px 14px' : '14px 24px'}}>
+          <div style={{display:'flex', gap:8, alignItems:'center', flexWrap:'wrap'}}>
+            <span style={{fontSize:11,fontWeight:700,color:B.muted,textTransform:'uppercase',letterSpacing:'0.12em',whiteSpace:'nowrap',flexShrink:0}}>Indicação</span>
+            <div style={{display:'flex', flexWrap:'wrap', gap:6, flex:1}}>
+              <button onClick={()=>{setShowFavorites(false);setFilterInds([]);}}
+                style={{padding:'5px 14px',borderRadius:999,border:`1.5px solid ${!showFavorites&&filterInds.length===0?B.purple:B.border}`,background:!showFavorites&&filterInds.length===0?B.purple:B.white,color:!showFavorites&&filterInds.length===0?'#fff':B.muted,fontSize:12,fontWeight:700,cursor:'pointer',fontFamily:'inherit',transition:'all 0.15s'}}>
+                Todas
+              </button>
+              <button onClick={()=>setShowFavorites(v=>!v)}
+                style={{padding:'5px 14px',borderRadius:999,border:`1.5px solid ${showFavorites?B.red:B.border}`,background:showFavorites?B.redLight:B.white,color:showFavorites?B.red:B.muted,fontSize:12,fontWeight:700,cursor:'pointer',fontFamily:'inherit',transition:'all 0.15s',display:'inline-flex',alignItems:'center',gap:5}}>
+                ♡ Favoritos
+              </button>
+              {[...indications].sort((a,b)=>a.label.localeCompare(b.label)).map(ind=>{
+                const active = filterInds.includes(ind.id);
+                return (
+                  <button key={ind.id} onClick={()=>toggleInd(ind.id)}
+                    style={{padding:'5px 14px',borderRadius:999,border:`1.5px solid ${active?B.purple:B.border}`,background:active?B.purpleLight:B.white,color:active?B.purple:B.muted,fontSize:12,fontWeight:700,cursor:'pointer',fontFamily:'inherit',transition:'all 0.15s'}}>
+                    {active && '✓ '}{ind.label}
+                  </button>
+                );
+              })}
+            </div>
+            {hasActiveFilters && (
+              <button onClick={clearAll}
+                style={{padding:'5px 14px',borderRadius:999,border:`1.5px solid ${B.border}`,background:B.white,color:B.muted,fontSize:12,fontWeight:700,cursor:'pointer',fontFamily:'inherit',whiteSpace:'nowrap',transition:'all 0.15s'}}
+                onMouseEnter={e=>{e.currentTarget.style.borderColor=B.red;e.currentTarget.style.color=B.red;}}
+                onMouseLeave={e=>{e.currentTarget.style.borderColor=B.border;e.currentTarget.style.color=B.muted;}}>
+                Limpar ×
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -911,7 +907,7 @@ const ProtocolDetail = ({ protocol:p, products, indications, categories, navigat
     <div style={{background:B.cream, flex: 1}}>
       <div className="no-print rp-bkbar" style={{background:B.white,borderBottom:`1px solid ${B.border}`,padding:isMobile?'12px':'10px 24px',display:'flex',justifyContent:'space-between',alignItems:isMobile?'stretch':'center',gap:10,flexDirection:isMobile?'column':'row',overflowX:'hidden'}}>
         <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',gap:10,width:isMobile?'100%':'auto'}}>
-          <button onClick={()=>navigate('/')} style={{background:isMobile?B.purpleLight:'none',border:isMobile?`1px solid ${B.border}`:'none',color:B.purple,fontWeight:700,cursor:'pointer',fontSize:14,fontFamily:'inherit',borderRadius:isMobile?10:0,padding:isMobile?'10px 12px':0}}>Voltar</button>
+          <button onClick={()=>navigate('/protocolos')} style={{background:isMobile?B.purpleLight:'none',border:isMobile?`1px solid ${B.border}`:'none',color:B.purple,fontWeight:700,cursor:'pointer',fontSize:14,fontFamily:'inherit',borderRadius:isMobile?10:0,padding:isMobile?'10px 12px':0}}>← Voltar ao catálogo</button>
           {isMobile && <span style={{fontSize:11,fontWeight:700,color:B.muted,letterSpacing:'0.08em',textTransform:'uppercase'}}>Acoes do protocolo</span>}
         </div>
         <div style={{display:'flex', gap:8, flexWrap:'wrap', width:isMobile?'100%':'auto'}}>
@@ -1235,7 +1231,7 @@ const PublicProductPage = ({ product: p, protocols, categories, navigate, brand,
     <div style={{background:B.cream, flex: 1}}>
       <div className="no-print" style={{background:B.white,borderBottom:`1px solid ${B.border}`,padding:`${isMobile?12:10}px ${isMobile?12:24}px`,display:'flex',justifyContent:'space-between',alignItems:isMobile?'stretch':'center',flexDirection:isMobile?'column':'row',gap:10,overflowX:'hidden'}}>
         <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',gap:10,width:isMobile?'100%':'auto'}}>
-          <button onClick={()=>navigate('/')} style={{background:isMobile?B.purpleLight:'none',border:isMobile?`1px solid ${B.border}`:'none',color:B.purple,fontWeight:700,cursor:'pointer',fontSize:14,fontFamily:'inherit',borderRadius:isMobile?10:0,padding:isMobile?'10px 12px':0}}>Voltar</button>
+          <button onClick={()=>navigate('/protocolos')} style={{background:isMobile?B.purpleLight:'none',border:isMobile?`1px solid ${B.border}`:'none',color:B.purple,fontWeight:700,cursor:'pointer',fontSize:14,fontFamily:'inherit',borderRadius:isMobile?10:0,padding:isMobile?'10px 12px':0}}>← Voltar ao catálogo</button>
           {isMobile && <span style={{fontSize:11,fontWeight:700,color:B.muted,letterSpacing:'0.08em',textTransform:'uppercase'}}>Acoes do produto</span>}
         </div>
         <div style={{display:'flex', gap:8, flexWrap:'wrap', width:isMobile?'100%':'auto'}}>

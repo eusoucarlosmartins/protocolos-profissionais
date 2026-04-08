@@ -13,6 +13,7 @@ export const RESPONSIVE_CSS = `
   .avoid-break { page-break-inside: avoid; break-inside: avoid; }
   
   @media (max-width: 640px) {
+    input, select, textarea { font-size: 16px !important; }
     .rp-hero { padding: 32px 16px 28px !important; }
     .rp-hero h1 { font-size: 22px !important; }
     .rp-grid-proto { grid-template-columns: 1fr !important; }
