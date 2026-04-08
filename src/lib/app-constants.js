@@ -176,9 +176,20 @@ export const INIT_MARKETING = {
   campaign: { active: false, protocolId: "", title: "", subtitle: "" },
 };
 
+export const generateSlug = (name) =>
+  String(name || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9\s-]/g, "")
+    .trim()
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-");
+
 export const EMPTY_PRODUCT = {
   id: "",
   code: "",
+  slug: "",
   name: "",
   categories: ["facial"],
   uso: ["profissional"],
@@ -233,6 +244,7 @@ export const INIT_PROTOCOLS = [
   {
     id: "prot1",
     code: "PROTO-001",
+    slug: "peeling-de-diamante-clareamento-e-uniformizacao",
     name: "Peeling de Diamante – Clareamento e Uniformização",
     description:
       "Protocolo facial completo associado ao peeling de diamante para auxiliar no clareamento e uniformização da pele, ideal para manchas e tom irregular.",

@@ -336,6 +336,82 @@ export const normalizeProductsForStorage = (products) => (products || []).map(no
 export const getProductTypeLabel = (typeId) =>
   PRODUCT_TYPE_OPTIONS.find((option) => option.id === typeId)?.label || typeId;
 
+// ── Public Auth (Supabase Auth) ──────────────────────────────────────────────
+
+export const signUpPublic = async ({ email, password }) => {
+  const sb = await getSupabase();
+  const { data, error } = await sb.auth.signUp({ email, password });
+  if (error) throw new Error(error.message);
+  return data.user;
+};
+
+export const signInPublic = async ({ email, password }) => {
+  const sb = await getSupabase();
+  const { data, error } = await sb.auth.signInWithPassword({ email, password });
+  if (error) throw new Error(error.message);
+  return data.user;
+};
+
+export const signOutPublic = async () => {
+  const sb = await getSupabase();
+  await sb.auth.signOut();
+};
+
+export const onPublicAuthChange = async (callback) => {
+  const sb = await getSupabase();
+  const { data: { subscription } } = sb.auth.onAuthStateChange((_event, session) => {
+    callback(session?.user || null);
+  });
+  return () => subscription.unsubscribe();
+};
+
+export const loadFavorites = async (userId) => {
+  const sb = await getSupabase();
+  const { data, error } = await sb.from("user_favorites").select("protocol_id").eq("user_id", userId);
+  if (error) return [];
+  return (data || []).map((row) => row.protocol_id);
+};
+
+export const addFavorite = async (userId, protocolId) => {
+  const sb = await getSupabase();
+  await sb.from("user_favorites").upsert({ user_id: userId, protocol_id: protocolId }, { onConflict: "user_id,protocol_id" });
+};
+
+export const removeFavorite = async (userId, protocolId) => {
+  const sb = await getSupabase();
+  await sb.from("user_favorites").delete().eq("user_id", userId).eq("protocol_id", protocolId);
+};
+
+// ── Meta tags (SEO / OG) ─────────────────────────────────────────────────────
+
+const DEFAULT_TITLE = "Extratos da Terra — Protocolos Profissionais";
+const DEFAULT_DESC = "Catálogo técnico de protocolos para profissionais de estética.";
+
+const setMeta = (name, content, prop = false) => {
+  const attr = prop ? "property" : "name";
+  let el = document.querySelector(`meta[${attr}="${name}"]`);
+  if (!el) { el = document.createElement("meta"); el.setAttribute(attr, name); document.head.appendChild(el); }
+  el.setAttribute("content", content);
+};
+
+export const setPageMeta = ({ title, description, url } = {}) => {
+  const t = title ? `${title} — Extratos da Terra` : DEFAULT_TITLE;
+  const d = description ? String(description).slice(0, 160) : DEFAULT_DESC;
+  const u = url || window.location.href;
+  document.title = t;
+  setMeta("description", d);
+  setMeta("og:title", t, true);
+  setMeta("og:description", d, true);
+  setMeta("og:url", u, true);
+};
+
+export const resetPageMeta = () => setPageMeta({});
+
+// ── Protocols / Products slug helpers ────────────────────────────────────────
+
+export const findBySlugOrId = (list, slugOrId) =>
+  list.find((item) => item.slug === slugOrId || item.id === slugOrId) || null;
+
 export const getAffectedProtocols = (product, protocols) =>
   protocols.filter(
     (protocol) =>

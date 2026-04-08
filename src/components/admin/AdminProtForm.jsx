@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useIsMobile } from '../../hooks/useAppShell';
 import { useNotionImporter } from '../../hooks/useNotionImporter';
-import { B, hasPerm } from '../../lib/app-constants';
+import { B, generateSlug, hasPerm } from '../../lib/app-constants';
 import {
   costPerApp,
   fmtCurrency,
@@ -167,6 +167,7 @@ const AdminProtForm = ({ prot, products, protocols, indications, categories, pha
 
   const [modal, setModal] = useState(null);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [slugLocked, setSlugLocked] = useState(true);
 
   const showAlert = (message) => new Promise(resolve => {
     setModal({ type: 'alert', message, onConfirm: () => { setModal(null); resolve(); } });
@@ -335,6 +336,7 @@ const AdminProtForm = ({ prot, products, protocols, indications, categories, pha
 
     const { _new, ...data } = f;
     data.code = String(data.code || '').trim();
+    if (!data.slug) data.slug = generateSlug(data.name);
     data.reviewStatus = data.reviewStatus || 'needs_review';
     if (pub !== null) data.published = pub;
     data.version = (Number(prot.version) || 0) + 1;
@@ -471,6 +473,33 @@ const AdminProtForm = ({ prot, products, protocols, indications, categories, pha
             <Field label="Código" value={f.code || ''} onChange={v => setF(x => ({ ...x, code: v }))} placeholder="Ex: PROT-001" />
             <Field label="Nome" value={f.name || ''} onChange={v => setF(x => ({ ...x, name: v }))} placeholder="Ex: Limpeza de Pele Negra" />
           </div>
+          {/* Slug */}
+          <div style={{ marginBottom: 4 }}>
+            <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: B.muted, marginBottom: 5, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Slug (URL)</label>
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+              <input
+                type="text"
+                value={f.slug || ''}
+                disabled={slugLocked}
+                onChange={e => setF(x => ({ ...x, slug: generateSlug(e.target.value) }))}
+                placeholder="gerado-automaticamente-do-nome"
+                style={{ ...inpSt, flex: 1, background: slugLocked ? B.cream : B.white, color: slugLocked ? B.muted : B.text, cursor: slugLocked ? 'default' : 'text' }}
+              />
+              <button
+                type="button"
+                onClick={() => setSlugLocked(v => !v)}
+                style={{ padding: '9px 14px', borderRadius: 8, border: `1.5px solid ${B.border}`, background: slugLocked ? B.white : B.purpleLight, color: slugLocked ? B.muted : B.purple, fontWeight: 700, fontSize: 12, cursor: 'pointer', whiteSpace: 'nowrap', fontFamily: 'inherit' }}
+              >
+                {slugLocked ? '✏️ Editar slug' : '🔒 Bloquear'}
+              </button>
+            </div>
+            {!f.slug && f.name && (
+              <div style={{ fontSize: 11, color: B.muted, marginTop: 4 }}>
+                Será gerado: <code style={{ background: B.cream, padding: '1px 6px', borderRadius: 4 }}>{generateSlug(f.name)}</code>
+              </div>
+            )}
+          </div>
+
           <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 12 }}>
             <Sel
               label="Categoria"

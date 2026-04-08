@@ -8,6 +8,7 @@ import {
   BRAND_KEY,
   CATEGORIES_KEY,
   EMPTY_PRODUCT,
+  generateSlug,
   INIT_BRAND,
   INIT_CATEGORIES,
   INIT_INDICATIONS,
@@ -30,6 +31,7 @@ import {
   hasPerm,
 } from "./lib/app-constants";
 import {
+  addFavorite,
   clean,
   costPerApp,
   fmtCurrency,
@@ -39,19 +41,26 @@ import {
   getProductTypes,
   isActive,
   load,
+  loadFavorites,
   loadHtml2Pdf,
   normalizeProductForStorage,
   logoutAdmin,
+  onPublicAuthChange,
   productHasType,
   primePurify,
+  removeFavorite,
   save,
   savePublic,
   secureUsersForStorage,
+  setPageMeta,
+  resetPageMeta,
+  signOutPublic,
   sortByName,
   uid,
   updateAdminPassword,
   uploadImageSafe,
 } from "./lib/app-services";
+import { PublicAuthModal } from "./components/PublicAuthModal";
 
 const AdminLogin = lazy(() =>
   import("./components/admin/AdminAuth").then((module) => ({
@@ -174,7 +183,7 @@ const CampaignSection = ({ campaign, protocols, navigate }) => {
         <div style={{color:'rgba(255,255,255,0.7)', fontSize:13, fontWeight:600}}>{campaign.title||'Protocolo em Destaque'}</div>
         <div style={{color:'#fff', fontSize:22, fontWeight:700, fontFamily:'Georgia,serif', lineHeight:1.3}}>{prot.name}</div>
         {campaign.subtitle&&<div style={{color:'rgba(255,255,255,0.75)', fontSize:14, lineHeight:1.6}}>{campaign.subtitle}</div>}
-        <button onClick={()=>navigate(`/protocolo/${prot.id}`)} style={{alignSelf:'flex-start', background:B.gold, color:'#fff', border:'none', padding:'10px 24px', borderRadius:8, fontWeight:700, fontSize:14, cursor:'pointer', fontFamily:'inherit'}}>Ver protocolo completo &rarr;</button>
+        <button onClick={()=>navigate(`/protocolo/${prot.slug||prot.id}`)} style={{alignSelf:'flex-start', background:B.gold, color:'#fff', border:'none', padding:'10px 24px', borderRadius:8, fontWeight:700, fontSize:14, cursor:'pointer', fontFamily:'inherit'}}>Ver protocolo completo &rarr;</button>
       </div>
     </div>
   );
@@ -441,7 +450,7 @@ const ProductTooltip = ({ product: p, children, navigate }) => {
       )}
       <div style={{display:'flex',gap:6,marginTop:8,flexWrap:'wrap'}}>
         {p.fichaUrl && <a href={p.fichaUrl} target="_blank" rel="noreferrer" style={{flex:1,background:B.purpleDark,color:B.white,padding:'7px 0',borderRadius:7,fontWeight:700,fontSize:12,textAlign:'center',textDecoration:'none',display:'block'}}>Ficha Tecnica</a>}
-        <button onClick={()=>{setOpen(false);navigate(`/produto/${p.id}`);}} style={{flex:1,background:B.purple,color:B.white,padding:'7px 0',borderRadius:7,fontWeight:700,fontSize:12,textAlign:'center',border:'none',cursor:'pointer',fontFamily:'inherit'}}>Ver produto</button>
+        <button onClick={()=>{setOpen(false);navigate(`/produto/${p.slug||p.id}`);}} style={{flex:1,background:B.purple,color:B.white,padding:'7px 0',borderRadius:7,fontWeight:700,fontSize:12,textAlign:'center',border:'none',cursor:'pointer',fontFamily:'inherit'}}>Ver produto</button>
         {p.siteUrl && <a href={p.siteUrl} target="_blank" rel="noreferrer" style={{flex:1,background:B.purpleDark,color:B.white,padding:'7px 0',borderRadius:7,fontWeight:700,fontSize:12,textAlign:'center',textDecoration:'none',display:'block'}}>Comprar</a>}
         <button onClick={() => setOpen(false)} style={{background:'none',border:`1px solid ${B.border}`,borderRadius:7,padding:'7px 14px',fontSize:12,cursor:'pointer',color:B.muted,fontFamily:'inherit'}}>Fechar</button>
       </div>
@@ -470,10 +479,12 @@ const ProductTooltip = ({ product: p, children, navigate }) => {
   );
 };
 
-const Header = ({ navigate, adminAuth, setAdminAuth, brand }) => {
+const Header = ({ navigate, adminAuth, setAdminAuth, brand, publicUser, onPublicLogin, onPublicLogout }) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const isMobile = useIsMobile();
   const navItems = [{l:'Protocolos',v:'/protocolos'},{l:'Buscar por Produto',v:'/busca'}];
+
+  const publicUserShort = publicUser?.email?.split('@')[0];
 
   return (
     <header className="no-print" style={{background:B.purpleDark,padding:`0 ${isMobile?12:24}px`,display:'flex',alignItems:'center',justifyContent:'space-between',gap:isMobile?8:16,height:isMobile?64:58,position:'sticky',top:0,zIndex:200,width:'100%',overflow:'clip',boxShadow:isMobile?'0 10px 24px rgba(19, 10, 35, 0.18)':'none'}}>
@@ -486,19 +497,32 @@ const Header = ({ navigate, adminAuth, setAdminAuth, brand }) => {
       </div>
 
       {!isMobile && (
-        <nav style={{display:'flex',gap:4}}>
+        <nav style={{display:'flex',gap:4,alignItems:'center'}}>
           {navItems.map(n=>(
             <button key={n.v} onClick={()=>navigate(n.v)} style={{background:'transparent',color:'rgba(255,255,255,0.65)',border:'none',padding:'7px 14px',borderRadius:6,fontSize:13,fontWeight:700,cursor:'pointer',fontFamily:'inherit'}}>{n.l}</button>
           ))}
-          <button onClick={()=>adminAuth?navigate('/admin'):navigate('/login')} style={{background:B.gold,color:B.white,border:'none',padding:'7px 16px',borderRadius:6,fontSize:13,fontWeight:700,cursor:'pointer',marginLeft:8,fontFamily:'inherit'}}>
-            {adminAuth ? 'Painel Admin' : 'Entrar Admin'}
+          {publicUser ? (
+            <div style={{display:'flex',alignItems:'center',gap:6,marginLeft:8}}>
+              <span style={{color:'rgba(255,255,255,0.7)',fontSize:12,fontWeight:600}}>{publicUserShort}</span>
+              <button onClick={onPublicLogout} style={{background:'rgba(255,255,255,0.12)',color:B.white,border:'1px solid rgba(255,255,255,0.15)',padding:'6px 12px',borderRadius:6,fontSize:12,fontWeight:700,cursor:'pointer',fontFamily:'inherit'}}>Sair</button>
+            </div>
+          ) : (
+            <button onClick={onPublicLogin} style={{background:'rgba(255,255,255,0.12)',color:B.white,border:'1px solid rgba(255,255,255,0.15)',padding:'7px 14px',borderRadius:6,fontSize:13,fontWeight:700,cursor:'pointer',marginLeft:4,fontFamily:'inherit'}}>♡ Favoritos</button>
+          )}
+          <button onClick={()=>adminAuth?navigate('/admin'):navigate('/login')} style={{background:B.gold,color:B.white,border:'none',padding:'7px 16px',borderRadius:6,fontSize:13,fontWeight:700,cursor:'pointer',marginLeft:4,fontFamily:'inherit'}}>
+            {adminAuth ? 'Painel Admin' : 'Admin'}
           </button>
         </nav>
       )}
 
       {isMobile && (
         <div style={{display:'flex',alignItems:'center',gap:8,flexShrink:0}}>
-          <button onClick={()=>adminAuth?navigate('/admin'):navigate('/login')} style={{background:B.gold,color:B.white,border:'none',padding:'7px 12px',borderRadius:12,fontSize:11,fontWeight:700,cursor:'pointer',fontFamily:'inherit',whiteSpace:'nowrap',minHeight:40,boxShadow:'0 8px 18px rgba(217, 177, 94, 0.24)'}}>{adminAuth ? 'Painel' : 'Entrar'}</button>
+          {publicUser ? (
+            <button onClick={onPublicLogout} style={{background:'rgba(255,255,255,0.12)',color:B.white,border:'1px solid rgba(255,255,255,0.15)',padding:'6px 10px',borderRadius:10,fontSize:11,fontWeight:700,cursor:'pointer',fontFamily:'inherit',whiteSpace:'nowrap',minHeight:36}}>Sair</button>
+          ) : (
+            <button onClick={onPublicLogin} style={{background:'rgba(255,255,255,0.12)',color:B.white,border:'1px solid rgba(255,255,255,0.15)',padding:'6px 10px',borderRadius:10,fontSize:11,fontWeight:700,cursor:'pointer',fontFamily:'inherit',whiteSpace:'nowrap',minHeight:36}}>♡</button>
+          )}
+          <button onClick={()=>adminAuth?navigate('/admin'):navigate('/login')} style={{background:B.gold,color:B.white,border:'none',padding:'7px 12px',borderRadius:12,fontSize:11,fontWeight:700,cursor:'pointer',fontFamily:'inherit',whiteSpace:'nowrap',minHeight:40,boxShadow:'0 8px 18px rgba(217, 177, 94, 0.24)'}}>{adminAuth ? 'Painel' : 'Admin'}</button>
           <button onClick={()=>setMenuOpen(o=>!o)} style={{background:menuOpen?'rgba(255,255,255,0.22)':'rgba(255,255,255,0.12)',color:B.white,border:'1px solid rgba(255,255,255,0.08)',minWidth:54,height:40,padding:'0 12px',borderRadius:12,fontSize:12,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',fontWeight:700,fontFamily:'inherit',whiteSpace:'nowrap',backdropFilter:'blur(8px)'}}>{menuOpen ? 'Fechar' : 'Menu'}</button>
         </div>
       )}
@@ -520,7 +544,7 @@ const Header = ({ navigate, adminAuth, setAdminAuth, brand }) => {
   );
 };
 
-const PublicHome = ({ protocols, products, indications, categories, favorites, setFavorites, navigate, brand, marketing, homeFilters, setHomeFilters, views = {} }) => {
+const PublicHome = ({ protocols, products, indications, categories, favorites, setFavorites, toggleFav, navigate, brand, marketing, homeFilters, setHomeFilters, views = {} }) => {
   const { search, filterCat, filterProds, filterInds, showFavorites, page } = homeFilters;
   const setSearch      = v => setHomeFilters(f => ({ ...f, search: v, page: 1 }));
   const setFilterCat   = v => setHomeFilters(f => ({ ...f, filterCat: v, page: 1 }));
@@ -783,7 +807,7 @@ const PublicHome = ({ protocols, products, indications, categories, favorites, s
           : (
             <>
               <div className="rp-grid-proto" style={{display:'grid',gap:18}}>
-                {paginated.map(p=><ProtocolCard key={p.id} protocol={p} products={products} indications={indications} categories={categories} onClick={()=>navigate(`/protocolo/${p.id}`)} isFav={favorites.includes(p.id)} toggleFav={(e)=>{e.stopPropagation(); setFavorites(prev => prev.includes(p.id)? prev.filter(x=>x!==p.id) : [...prev, p.id])}} />)}
+                {paginated.map(p=><ProtocolCard key={p.id} protocol={p} products={products} indications={indications} categories={categories} onClick={()=>navigate(`/protocolo/${p.slug||p.id}`)} isFav={favorites.includes(p.id)} toggleFav={(e)=>{e.stopPropagation(); toggleFav?.(p.id);}} />)}
               </div>
               {totalPages > 1 && (
                 <div style={{display:'flex',justifyContent:'center',alignItems:'center',gap:6,marginTop:36,flexWrap:'wrap'}}>
@@ -843,7 +867,11 @@ const ProtocolDetail = ({ protocol:p, products, indications, categories, navigat
   const professionalKit = p.professionalKitId ? get(p.professionalKitId) : null;
   const homeKit = p.homeKitId ? get(p.homeKitId) : null;
 
-  useEffect(()=>{ if(onView) onView('protocol', p.id); },[p.id]);
+  useEffect(()=>{
+    if(onView) onView('protocol', p.id);
+    setPageMeta({ title: p.name, description: p.description, url: window.location.href });
+    return () => resetPageMeta();
+  },[p.id]);
 
   const [sessions, setSessions] = useState(1);
   const [charge, setCharge] = useState('');
@@ -863,8 +891,8 @@ const ProtocolDetail = ({ protocol:p, products, indications, categories, navigat
   const secPad = isMobile ? '16px 14px' : '24px 28px';
   const categoryLabel = categories.find(c => c.id === p.category)?.label || p.category;
   const shareUrl = typeof window !== 'undefined'
-    ? `${window.location.origin}/protocolo/${p.id}`
-    : `/protocolo/${p.id}`;
+    ? `${window.location.origin}/protocolo/${p.slug||p.id}`
+    : `/protocolo/${p.slug||p.id}`;
 
   const handlePrint = async () => {
     const html2pdf = await loadHtml2Pdf();
@@ -1205,7 +1233,11 @@ const CompositionSection = ({ composition, isMobile }) => {
 
 const PublicProductPage = ({ product: p, protocols, categories, navigate, brand, onView }) => {
   const isMobile = useIsMobile();
-  useEffect(()=>{ if(onView) onView('product', p.id); },[p.id]);
+  useEffect(()=>{
+    if(onView) onView('product', p.id);
+    setPageMeta({ title: p.name, description: p.mainFunction || p.description, url: window.location.href });
+    return () => resetPageMeta();
+  },[p.id]);
   const usedIn = protocols.filter(prot =>
     prot.published && (
       prot.steps.some(s => s.productId === p.id) ||
@@ -1215,8 +1247,8 @@ const PublicProductPage = ({ product: p, protocols, categories, navigate, brand,
   );
   const cats = (p.categories || [p.category]);
   const shareUrl = typeof window !== 'undefined'
-    ? `${window.location.origin}/produto/${p.id}`
-    : `/produto/${p.id}`;
+    ? `${window.location.origin}/produto/${p.slug||p.id}`
+    : `/produto/${p.slug||p.id}`;
 
   const Section = ({ title, children }) => (
     <div style={{marginBottom:20}}>
@@ -1341,7 +1373,7 @@ const PublicProductPage = ({ product: p, protocols, categories, navigate, brand,
                 <Section title={`Usado em ${usedIn.length} protocolo${usedIn.length>1?'s':''}`}>
                   <div style={{display:'flex',flexDirection:'column',gap:8}}>
                     {usedIn.map(prot=>(
-                      <button key={prot.id} onClick={()=>navigate(`/protocolo/${prot.id}`)} style={{display:'flex',justifyContent:'space-between',alignItems:'center',background:B.cream,border:`1px solid ${B.border}`,borderRadius:10,padding:'10px 14px',cursor:'pointer',fontFamily:'inherit',textAlign:'left',width:'100%'}}>
+                      <button key={prot.id} onClick={()=>navigate(`/protocolo/${prot.slug||prot.id}`)} style={{display:'flex',justifyContent:'space-between',alignItems:'center',background:B.cream,border:`1px solid ${B.border}`,borderRadius:10,padding:'10px 14px',cursor:'pointer',fontFamily:'inherit',textAlign:'left',width:'100%'}}>
                         <span style={{fontSize:13,fontWeight:700,color:B.purpleDark,lineHeight:1.3}}>{prot.name}</span>
                         <span style={{fontSize:12,color:B.purple,fontWeight:700,flexShrink:0,marginLeft:8}}>Ver protocolo</span>
                       </button>
@@ -1417,7 +1449,7 @@ const ProductSearch = ({ products, protocols, indications, categories, navigate 
                     <ProductTypeTags product={prod} />
                   </div>
                   <div style={{display:'flex', gap:8, alignItems:'stretch', flexDirection:isMobile?'row':'row', width:isMobile?'100%':'auto'}}>
-                    <button onClick={()=>navigate(`/produto/${prod.id}`)} style={{background:B.purpleLight,border:`1px solid ${B.border}`,color:B.purple,fontWeight:700,fontSize:12,cursor:'pointer',fontFamily:'inherit',padding:'10px 12px',borderRadius:10,minHeight:42,textAlign:'center',flex:isMobile?1:'0 0 auto'}}>Ver produto</button>
+                    <button onClick={()=>navigate(`/produto/${prod.slug||prod.id}`)} style={{background:B.purpleLight,border:`1px solid ${B.border}`,color:B.purple,fontWeight:700,fontSize:12,cursor:'pointer',fontFamily:'inherit',padding:'10px 12px',borderRadius:10,minHeight:42,textAlign:'center',flex:isMobile?1:'0 0 auto'}}>Ver produto</button>
                     <BuyLink href={prod.siteUrl} isMobile={isMobile} sx={{padding: '10px 14px', fontSize: 12, minHeight:42}} />
                   </div>
                 </div>
@@ -1425,7 +1457,7 @@ const ProductSearch = ({ products, protocols, indications, categories, navigate 
               {protos.length>0
                 ? <><div style={{fontSize:13,fontWeight:700,color:B.text,marginBottom:10}}>Utilizado em {protos.length} protocolo(s):</div>
                     <div style={{display:'flex',flexDirection:'column',gap:8}}>
-                      {protos.map(pr=><button key={pr.id} onClick={()=>navigate(`/protocolo/${pr.id}`)} style={{background:B.purpleLight,border:`1px solid ${B.border}`,borderRadius:10,padding:'11px 14px',textAlign:'left',cursor:'pointer',fontSize:14,color:B.purple,fontWeight:700,fontFamily:'inherit'}}>{pr.name} ?</button>)}
+                      {protos.map(pr=><button key={pr.id} onClick={()=>navigate(`/protocolo/${pr.slug||pr.id}`)} style={{background:B.purpleLight,border:`1px solid ${B.border}`,borderRadius:10,padding:'11px 14px',textAlign:'left',cursor:'pointer',fontSize:14,color:B.purple,fontWeight:700,fontFamily:'inherit'}}>{pr.name} →</button>)}
                     </div></>
                 : <div style={{fontSize:13,color:B.muted,fontStyle:'italic'}}>Nao vinculado a nenhum protocolo publicado</div>
               }
@@ -2304,6 +2336,7 @@ const AdminProdForm = ({ prod, products, categories, saveProducts, setEditProd, 
   const [f, setF] = useState({...prod});
   const set = k => v => setF(x=>({...x,[k]:v}));
   const cpa = costPerApp(f);
+  const [slugLocked, setSlugLocked] = useState(true);
   const [jsonModal, setJsonModal] = useState(false);
   const [jsonText, setJsonText] = useState('');
   const [jsonErr, setJsonErr] = useState('');
@@ -2388,6 +2421,7 @@ const AdminProdForm = ({ prod, products, categories, saveProducts, setEditProd, 
 
     const {_new, ...clean} = normalizeProductForStorage(f);
     clean.code = String(clean.code || '').trim();
+    if (!clean.slug) clean.slug = generateSlug(clean.name);
     clean.importSource = clean.importSource || 'manual';
 
     if (prod._new) saveProducts([...products, clean]);
@@ -2442,6 +2476,29 @@ const AdminProdForm = ({ prod, products, categories, saveProducts, setEditProd, 
             {errors.name && <div style={{marginTop:-10,marginBottom:10,fontSize:12,color:B.red,fontWeight:600}}>{errors.name}</div>}
           </div>
         </div>
+        {/* Slug */}
+        <div style={{marginBottom:16}}>
+          <label style={{display:'block',fontSize:12,fontWeight:700,color:B.muted,marginBottom:5,textTransform:'uppercase',letterSpacing:'0.06em'}}>Slug (URL)</label>
+          <div style={{display:'flex',gap:8,alignItems:'center'}}>
+            <input
+              type="text"
+              value={f.slug||''}
+              disabled={slugLocked}
+              onChange={e=>setF(x=>({...x,slug:generateSlug(e.target.value)}))}
+              placeholder="gerado-automaticamente-do-nome"
+              style={{flex:1,padding:'9px 12px',border:`1.5px solid ${B.border}`,borderRadius:8,fontSize:14,outline:'none',boxSizing:'border-box',fontFamily:'inherit',background:slugLocked?B.cream:B.white,color:slugLocked?B.muted:B.text,cursor:slugLocked?'default':'text'}}
+            />
+            <button
+              type="button"
+              onClick={()=>setSlugLocked(v=>!v)}
+              style={{padding:'9px 14px',borderRadius:8,border:`1.5px solid ${B.border}`,background:slugLocked?B.white:B.purpleLight,color:slugLocked?B.muted:B.purple,fontWeight:700,fontSize:12,cursor:'pointer',whiteSpace:'nowrap',fontFamily:'inherit'}}
+            >
+              {slugLocked?'✏️ Editar slug':'🔒 Bloquear'}
+            </button>
+          </div>
+          {!f.slug&&f.name&&<div style={{fontSize:11,color:B.muted,marginTop:4}}>Será gerado: <code style={{background:B.cream,padding:'1px 6px',borderRadius:4}}>{generateSlug(f.name)}</code></div>}
+        </div>
+
         <div style={{display:'grid',gridTemplateColumns:isMobile?'1fr':'1fr 1fr',gap:14,marginBottom:16}}>
           <Sel label="Origem" value={f.importSource || 'manual'} onChange={(v) => setF({...f, importSource: v})} options={[{v:'manual', l:'Manual'}, {v:'xml', l:'Importado por XML'}]} />
           <Sel label="Revisao" value={f.reviewStatus || 'needs_review'} onChange={(v) => setF({...f, reviewStatus: v})} options={[{v:'needs_review', l:'A Revisar'}, {v:'reviewed', l:'Revisado'}, {v:'approved', l:'Aprovado'}]} />
@@ -2678,6 +2735,8 @@ export default function App() {
   const [landingConfig,setLandingConfig]=useState(INIT_LANDING);
   const [views,setViews]=useState({});
   const [favorites,setFavorites]=useState([]);
+  const [publicUser,setPublicUser]=useState(null);
+  const [showAuthModal,setShowAuthModal]=useState(false);
   const [loggedUser,setLoggedUser]=useState(null);
   const [path, navigate] = useRoute();
   const [homeFilters, setHomeFilters] = useState({ search:'', filterCat:'all', filterProds:[], filterInds:[], showFavorites:false, page:1 });
@@ -2691,6 +2750,33 @@ export default function App() {
       import('./components/admin/AdminProtocols');
     }
   }, [path]);
+
+  // Public auth listener
+  useEffect(() => {
+    let unsub;
+    onPublicAuthChange(async (user) => {
+      setPublicUser(user);
+      if (user) {
+        const favs = await loadFavorites(user.id).catch(() => []);
+        setFavorites(favs);
+      } else {
+        setFavorites([]);
+      }
+    }).then(fn => { unsub = fn; });
+    return () => { if (unsub) unsub(); };
+  }, []);
+
+  const handleToggleFav = async (protocolId) => {
+    if (!publicUser) { setShowAuthModal(true); return; }
+    const isAlready = favorites.includes(protocolId);
+    if (isAlready) {
+      setFavorites(prev => prev.filter(id => id !== protocolId));
+      await removeFavorite(publicUser.id, protocolId).catch(() => null);
+    } else {
+      setFavorites(prev => [...prev, protocolId]);
+      await addFavorite(publicUser.id, protocolId).catch(() => null);
+    }
+  };
 
   useEffect(()=>{
     (async()=>{
@@ -2824,12 +2910,12 @@ export default function App() {
     view = loggedUser ? 'admin' : 'admin_login';
   } else if (path.startsWith('/protocolo/')) {
     view = 'protocol';
-    const id = path.replace('/protocolo/', '');
-    activeProt = protocols.find(p => p.id === id);
+    const slugOrId = path.replace('/protocolo/', '');
+    activeProt = protocols.find(p => p.slug === slugOrId || p.id === slugOrId) || null;
   } else if (path.startsWith('/produto/')) {
     view = 'product';
-    const id = path.replace('/produto/', '');
-    activeProd = products.find(p => p.id === id);
+    const slugOrId = path.replace('/produto/', '');
+    activeProd = products.find(p => p.slug === slugOrId || p.id === slugOrId) || null;
   }
 
   if ((view === 'protocol' && !activeProt) || (view === 'product' && !activeProd)) {
@@ -2839,10 +2925,11 @@ export default function App() {
   return (
     <div style={{fontFamily:"'Segoe UI', system-ui, sans-serif",color:B.text,background:B.cream, display: 'flex', flexDirection: 'column', minHeight: '100vh', overflowX:'hidden'}}>
       <style>{`* { box-sizing: border-box; margin: 0; padding: 0; } button, input, select, textarea { font-family: inherit; }` + RESPONSIVE_CSS}</style>
-      <Header navigate={navigate} adminAuth={!!loggedUser} setAdminAuth={v=>{ if(!v) setLoggedUser(null); }} brand={brand} />
+      <Header navigate={navigate} adminAuth={!!loggedUser} setAdminAuth={v=>{ if(!v) setLoggedUser(null); }} brand={brand} publicUser={publicUser} onPublicLogin={()=>setShowAuthModal(true)} onPublicLogout={async()=>{await signOutPublic();setPublicUser(null);setFavorites([]);}} />
+      <PublicAuthModal open={showAuthModal} onClose={()=>setShowAuthModal(false)} />
       <NoticeBanner notice={marketing?.notice} />
       {view==='landing'    &&<LandingPage protocols={protocols} indications={indications} categories={categories} brand={brand} landingConfig={landingConfig} setHomeFilters={setHomeFilters} navigate={navigate} />}
-      {view==='home'       &&<PublicHome protocols={protocols} products={products} indications={indications} categories={categories} favorites={favorites} setFavorites={setFavorites} navigate={navigate} brand={brand} marketing={marketing} homeFilters={homeFilters} setHomeFilters={setHomeFilters} views={views} />}
+      {view==='home'       &&<PublicHome protocols={protocols} products={products} indications={indications} categories={categories} favorites={favorites} setFavorites={setFavorites} toggleFav={handleToggleFav} navigate={navigate} brand={brand} marketing={marketing} homeFilters={homeFilters} setHomeFilters={setHomeFilters} views={views} />}
       {view==='product'    &&activeProd&&<PublicProductPage product={activeProd} protocols={protocols} categories={categories} navigate={navigate} brand={brand} onView={handleView} />}
       {view==='protocol'   &&activeProt&&<ProtocolDetail protocol={activeProt} products={products} indications={indications} categories={categories} navigate={navigate} brand={brand} onView={handleView} />}
       {view==='search'     &&<ProductSearch products={products} protocols={protocols} indications={indications} categories={categories} navigate={navigate} />}
