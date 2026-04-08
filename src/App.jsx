@@ -624,140 +624,179 @@ const PublicHome = ({ protocols, products, indications, categories, favorites, s
     <div style={{background:B.cream, flex: 1}}>
       <HeroBanner banners={marketing?.banners} navigate={navigate} />
       <CampaignSection campaign={marketing?.campaign} protocols={protocols} navigate={navigate} />
-      <div className="rp-hero" style={{background:`linear-gradient(135deg, ${B.purpleDark} 0%, ${B.purple} 45%, #2f1a5a 100%)`,color:'#fff',textAlign:'center'}}>
-        <div style={{fontSize:10,color:'#fadbff',fontWeight:700,letterSpacing:'0.16em',marginBottom:8,textTransform:'uppercase'}}>Cosmetologia Avancada</div>
-        <h1 className="rp-hero" style={{color:B.white,fontWeight:700,fontFamily:'Georgia, serif',margin:'0 0 10px',letterSpacing:'-0.01em'}}>Protocolos Profissionais</h1>
-        <p style={{color:'rgba(255,255,255,0.7)',fontSize:isMobile?13:15,margin:`0 0 ${isMobile?18:28}px`,lineHeight:1.5}}>Passo a passo completo para esteticistas, com os produtos {brand?.companyName || 'Extratos da Terra'}</p>
 
-        <div style={{maxWidth:900, margin:'0 auto', padding:`0 ${isMobile?4:0}px`}}>
-          <div style={{background:'rgba(255,255,255,0.14)',backdropFilter:'blur(6px)', padding: '18px', borderRadius: 18, border: '1px solid rgba(255,255,255,0.28)', boxShadow:'0 16px 42px rgba(27, 9, 71, 0.26)'}}>
-            <div style={{display:'flex',justifyContent:'space-between',alignItems:isMobile?'flex-start':'center',gap:12,flexDirection:isMobile?'column':'row',textAlign:'left'}}>
-              <div>
-                <div style={{fontSize:10,fontWeight:700,color:'rgba(255,255,255,0.78)',textTransform:'uppercase',letterSpacing:'0.115em',marginBottom:5}}>Encontre o protocolo ideal</div>
-                <div style={{fontSize:14,color:'rgba(255,255,255,0.92)',lineHeight:1.35}}>Filtre por nome, categoria, produto vinculado e indicacao.</div>
-              </div>
-              {hasActiveFilters && (
-                <button onClick={clearAll} style={{padding:'10px 16px',borderRadius:999,border:'1px solid rgba(255,255,255,0.3)',background:'rgba(255,255,255,0.12)',color:'#fff',fontSize:12,fontWeight:700,cursor:'pointer',fontFamily:'inherit',textTransform:'uppercase',letterSpacing:'0.05em'}}>
-                  Limpar tudo
-                </button>
-              )}
-            </div>
+      {/* ── HERO: título + busca ── */}
+      <div className="rp-hero" style={{background:`linear-gradient(135deg, ${B.purpleDark} 0%, ${B.purple} 50%, #3b1f6e 100%)`, padding: isMobile ? '28px 16px 0' : '44px 24px 0', textAlign:'center'}}>
+        <div style={{fontSize:10,color:'rgba(250,219,255,0.85)',fontWeight:700,letterSpacing:'0.18em',marginBottom:8,textTransform:'uppercase'}}>Cosmetologia Avancada</div>
+        <h1 style={{color:B.white,fontWeight:800,fontFamily:'Georgia, serif',margin:'0 0 8px',fontSize:isMobile?24:32,letterSpacing:'-0.01em'}}>Protocolos Profissionais</h1>
+        <p style={{color:'rgba(255,255,255,0.65)',fontSize:isMobile?13:14,margin:`0 0 ${isMobile?20:28}px`,lineHeight:1.5}}>
+          Passo a passo completo para esteticistas, com os produtos {brand?.companyName || 'Extratos da Terra'}
+        </p>
 
-            <div style={{marginTop:14, display:'grid', gridTemplateColumns:isMobile?'1fr':'3fr 2fr', gap:10}}>
-              <input
-                value={search}
-                onChange={e=>setSearch(e.target.value)}
-                placeholder="Pesquisar protocolo por nome ou descricao..."
-                style={{width:'100%',padding:'12px 16px',borderRadius:12,border:'none',fontSize:14,outline:'none',boxSizing:'border-box',background:'#fff',color:B.text,fontFamily:'inherit',fontWeight:600}}
-              />
-              <div style={{display:'flex',gap:10,flexDirection:'column'}}>
-                <select
-                  value={filterCat}
-                  onChange={e=>setFilterCat(e.target.value)}
-                  style={{width:'100%',padding:'12px 12px',borderRadius:12,border:'1px solid rgba(153,153,153,0.3)',fontSize:14,outline:'none',background:'#fff',color:B.text,fontFamily:'inherit',fontWeight:600}}
-                >
-                  <option value="all">Todas as Categorias</option>
-                  {[...categories].sort((a,b)=>a.label.localeCompare(b.label)).map(c=><option key={c.id} value={c.id}>{c.label}{catCounts[c.id]!=null ? ` (${catCounts[c.id]})` : ''}</option>)}
-                </select>
-                <div style={{position:'relative'}}>
-                  <input
-                    value={prodSearch}
-                    onChange={e=>{setProdSearch(e.target.value);setProdDropOpen(true);}}
-                    onFocus={()=>setProdDropOpen(true)}
-                    onBlur={()=>setTimeout(()=>setProdDropOpen(false),150)}
-                    placeholder={filterProds.length>0?`+${filterProds.length} produto(s) selecionado(s)`:'Filtrar por produto...'}
-                    style={{width:'100%',padding:'12px 12px',borderRadius:12,border:'1px solid rgba(153,153,153,0.3)',fontSize:14,outline:'none',background:'#fff',color:B.text,fontFamily:'inherit',fontWeight:600,boxSizing:'border-box'}}
-                  />
-                  {prodDropOpen && prodOptions.length > 0 && (
-                    <div style={{position:'absolute',top:'calc(100% + 4px)',left:0,right:0,background:'#fff',borderRadius:10,border:`1px solid ${B.border}`,boxShadow:'0 8px 24px rgba(0,0,0,0.12)',zIndex:200,maxHeight:200,overflowY:'auto'}}>
-                      {prodOptions.map(p=>(
-                        <div key={p.id} onMouseDown={()=>addProd(p.id)} style={{padding:'10px 14px',fontSize:13,color:B.text,fontWeight:600,cursor:'pointer',borderBottom:`1px solid ${B.cream}`}}
-                          onMouseEnter={e=>e.currentTarget.style.background=B.purpleLight}
-                          onMouseLeave={e=>e.currentTarget.style.background='#fff'}
-                        >
-                          {p.name}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                  {filterProds.length > 0 && (
-                    <div style={{display:'flex',flexWrap:'wrap',gap:4,marginTop:6}}>
-                      {filterProds.map(id=>{
-                        const prod = products.find(p=>p.id===id);
-                        return (
-                          <span key={id} onClick={()=>removeProd(id)} style={{display:'inline-flex',alignItems:'center',gap:4,padding:'3px 8px',borderRadius:999,background:'rgba(255,255,255,0.22)',border:'1px solid rgba(255,255,255,0.4)',color:'#fff',fontSize:11,fontWeight:700,cursor:'pointer'}}>
-                            {prod?.name} &times;
-                          </span>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            <div style={{marginTop:12,background:'rgba(255,255,255,0.08)',border:'1px solid rgba(255,255,255,0.2)',borderRadius:12,padding:'12px 12px 10px'}}>
-              <div style={{fontSize:10,fontWeight:700,color:'rgba(255,255,255,0.75)',textTransform:'uppercase',letterSpacing:'0.09em',marginBottom:8}}>Indicacao</div>
-              <div style={{display:'flex',flexWrap:'wrap',gap:8}}>
-                <button onClick={()=>{ setShowFavorites(false); setFilterInds([]); }} style={{padding:'8px 14px',borderRadius:999,border:'1px solid rgba(255,255,255,0.28)',background:!showFavorites&&filterInds.length===0?'#fff':'rgba(255,255,255,0.16)',color:!showFavorites&&filterInds.length===0?B.purpleDark:'#fff',fontSize:12,fontWeight:700,cursor:'pointer',fontFamily:'inherit'}}>
-                  Todos
-                </button>
-                <button onClick={()=>setShowFavorites(v=>!v)} style={{padding:'8px 14px',borderRadius:999,border:'1px solid rgba(255,255,255,0.28)',background:showFavorites?B.redLight:'rgba(255,255,255,0.16)',color:showFavorites?B.red:'#fff',fontSize:12,fontWeight:700,cursor:'pointer',fontFamily:'inherit'}}>
-                  Meus Favoritos
-                </button>
-                {[...indications].sort((a,b)=>a.label.localeCompare(b.label)).map(ind=>{
-                  const active = filterInds.includes(ind.id);
-                  return (
-                    <button key={ind.id} onClick={()=>toggleInd(ind.id)} style={{padding:'8px 14px',borderRadius:999,border:`1px solid ${active?B.gold:'rgba(255,255,255,0.28)'}`,background:active?B.gold:'rgba(255,255,255,0.16)',color:active?'#fff':'rgba(255,255,255,0.9)',fontSize:12,fontWeight:700,cursor:'pointer',fontFamily:'inherit'}}>
-                      {ind.label}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {activeChips.length > 0 && (
-              <div style={{marginTop:10,display:'flex',flexWrap:'wrap',gap:6,alignItems:'center'}}>
-                <span style={{fontSize:10,color:'rgba(255,255,255,0.6)',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.06em',marginRight:2}}>Ativos:</span>
-                {activeChips.map(chip=>(
-                  <button key={chip.key} onClick={chip.onRemove} style={{padding:'4px 10px',borderRadius:999,border:'1px solid rgba(255,255,255,0.4)',background:'rgba(255,255,255,0.22)',color:'#fff',fontSize:11,fontWeight:700,cursor:'pointer',fontFamily:'inherit',display:'inline-flex',alignItems:'center',gap:5}}>
-                    {chip.label} &times;
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
+        {/* Barra de busca principal */}
+        <div style={{maxWidth:680, margin:'0 auto', position:'relative'}}>
+          <span style={{position:'absolute',left:18,top:'50%',transform:'translateY(-50%)',fontSize:16,opacity:0.4,pointerEvents:'none'}}>🔍</span>
+          <input
+            value={search}
+            onChange={e=>setSearch(e.target.value)}
+            placeholder="Buscar protocolo por nome ou descrição..."
+            style={{width:'100%',padding:'15px 48px',borderRadius:16,border:'none',fontSize:15,outline:'none',boxSizing:'border-box',background:'#fff',color:B.text,fontFamily:'inherit',fontWeight:500,boxShadow:'0 8px 32px rgba(0,0,0,0.18)'}}
+          />
+          {search && (
+            <button onClick={()=>setSearch('')} style={{position:'absolute',right:14,top:'50%',transform:'translateY(-50%)',background:'none',border:'none',fontSize:18,cursor:'pointer',color:B.muted,lineHeight:1,padding:4}}>×</button>
+          )}
         </div>
 
-        <div style={{marginTop:16,color:'rgba(255,255,255,0.85)',fontSize:12,fontWeight:600}}>
-          {filtered.length === 0
-            ? 'Nenhum protocolo encontrado'
-            : totalPages > 1
-              ? `Mostrando ${(safePage-1)*PAGE_SIZE+1}–${Math.min(safePage*PAGE_SIZE, filtered.length)} de ${filtered.length} protocolo${filtered.length!==1?'s':''}`
-              : `${filtered.length} protocolo${filtered.length!==1?'s':''} encontrado${filtered.length!==1?'s':''}`
-          }
+        {/* Tabs de categoria — grudadas na base do hero */}
+        <div style={{maxWidth:900,margin:'24px auto 0',display:'flex',gap:4,justifyContent:'center',flexWrap:'wrap',paddingBottom:0}}>
+          {[{id:'all',label:'Todos',count:pub.length}, ...[...categories].sort((a,b)=>a.label.localeCompare(b.label)).map(c=>({...c,count:catCounts[c.id]||0}))].map(c=>{
+            const active = filterCat===c.id;
+            return (
+              <button key={c.id} onClick={()=>setFilterCat(c.id)}
+                style={{padding:'10px 20px',borderRadius:'10px 10px 0 0',border:'none',background:active?B.white:'transparent',color:active?B.purple:'rgba(255,255,255,0.75)',fontWeight:700,fontSize:13,cursor:'pointer',fontFamily:'inherit',transition:'all 0.15s',position:'relative',bottom:0}}>
+                {c.label}
+                <span style={{marginLeft:6,fontSize:11,opacity:0.7,fontWeight:600}}>({c.count})</span>
+              </button>
+            );
+          })}
         </div>
       </div>
 
+      {/* ── FILTER BAR: indicações + produto (sticky) ── */}
+      <div style={{background:B.white, borderBottom:`1px solid ${B.border}`, position:'sticky', top: isMobile ? 58 : 64, zIndex:50, boxShadow:'0 2px 12px rgba(44,31,64,0.07)'}}>
+        <div style={{maxWidth:1100, margin:'0 auto', padding: isMobile ? '10px 12px' : '12px 24px'}}>
+
+          {/* Linha 1: chips de indicação + favoritos */}
+          <div style={{display:'flex', gap:6, overflowX:'auto', paddingBottom:2, scrollbarWidth:'none', msOverflowStyle:'none'}}>
+            <button onClick={()=>{setShowFavorites(false);setFilterInds([]);}}
+              style={{padding:'6px 14px',borderRadius:999,border:`1.5px solid ${!showFavorites&&filterInds.length===0?B.purple:B.border}`,background:!showFavorites&&filterInds.length===0?B.purple:B.white,color:!showFavorites&&filterInds.length===0?'#fff':B.muted,fontSize:12,fontWeight:700,cursor:'pointer',fontFamily:'inherit',whiteSpace:'nowrap',flexShrink:0,transition:'all 0.15s'}}>
+              Todas indicações
+            </button>
+            <button onClick={()=>setShowFavorites(v=>!v)}
+              style={{padding:'6px 14px',borderRadius:999,border:`1.5px solid ${showFavorites?B.red:B.border}`,background:showFavorites?B.redLight:B.white,color:showFavorites?B.red:B.muted,fontSize:12,fontWeight:700,cursor:'pointer',fontFamily:'inherit',whiteSpace:'nowrap',flexShrink:0,transition:'all 0.15s',display:'flex',alignItems:'center',gap:5}}>
+              <span style={{fontSize:13}}>♡</span> Favoritos
+            </button>
+            {[...indications].sort((a,b)=>a.label.localeCompare(b.label)).map(ind=>{
+              const active = filterInds.includes(ind.id);
+              return (
+                <button key={ind.id} onClick={()=>toggleInd(ind.id)}
+                  style={{padding:'6px 14px',borderRadius:999,border:`1.5px solid ${active?B.purple:B.border}`,background:active?B.purpleLight:B.white,color:active?B.purple:B.muted,fontSize:12,fontWeight:700,cursor:'pointer',fontFamily:'inherit',whiteSpace:'nowrap',flexShrink:0,transition:'all 0.15s'}}>
+                  {ind.label}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Linha 2: filtro por produto */}
+          <div style={{marginTop:8, display:'flex', gap:8, alignItems:'flex-start', flexWrap: isMobile ? 'wrap' : 'nowrap'}}>
+            <div style={{position:'relative', flex:1, minWidth: isMobile ? '100%' : 260}}>
+              <span style={{position:'absolute',left:12,top:'50%',transform:'translateY(-50%)',fontSize:13,opacity:0.35,pointerEvents:'none'}}>📦</span>
+              <input
+                value={prodSearch}
+                onChange={e=>{setProdSearch(e.target.value);setProdDropOpen(true);}}
+                onFocus={()=>setProdDropOpen(true)}
+                onBlur={()=>setTimeout(()=>setProdDropOpen(false),150)}
+                placeholder="Filtrar por produto vinculado..."
+                style={{width:'100%',padding:'8px 12px 8px 32px',borderRadius:10,border:`1.5px solid ${prodDropOpen||filterProds.length>0?B.purple:B.border}`,fontSize:13,outline:'none',background:B.white,color:B.text,fontFamily:'inherit',fontWeight:500,boxSizing:'border-box',transition:'border-color 0.15s'}}
+              />
+              {prodDropOpen && prodOptions.length > 0 && (
+                <div style={{position:'absolute',top:'calc(100% + 4px)',left:0,right:0,background:'#fff',borderRadius:10,border:`1.5px solid ${B.purple}`,boxShadow:'0 8px 32px rgba(94,61,143,0.14)',zIndex:200,maxHeight:200,overflowY:'auto'}}>
+                  {prodOptions.map(p=>(
+                    <div key={p.id} onMouseDown={()=>addProd(p.id)}
+                      style={{padding:'10px 14px',fontSize:13,color:B.text,fontWeight:600,cursor:'pointer',borderBottom:`1px solid ${B.cream}`,display:'flex',alignItems:'center',gap:8}}
+                      onMouseEnter={e=>e.currentTarget.style.background=B.purpleLight}
+                      onMouseLeave={e=>e.currentTarget.style.background='#fff'}>
+                      <span style={{width:6,height:6,borderRadius:'50%',background:B.purple,flexShrink:0,display:'inline-block'}}/>
+                      {p.name}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Chips de produtos selecionados */}
+            {filterProds.length > 0 && (
+              <div style={{display:'flex',flexWrap:'wrap',gap:5,alignItems:'center'}}>
+                {filterProds.map(id=>{
+                  const prod = products.find(p=>p.id===id);
+                  return (
+                    <span key={id} onClick={()=>removeProd(id)}
+                      style={{display:'inline-flex',alignItems:'center',gap:5,padding:'5px 10px',borderRadius:999,background:B.purpleLight,border:`1.5px solid ${B.purple}`,color:B.purple,fontSize:12,fontWeight:700,cursor:'pointer',whiteSpace:'nowrap'}}>
+                      {prod?.name} <span style={{fontSize:14,lineHeight:1}}>×</span>
+                    </span>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* Limpar tudo */}
+            {hasActiveFilters && (
+              <button onClick={clearAll}
+                style={{padding:'8px 16px',borderRadius:10,border:`1.5px solid ${B.border}`,background:B.white,color:B.muted,fontSize:12,fontWeight:700,cursor:'pointer',fontFamily:'inherit',whiteSpace:'nowrap',flexShrink:0,transition:'all 0.15s'}}
+                onMouseEnter={e=>{e.currentTarget.style.borderColor=B.red;e.currentTarget.style.color=B.red;}}
+                onMouseLeave={e=>{e.currentTarget.style.borderColor=B.border;e.currentTarget.style.color=B.muted;}}>
+                Limpar tudo
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* ── RESULTADOS ── */}
       <div style={{maxWidth:1100,margin:'0 auto',padding:`${isMobile?20:32}px ${isMobile?12:24}px`}}>
+
+        {/* Cabeçalho dos resultados */}
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:20,flexWrap:'wrap',gap:8}}>
+          <div style={{fontSize:13,color:B.muted,fontWeight:600}}>
+            {filtered.length === 0
+              ? 'Nenhum protocolo encontrado'
+              : totalPages > 1
+                ? <><span style={{fontWeight:800,color:B.purpleDark}}>{filtered.length}</span> protocolos — mostrando {(safePage-1)*PAGE_SIZE+1}–{Math.min(safePage*PAGE_SIZE,filtered.length)}</>
+                : <><span style={{fontWeight:800,color:B.purpleDark}}>{filtered.length}</span> protocolo{filtered.length!==1?'s':''} encontrado{filtered.length!==1?'s':''}</>
+            }
+          </div>
+          {/* Chips de filtros ativos no cabeçalho */}
+          {activeChips.length > 0 && (
+            <div style={{display:'flex',flexWrap:'wrap',gap:5}}>
+              {activeChips.map(chip=>(
+                <button key={chip.key} onClick={chip.onRemove}
+                  style={{padding:'4px 10px',borderRadius:999,border:`1px solid ${B.border}`,background:B.white,color:B.text,fontSize:11,fontWeight:700,cursor:'pointer',fontFamily:'inherit',display:'inline-flex',alignItems:'center',gap:5}}>
+                  {chip.label} <span style={{fontSize:13,color:B.muted,lineHeight:1}}>×</span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
         {filtered.length===0
-          ? <div style={{textAlign:'center',padding:'70px 0',color:B.muted}}><div style={{fontSize:52,marginBottom:14}}>...</div><div style={{fontSize:16,fontWeight:600,color:B.text,marginBottom:6}}>Nenhum protocolo encontrado com estes filtros</div></div>
-          : <>
-              <div className="rp-grid-proto" style={{display:'grid',gap:16}}>
+          ? (
+            <div style={{textAlign:'center',padding:'80px 0 60px',color:B.muted}}>
+              <div style={{fontSize:48,marginBottom:16,opacity:0.4}}>🔍</div>
+              <div style={{fontSize:17,fontWeight:700,color:B.text,marginBottom:8}}>Nenhum protocolo encontrado</div>
+              <div style={{fontSize:14,marginBottom:24}}>Tente ajustar os filtros ou limpar a busca</div>
+              {hasActiveFilters && <button onClick={clearAll} style={{padding:'10px 24px',borderRadius:10,border:'none',background:B.purple,color:'#fff',fontWeight:700,fontSize:14,cursor:'pointer',fontFamily:'inherit'}}>Limpar filtros</button>}
+            </div>
+          )
+          : (
+            <>
+              <div className="rp-grid-proto" style={{display:'grid',gap:18}}>
                 {paginated.map(p=><ProtocolCard key={p.id} protocol={p} products={products} indications={indications} categories={categories} onClick={()=>navigate(`/protocolo/${p.id}`)} isFav={favorites.includes(p.id)} toggleFav={(e)=>{e.stopPropagation(); setFavorites(prev => prev.includes(p.id)? prev.filter(x=>x!==p.id) : [...prev, p.id])}} />)}
               </div>
               {totalPages > 1 && (
-                <div style={{display:'flex',justifyContent:'center',alignItems:'center',gap:6,marginTop:32,flexWrap:'wrap'}}>
-                  <button onClick={()=>setPage(p=>Math.max(1,p-1))} disabled={safePage===1} style={{padding:'8px 16px',borderRadius:10,border:`1px solid ${B.border}`,background:safePage===1?B.cream:B.white,color:safePage===1?B.muted:B.purple,fontWeight:700,fontSize:13,cursor:safePage===1?'default':'pointer',fontFamily:'inherit'}}>
-                    Anterior
+                <div style={{display:'flex',justifyContent:'center',alignItems:'center',gap:6,marginTop:36,flexWrap:'wrap'}}>
+                  <button onClick={()=>setPage(p=>Math.max(1,p-1))} disabled={safePage===1}
+                    style={{padding:'9px 18px',borderRadius:10,border:`1.5px solid ${B.border}`,background:B.white,color:safePage===1?B.muted:B.purple,fontWeight:700,fontSize:13,cursor:safePage===1?'default':'pointer',fontFamily:'inherit',opacity:safePage===1?0.5:1}}>
+                    ← Anterior
                   </button>
                   {renderPageButtons()}
-                  <button onClick={()=>setPage(p=>Math.min(totalPages,p+1))} disabled={safePage===totalPages} style={{padding:'8px 16px',borderRadius:10,border:`1px solid ${B.border}`,background:safePage===totalPages?B.cream:B.white,color:safePage===totalPages?B.muted:B.purple,fontWeight:700,fontSize:13,cursor:safePage===totalPages?'default':'pointer',fontFamily:'inherit'}}>
-                    Proximo
+                  <button onClick={()=>setPage(p=>Math.min(totalPages,p+1))} disabled={safePage===totalPages}
+                    style={{padding:'9px 18px',borderRadius:10,border:`1.5px solid ${B.border}`,background:B.white,color:safePage===totalPages?B.muted:B.purple,fontWeight:700,fontSize:13,cursor:safePage===totalPages?'default':'pointer',fontFamily:'inherit',opacity:safePage===totalPages?0.5:1}}>
+                    Próximo →
                   </button>
                 </div>
               )}
             </>
+          )
         }
       </div>
     </div>
