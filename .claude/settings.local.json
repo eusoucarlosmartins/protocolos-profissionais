@@ -10,7 +10,9 @@
       "WebFetch(domain:notion-api.splitbee.io)",
       "Bash(bash \"C:/Users/crm19/.claude/skills/brainstorming/scripts/start-server.sh\" --project-dir \"c:/Users/crm19/OneDrive/Documentos/GitHub/protocolos-profissionais\")",
       "Bash(npx vercel:*)",
-      "Bash(npx skills:*)"
+      "Bash(npx skills:*)",
+      "Bash(cat \"c:\\\\Users\\\\crm19\\\\OneDrive\\\\Documentos\\\\GitHub\\\\protocolos-profissionais\\\\.superpowers\\\\brainstorm\"/**/state/server-info)",
+      "Bash(npx vite:*)"
     ]
   }
 }
