@@ -931,21 +931,17 @@ const ProtocolDetail = ({ protocol:p, products, indications, categories, navigat
     ].filter(Boolean).join('\n')
   );
 
+  const ActionButtons = ({ flex }) => (
+    <>
+      <button onClick={()=>{navigator.clipboard.writeText(window.location.href); alert('Link copiado!');}} style={{background:B.purpleLight,color:B.purple,border:'none',padding:'7px 13px',borderRadius:8,fontWeight:700,fontSize:12,cursor:'pointer',fontFamily:'inherit',flex:flex||'0 0 auto'}}>Copiar link</button>
+      <a href={`https://api.whatsapp.com/send?text=${shareText}`} target="_blank" rel="noreferrer" style={{background:'#25D366',color:B.white,textDecoration:'none',padding:'7px 14px',borderRadius:8,fontWeight:700,fontSize:12,display:'inline-flex',alignItems:'center',justifyContent:'center',flex:flex||'0 0 auto'}}>Compartilhar</a>
+      <button onClick={handlePrint} style={{background:B.purple,color:B.white,border:'none',padding:'7px 14px',borderRadius:8,fontWeight:700,fontSize:12,cursor:'pointer',fontFamily:'inherit',flex:flex||'0 0 auto'}}>PDF</button>
+    </>
+  );
+
   return (
     <div style={{background:B.cream, flex: 1}}>
-      <div className="no-print rp-bkbar" style={{background:B.white,borderBottom:`1px solid ${B.border}`,padding:isMobile?'12px':'10px 24px',display:'flex',justifyContent:'space-between',alignItems:isMobile?'stretch':'center',gap:10,flexDirection:isMobile?'column':'row',overflowX:'hidden'}}>
-        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',gap:10,width:isMobile?'100%':'auto'}}>
-          <button onClick={()=>navigate('/protocolos')} style={{background:isMobile?B.purpleLight:'none',border:isMobile?`1px solid ${B.border}`:'none',color:B.purple,fontWeight:700,cursor:'pointer',fontSize:14,fontFamily:'inherit',borderRadius:isMobile?10:0,padding:isMobile?'10px 12px':0}}>← Voltar ao catálogo</button>
-          {isMobile && <span style={{fontSize:11,fontWeight:700,color:B.muted,letterSpacing:'0.08em',textTransform:'uppercase'}}>Acoes do protocolo</span>}
-        </div>
-        <div style={{display:'flex', gap:8, flexWrap:'wrap', width:isMobile?'100%':'auto'}}>
-          <button onClick={()=>{navigator.clipboard.writeText(window.location.href); alert('Link copiado!');}} style={{background:B.purpleLight,color:B.purple,border:'none',padding:'8px 14px',borderRadius:8,fontWeight:700,fontSize:isMobile?12:13,cursor:'pointer',fontFamily:'inherit',flex:isMobile?'1 1 120px':'0 0 auto'}}>Copiar link</button>
-          <a href={`https://api.whatsapp.com/send?text=${shareText}`} target="_blank" rel="noreferrer" style={{background:'#25D366',color:B.white,textDecoration:'none',padding:'8px 16px',borderRadius:8,fontWeight:700,fontSize:isMobile?12:13,display:'inline-flex',alignItems:'center',justifyContent:'center',flex:isMobile?'1 1 120px':'0 0 auto'}}>Compartilhar</a>
-          <button onClick={handlePrint} style={{background:B.purple,color:B.white,border:'none',padding:'8px 16px',borderRadius:8,fontWeight:700,fontSize:isMobile?12:13,cursor:'pointer',fontFamily:'inherit',flex:isMobile?'1 1 120px':'0 0 auto'}}>{isMobile ? 'PDF' : 'Salvar PDF'}</button>
-        </div>
-      </div>
-
-      <div id="protocol-content" style={{maxWidth:740,margin:'0 auto',padding:isMobile?'18px 12px 26px':'36px 24px', background: B.cream}}>
+      <div id="protocol-content" style={{maxWidth:860,margin:'0 auto',padding:isMobile?'14px 12px 26px':'32px 28px', background: B.cream}}>
         
           {/* Header para impressao */}
         <div className="print-only" style={{ textAlign: 'center', marginBottom: '30px', borderBottom: `2px solid ${B.purple}`, paddingBottom: '20px' }}>
@@ -954,6 +950,12 @@ const ProtocolDetail = ({ protocol:p, products, indications, categories, navigat
           </div>
           <h1 style={{ color: B.purpleDark, margin: '0 0 6px', fontFamily: 'Georgia, serif', fontSize: 24 }}>{brand?.companyName || 'Extratos da Terra'}</h1>
           <p style={{ margin: 0, color: B.muted, fontSize: 14, textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 700 }}>Protocolo Profissional</p>
+        </div>
+
+        {/* Voltar + ações mobile */}
+        <div className="no-print" style={{display:'flex',justifyContent:'space-between',alignItems:'center',gap:8,marginBottom:14,flexWrap:'wrap'}}>
+          <button onClick={()=>navigate('/protocolos')} style={{background:'none',border:'none',color:B.purple,fontWeight:700,cursor:'pointer',fontSize:13,fontFamily:'inherit',padding:0,display:'inline-flex',alignItems:'center',gap:4}}>← Voltar ao catálogo</button>
+          <div style={{display:'flex',gap:6}}><ActionButtons /></div>
         </div>
 
         {/* Header */}
@@ -986,35 +988,45 @@ const ProtocolDetail = ({ protocol:p, products, indications, categories, navigat
           {p.steps.map((step,i)=>{
             const prod = step.productId ? get(step.productId) : null;
             const cpa = costPerApp(prod);
+            const prevStep = i > 0 ? p.steps[i-1] : null;
+            const isNewPhase = step.phase && (!prevStep || prevStep.phase !== step.phase);
             return (
-              <div key={step.id} className="avoid-break" style={{display:'flex',gap:isMobile?10:16,marginBottom:i<p.steps.length-1?4:0}}>
-                <div className="no-print" style={{display:'flex',flexDirection:'column',alignItems:'center',width:isMobile?30:38,flexShrink:0}}>
-                  <div style={{width:isMobile?28:36,height:isMobile?28:36,borderRadius:'50%',background:B.purple,color:B.white,display:'flex',alignItems:'center',justifyContent:'center',fontWeight:700,fontSize:isMobile?12:14,flexShrink:0}}>{i+1}</div>
-                  {i<p.steps.length-1&&<div style={{width:2,flex:1,minHeight:16,background:B.border,margin:'4px 0'}} />}
-                </div>
-                <div className="rp-step-gap avoid-break" style={{flex:1,paddingBottom:20}}>
-                  <div style={{fontSize:10,fontWeight:700,color:B.purpleMid,textTransform:'uppercase',letterSpacing:'0.08em',marginBottom:5}}>{step.phase}</div>
-                  {prod
-                    ? <div style={{background:B.purpleLight,border:`1px solid ${B.border}`,borderRadius:10,padding:isMobile?'8px 10px':'10px 14px',marginBottom:8}}>
-                        <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',gap:10,flexWrap:'wrap'}}>
-                          <div style={{display:'flex',alignItems:'center',gap:10,minWidth:0,flex:'1 1 260px'}}>
-                            {prod.image ? (
-                              <img src={prod.image} alt={prod.name} style={{width:isMobile?38:44,height:isMobile?38:44,objectFit:'contain',borderRadius:8,background:B.white,border:`1px solid ${B.border}`,flexShrink:0}} />
-                            ) : (
-                              <div style={{width:isMobile?38:44,height:isMobile?38:44,borderRadius:8,background:B.cream,display:'flex',alignItems:'center',justifyContent:'center',fontSize:isMobile?15:18,flexShrink:0}}>P</div>
-                            )}
-                            <ProductTooltip product={prod} navigate={navigate}>
-                              <span style={{fontWeight:700,fontSize:isMobile?13:14,color:isActive(prod)?B.purpleDark:B.red,lineHeight:1.35}}>{prod.name}{!isActive(prod)&&' (inativo)'}</span>
-                            </ProductTooltip>
+              <div key={step.id}>
+                {isNewPhase && (
+                  <div className="avoid-break" style={{display:'flex',alignItems:'center',gap:10,margin:i===0?'0 0 18px':'16px 0 18px'}}>
+                    <div style={{flex:1,height:1,background:`linear-gradient(to right, ${B.border}, ${B.purpleMid}40)`}} />
+                    <span style={{fontSize:10,fontWeight:800,color:B.purpleMid,textTransform:'uppercase',letterSpacing:'0.12em',whiteSpace:'nowrap',padding:'3px 10px',background:B.purpleLight,borderRadius:20,border:`1px solid ${B.border}`}}>{step.phase}</span>
+                    <div style={{flex:1,height:1,background:`linear-gradient(to left, ${B.border}, ${B.purpleMid}40)`}} />
+                  </div>
+                )}
+                <div className="avoid-break" style={{display:'flex',gap:isMobile?10:16,marginBottom:i<p.steps.length-1?4:0}}>
+                  <div className="no-print" style={{display:'flex',flexDirection:'column',alignItems:'center',width:isMobile?30:38,flexShrink:0}}>
+                    <div style={{width:isMobile?28:36,height:isMobile?28:36,borderRadius:'50%',background:B.purple,color:B.white,display:'flex',alignItems:'center',justifyContent:'center',fontWeight:700,fontSize:isMobile?12:14,flexShrink:0}}>{i+1}</div>
+                    {i<p.steps.length-1&&<div style={{width:2,flex:1,minHeight:16,background:B.border,margin:'4px 0'}} />}
+                  </div>
+                  <div className="rp-step-gap avoid-break" style={{flex:1,paddingBottom:20}}>
+                    {prod
+                      ? <div style={{background:B.purpleLight,border:`1px solid ${B.border}`,borderRadius:10,padding:isMobile?'8px 10px':'10px 14px',marginBottom:8}}>
+                          <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',gap:10,flexWrap:'wrap'}}>
+                            <div style={{display:'flex',alignItems:'center',gap:10,minWidth:0,flex:'1 1 260px'}}>
+                              {prod.image ? (
+                                <img src={prod.image} alt={prod.name} style={{width:isMobile?38:44,height:isMobile?38:44,objectFit:'contain',borderRadius:8,background:B.white,border:`1px solid ${B.border}`,flexShrink:0}} />
+                              ) : (
+                                <div style={{width:isMobile?38:44,height:isMobile?38:44,borderRadius:8,background:B.cream,display:'flex',alignItems:'center',justifyContent:'center',fontSize:isMobile?15:18,flexShrink:0}}>P</div>
+                              )}
+                              <ProductTooltip product={prod} navigate={navigate}>
+                                <span style={{fontWeight:700,fontSize:isMobile?13:14,color:isActive(prod)?B.purpleDark:B.red,lineHeight:1.35}}>{prod.name}{!isActive(prod)&&' (inativo)'}</span>
+                              </ProductTooltip>
+                            </div>
+                            {cpa!=null&&<span className="no-print" style={{fontSize:11,fontWeight:700,color:B.green,whiteSpace:'nowrap'}}>{fmtCurrency(cpa)}/apl.</span>}
                           </div>
-                          {cpa!=null&&<span className="no-print" style={{fontSize:11,fontWeight:700,color:B.green,whiteSpace:'nowrap'}}>{fmtCurrency(cpa)}/apl.</span>}
+                          {!isActive(prod)&&<div className="no-print" style={{fontSize:11,color:B.red,fontWeight:700,marginTop:3}}>Produto inativo</div>}
+                          {prod.actives&&isActive(prod)&&<div style={{fontSize:11,color:B.muted,marginTop:3,lineHeight:1.4}} dangerouslySetInnerHTML={{__html: clean('Ativos: ' + prod.actives.slice(0,isMobile?80:999) + (isMobile&&prod.actives.length>80?'...':''))}} /> }
                         </div>
-                        {!isActive(prod)&&<div className="no-print" style={{fontSize:11,color:B.red,fontWeight:700,marginTop:3}}>Produto inativo</div>}
-                        {prod.actives&&isActive(prod)&&<div style={{fontSize:11,color:B.muted,marginTop:3,lineHeight:1.4}} dangerouslySetInnerHTML={{__html: clean('Ativos: ' + prod.actives.slice(0,isMobile?80:999) + (isMobile&&prod.actives.length>80?'...':''))}} /> }
-                      </div>
-                    : <div style={{background:'#F3F4F6',borderRadius:10,padding:'8px 12px',marginBottom:8,fontSize:13,color:B.muted,fontStyle:'italic'}}>Equipamento / tecnica manual</div>
-                  }
-                  <InfoText text={step.instruction} isMobile={isMobile} />
+                      : <div style={{background:'#F3F4F6',borderRadius:10,padding:'8px 12px',marginBottom:8,fontSize:13,color:B.muted,fontStyle:'italic'}}>Equipamento / tecnica manual</div>
+                    }
+                    <InfoText text={step.instruction} isMobile={isMobile} />
+                  </div>
                 </div>
               </div>
             );
